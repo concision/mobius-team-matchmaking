@@ -1,0 +1,3434 @@
+[
+    {
+        "snowflake": "1181363728239841310",
+        "name": "Bangalore",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                1,
+                1,
+                1
+            ],
+            "wednesday": [
+                1,
+                1,
+                1
+            ],
+            "thursday": [
+                1,
+                1,
+                1
+            ],
+            "friday": [
+                1,
+                1,
+                1
+            ],
+            "saturday": [
+                1,
+                1,
+                1
+            ]
+        }
+    },
+    {
+        "snowflake": "1181366172596318228",
+        "name": "Gamblers With Attitudes",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181374078255374507",
+        "name": "Tyrone",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181375064818581524",
+        "name": "Big Dogs",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181375544265289758",
+        "name": "Delirium",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                1,
+                0,
+                0
+            ],
+            "wednesday": [
+                1,
+                0,
+                0
+            ],
+            "thursday": [
+                1,
+                0,
+                0
+            ],
+            "friday": [
+                1,
+                0,
+                0
+            ],
+            "saturday": [
+                1,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181376222350024756",
+        "name": "Vandals",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181378050382909510",
+        "name": "Void",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181378502017175602",
+        "name": "guh",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181379197042700338",
+        "name": "Mike",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181379406481063996",
+        "name": "Apemen",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                1,
+                1
+            ],
+            "wednesday": [
+                0,
+                1,
+                1
+            ],
+            "thursday": [
+                0,
+                1,
+                1
+            ],
+            "friday": [
+                0,
+                1,
+                1
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181379577273135134",
+        "name": "Archangels",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                1,
+                1,
+                1
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                1,
+                1,
+                1
+            ],
+            "friday": [
+                1,
+                1,
+                1
+            ],
+            "saturday": [
+                1,
+                1,
+                1
+            ]
+        }
+    },
+    {
+        "snowflake": "1181379775160385546",
+        "name": "Milkmen",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181381061289197608",
+        "name": "Stercore Braccas",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                1
+            ],
+            "wednesday": [
+                0,
+                0,
+                1
+            ],
+            "thursday": [
+                0,
+                0,
+                1
+            ],
+            "friday": [
+                0,
+                0,
+                1
+            ],
+            "saturday": [
+                1,
+                1,
+                1
+            ]
+        }
+    },
+    {
+        "snowflake": "1181386633422053376",
+        "name": "KGB",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181389686766305351",
+        "name": "Big Cogs",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181394958851244122",
+        "name": "Bliss",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181403752494792795",
+        "name": "NANO",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181407276876185692",
+        "name": "Casino Kings",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181408573201317898",
+        "name": "Tempest",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181409899142459402",
+        "name": "Dirty Little Boys",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181410997790052372",
+        "name": "BM",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181411112554598584",
+        "name": "The Brigade",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181411474623713401",
+        "name": "MEGADEMENTIA",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181413924051091467",
+        "name": "Void B",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181427005707792394",
+        "name": "the captain of this team is gay",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181427047780843580",
+        "name": "Gobling Dynasty",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181435779977855058",
+        "name": "eXemplar",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181448066163806301",
+        "name": "Man House",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181593376051703918",
+        "name": "Mobius Dick",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181603021591949342",
+        "name": "Symbol",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181619837223588010",
+        "name": "Lineage",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                1,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181647323714027570",
+        "name": "HorseUpdate",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                1,
+                1,
+                1
+            ]
+        }
+    },
+    {
+        "snowflake": "1181673265668817056",
+        "name": "TsymTeam",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                1,
+                0,
+                0
+            ],
+            "wednesday": [
+                1,
+                0,
+                0
+            ],
+            "thursday": [
+                1,
+                0,
+                0
+            ],
+            "friday": [
+                1,
+                0,
+                0
+            ],
+            "saturday": [
+                1,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181680478680514621",
+        "name": "GayMetch Team",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181681769095897158",
+        "name": "SHAWARMA EXPERIENCE",
+        "region": "SA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181682084834709587",
+        "name": "Conguitos",
+        "region": "SA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181687531633389648",
+        "name": "Legacy",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181688456104120332",
+        "name": "Nemesis",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                1,
+                1,
+                0
+            ],
+            "thursday": [
+                1,
+                1,
+                0
+            ],
+            "friday": [
+                1,
+                1,
+                0
+            ],
+            "saturday": [
+                1,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181690332954501302",
+        "name": "FIST",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181693888277250068",
+        "name": "FSB",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181722140442112111",
+        "name": "Monolith",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181726471635603489",
+        "name": "MID TIER PUG GAPER DEMONS",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                1
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181730792632766544",
+        "name": "Swampmen",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181740899420618802",
+        "name": "Vitality",
+        "region": "SA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181743070862119024",
+        "name": "Baxton",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181764700493578332",
+        "name": "BackBox",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181768186241224795",
+        "name": "Oldmen",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181770707466727424",
+        "name": "Kings Guard",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181791505275437137",
+        "name": "Suspa",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181810295539253378",
+        "name": "Big Bogs",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181815622246600824",
+        "name": "sG A",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181821287849541673",
+        "name": "Eternal",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181832367980158977",
+        "name": "Marauders",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181965530488389752",
+        "name": "Neurotic Savages",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181998669516521574",
+        "name": "FdM",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1181998880368382044",
+        "name": "Jammers",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182006202817843230",
+        "name": "Bossmode",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182009572978872330",
+        "name": "STONIK",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182014551022125126",
+        "name": "Drain Gang",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182023622592823437",
+        "name": "xXPvPMastersXx",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                1,
+                1
+            ],
+            "wednesday": [
+                0,
+                1,
+                1
+            ],
+            "thursday": [
+                0,
+                1,
+                1
+            ],
+            "friday": [
+                0,
+                1,
+                1
+            ],
+            "saturday": [
+                0,
+                1,
+                1
+            ]
+        }
+    },
+    {
+        "snowflake": "1182025746873598002",
+        "name": "Verlore Verstand",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                1,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182025980580204596",
+        "name": "Stepdads",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182031467610652743",
+        "name": "JESTERS",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182048259540275304",
+        "name": "SOVE",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182054531517906974",
+        "name": "StandarD",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182057306972758106",
+        "name": "RtV",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182154565370519562",
+        "name": "Discount Duellers",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182350999952826418",
+        "name": "Zenmai Samurai",
+        "region": "ASIA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182495034927493120",
+        "name": "Centuria",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182705429197881364",
+        "name": "Shinken",
+        "region": "ASIA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182755115610943549",
+        "name": "uai novas",
+        "region": "SA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1182959424944476181",
+        "name": "Boondock Saints",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183200234948538418",
+        "name": "Comando Vermelho",
+        "region": "SA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183202227175821405",
+        "name": "Iron Fist",
+        "region": "SA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183286316201418833",
+        "name": "Hyperion",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183513749982822460",
+        "name": "Kings of JoJos",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183513814327636192",
+        "name": "Lords of JoJos",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183538159661895800",
+        "name": "Enigma",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183872678336135250",
+        "name": "Playtest Roster",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1183965426678517840",
+        "name": "Depth Guard",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                1,
+                1
+            ],
+            "saturday": [
+                0,
+                1,
+                1
+            ]
+        }
+    },
+    {
+        "snowflake": "1184133357953617942",
+        "name": "Golden Order",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1184155270541217822",
+        "name": "Knights Watch",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1184285180362489907",
+        "name": "Nubian Slayers",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1184325736824311858",
+        "name": "Nythh",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1185066023372726283",
+        "name": "Lockdown",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1185707739167600650",
+        "name": "MongoTv",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1186170296554762240",
+        "name": "Revival Eternum",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1186436202103054466",
+        "name": "Terry",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1186791609724051537",
+        "name": "Telephones",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1186821978246615080",
+        "name": "Mobius Yacht Club",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1188924773393252373",
+        "name": "Precious Players",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1189284566352015460",
+        "name": "Swagmode",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1189375155525386280",
+        "name": "CN",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1189397645429575771",
+        "name": "Rage",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1189725253824426035",
+        "name": "mens of cool",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1190008207251353700",
+        "name": "Beyond B",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1193115904213532772",
+        "name": "MB",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1194198995493457940",
+        "name": "Double Parry eSports",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1194324273616130118",
+        "name": "Minority Exterminators",
+        "region": "EU",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1194598038392557731",
+        "name": "SHW",
+        "region": "OCE",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1194818897665347805",
+        "name": "Gamblious",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1195627748702568488",
+        "name": "Foos",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1196700010700623902",
+        "name": "Amnesty",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    {
+        "snowflake": "1197336024431468657",
+        "name": "Ghost",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        }
+    }
+]

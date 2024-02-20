@@ -1,4 +1,6 @@
 ### Project Specific ###
+data/
+!data/teams.json
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,yarn,git,intellij+all,visualstudiocode,visualstudio,windows,linux,macos
