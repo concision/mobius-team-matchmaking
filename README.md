@@ -11,7 +11,7 @@
 - [Motivations](#motivations)
 - [Build Instructions](#build-instructions)
 - [Usage](#usage)
-- [Disclaimers](#disclaimers)
+- [License](#license)
 
 <hr>
 
@@ -56,6 +56,6 @@ TODO
 
 TODO
 
-## Disclaimers
+## License
 
-TODO
+This repository is licensed under the [GNU GPLv3 License](LICENSE).
