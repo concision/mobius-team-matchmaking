@@ -8,7 +8,7 @@
   "packageManager": "yarn@4.1.0",
   "scripts": {
     "compile": "tsc",
-    "start": "ts-node --transpileOnly src/Main.ts"
+    "start": "ts-node --transpileOnly src/TestDemo.ts"
   },
   "engines": {
     "node": ">=20.0.0"
