@@ -6,10 +6,16 @@
   "license": "GPL-3.0-only",
   "repository": "https://github.com/concision/mobius-team-matchmaking.git",
   "packageManager": "yarn@4.1.0",
+  "scripts": {
+    "compile": "tsc",
+    "start": "ts-node --transpileOnly src/Main.ts"
+  },
   "engines": {
     "node": ">=20.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.11.19",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
