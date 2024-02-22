@@ -47,12 +47,12 @@ export interface ITeamMatchups {
  * @exception Error If input teams are not all in the same region, then an exception will be thrown.
  * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
  */
-export type matchmakeTeamsInRegion = (options: IMatchmakingOptions) => ITeamMatchups;
+export type matchmakeTeams = (options: IMatchmakingOptions) => ITeamMatchups;
 
 /**
  * Performs the matchmaking algorithm on a set of teams, automatically partitioning them by region. This is a
  * convenience method computing match-ups for all regions in the league at once. If a specific region needs to be
- * recomputed due to changes, use {@link matchmakeTeamsInRegion} directly or invoke this with a subset of the teams.
+ * recomputed due to changes, use {@link matchmakeTeams} directly or invoke this with a subset of the teams.
  *
  * @param options The input options for the matchmaking algorithm. See {@link IMatchmakingOptions}.
  * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
