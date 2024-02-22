@@ -1,6 +1,6 @@
 import {readFileSync} from "fs";
-import {matchmakeTeamsByRegion} from "./index";
+import {ITeam, matchmakeTeams} from "./index";
 
-const teams = JSON.parse(readFileSync('data/teams.json', 'utf8'));
+const teams: ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));
 
-matchmakeTeamsByRegion({teams, maximumGames: 1});
+matchmakeTeams({teams: teams.filter(team => team.region === 'NA'), maximumGames: 1});
