@@ -23,7 +23,7 @@ export interface ITeamMatchupBase {
      * The teams participating in the match-up. The length of this array should always be 2. The order of the teams is
      * arbitrary and should not be relied upon.
      */
-    readonly teams: readonly ITeamParticipant[];
+    readonly teams: readonly [ITeamParticipant, ITeamParticipant];
     /**
      * Indicates whether the game has occurred or not; if true, additional properties are available on
      * {@link IScheduledMatchup} (e.g. winner, loser, team elo changes)
@@ -35,7 +35,7 @@ export interface ITeamMatchupBase {
  * A scheduled matchup that has not yet occurred (i.e. {@link #played} is false). See {@link ITeamMatchup}.
  */
 export interface IScheduledMatchup extends ITeamMatchupBase {
-    readonly teams: readonly ITeamNotYetPlayed[];
+    readonly teams: readonly [ITeamNotYetPlayed, ITeamNotYetPlayed];
     readonly played: false;
 }
 
@@ -56,6 +56,7 @@ export interface IPlayedMatchup extends ITeamMatchupBase {
      * be undefined. Note that this property is derived from {@link #teams}.
      */
     get winner(): ITeamPlayed | undefined;
+
     /**
      * A shorthand property to grab the losing team reference in {@link #teams}. If the game was a draw, then this will
      * be undefined. Note that this property is derived from {@link #teams}.
