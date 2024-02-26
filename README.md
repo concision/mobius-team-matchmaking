@@ -1,9 +1,9 @@
 <h1 align="center">
-    Mobius - Competitive Team Matchmaking
+    Mobius: Competitive Team Matchmaking
 </h1>
 
 <p align="center">
-    <i>A competitive team-matchmaking algorithm for the melee game [Mobius](https://store.steampowered.com/app/1766450/Mobius/) that utilizes a genetic algorithm to optimize for balanced team match-ups.</i>.
+    <i>A competitive team-matchmaking algorithm for the melee game <a href="https://store.steampowered.com/app/1766450/Mobius/">Mobius</a> that utilizes a genetic algorithm to optimize for balanced team match-ups.</i>.
 </p>
 
 ## Table of Contents
@@ -17,20 +17,20 @@
 
 ## Motivations
 
-The upcoming multiplayer game [Mobius](https://store.steampowered.com/app/1766450/Mobius/) features a competitive
-tournament scene for teams of 5 players each. Each week, teams submit their availability in the game's
-[Discord server](https://discord.gg/H7D8CJPNxt) to be scheduled to compete against another team in a match-up.
+The early-access multiplayer game [Mobius](https://store.steampowered.com/app/1766450/Mobius/) features a competitive
+tournament scene for teams of exactly 5 players. Team captains submit their team's availability in the game's
+[Discord server](https://discord.gg/mobiuscompetitive) to be scheduled to compete against another team in a match-up.
 Two teams will compete against each other for up to an hour, where the winning team takes
 [Elo rating](https://en.wikipedia.org/wiki/Elo_rating_system) from the losing team.
 
 Team matchmaking is a difficult problem, since several factors must be considered to ensure a fair and balanced
 match-up. These factors include:
 
-1. **(Required)** Each team can only be scheduled once per time slot to avoid double-booking.
-2. **(Required)** Teams cannot play back-to-back matches to prevent fatigue (e.g. a team cannot play a 8pm match and
-   then subsequently a 9pm match on the same day).
-3. **(Required)** Teams cannot compete against a team from another geographic region in the interest of minimizing
+1. **(Required)** Teams cannot compete against a team from another geographic region in the interest of minimizing
    latency for fairness (e.g. a NA team cannot compete against an EU team).
+2. **(Required)** Each team can only be scheduled once per time slot to avoid double-booking.
+3. **(Required)** Teams cannot play back-to-back matches to prevent fatigue (e.g. a team cannot play a 8pm match and
+   then subsequently a 9pm match on the same day).
 4. **(Soft)** The skill-level between competing teams should be minimal to ensure balanced wins/losses. Teams will be
    assigned [Elo rating](https://en.wikipedia.org/wiki/Elo_rating_system) that will be used to estimate their skill
    level; winning teams will take Elo from losing teams. The Elo differential between two teams should not exceed a
