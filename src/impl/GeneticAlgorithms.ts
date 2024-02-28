@@ -4,20 +4,21 @@ type ReplaceReturnType<T extends (...args: any) => any, TNewReturn> = (...args: 
 export type IndividualGenerator<I> = () => I;
 
 export type IndividualMutator<I> = (individual: I, population: readonly I[]) => I;
+export type OptionalIndividualMutator<I> = ReplaceReturnType<IndividualMutator<I>, I | undefined | null | void>;
 
-export interface IIndividualMutatorWeighting<I> {
+export interface IWeightedIndividualMutator<I> {
     weight: number;
     predicate?: ReplaceReturnType<IndividualMutator<I>, boolean>;
-    mutator: ReplaceReturnType<IndividualMutator<I>, I | undefined | null | void>;
+    mutator: OptionalIndividualMutator<I>;
 }
 
-export function WeightedRandomIndividualMutator<I>(...mutations: IIndividualMutatorWeighting<I>[]): IndividualMutator<I> {
+export function WeightedRandomIndividualMutator<I>(...mutations: IWeightedIndividualMutator<I>[]): IndividualMutator<I> {
     return (individual, population) => {
         const enabledGenerators = mutations.filter(({predicate}) => predicate?.(individual, population) ?? true);
         const totalWeight: number = mutations.reduce((sum, {weight}) => sum + Math.max(0, weight), 0);
 
         let choice = Math.floor(Math.random() * totalWeight); // unlikely to need a binary search optimization
-        for (let enabledGenerator of enabledGenerators) {
+        for (const enabledGenerator of enabledGenerators) {
             choice -= enabledGenerator.weight;
             if (choice < 0)
                 return enabledGenerator.mutator(individual, population) ?? individual;
@@ -51,11 +52,16 @@ export function IndividualFitnessFunction<I>(fitnessFunction: (individual: I) =>
 }
 
 export interface IFitnessFunctionWeighting<I> {
+    name?: string;
+    weighting: number;
     fitnessFunction: FitnessFunction<I>;
+    normalizer: "gaussian";
+    // normalizer: "linear" | "gaussian" | "normal" | "exponential" | "logarithmic" | "sigmoid" | "tanh" | "none";
+
     // TODO: implement weighting for fitness functions
     // TODO: account for gaussian, linear unbounded distributions, normal distributions, etc
     // TODO: implement predicate for fitness functions
-};
+}
 
 export function MultivariateFitnessFunction<I>(...fitnessFunctions: readonly IFitnessFunctionWeighting<I>[]): FitnessFunction<I> {
     return (population: readonly I[]) => {
@@ -83,13 +89,19 @@ export function MultivariateFitnessFunction<I>(...fitnessFunctions: readonly IFi
 // raw selectors: roulette wheel selection, tournament selection, rank selection, steady state, elitist, kill invalid individuals % of the time
 export type PopulationSelector<I> = (population: readonly IIndividualFitness<I>[], maximumPopulation: number) => readonly IIndividualFitness<I>[];
 
-export function ChainedPopulationSelector<I>(...selectors: PopulationSelector<I>[]): PopulationSelector<I> {
-    return (population: readonly IIndividualFitness<I>[], maximumPopulation: number) => {
+// maybe TODO: implement a population selector that only culls/selects every N generations to allow more state transitions for a population before selective pressure is applied
+
+export function ChainedPopulationSelector<I>(...selectors: PopulationSelector<I>[]): PopulationSelector<I> & {
+    selectors: readonly PopulationSelector<I>[]
+} {
+    const selector = function (population: readonly IIndividualFitness<I>[], maximumPopulation: number) {
         for (const selector of selectors) {
             population = selector(population, maximumPopulation);
         }
         return population;
     };
+    selector.selectors = selectors;
+    return selector;
 }
 
 export function RepopulatePopulationSelector<I>(): PopulationSelector<I> {
@@ -104,7 +116,7 @@ export function RepopulatePopulationSelector<I>(): PopulationSelector<I> {
 export function DeduplicatePopulationSelector<I>(identity: (individual: I) => string): PopulationSelector<I> {
     return (population: readonly IIndividualFitness<I>[], maximumPopulation: number) => {
         const seen = new Map<string, IIndividualFitness<I>>();
-        for (let individual of population) {
+        for (const individual of population) {
             const key = identity(individual.individual);
             if (!seen.has(key))
                 seen.set(key, individual);
@@ -167,7 +179,7 @@ export interface IGeneration<I> {
 
 export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IConstraints<I>, individuals: number): readonly IIndividualFitness<I>[] {
     let lastGeneration: readonly IIndividualFitness<I>[] | undefined;
-    for (let {generation, population} of geneticAlgorithms(constraints)) {
+    for (const {generation, population} of geneticAlgorithms(constraints)) {
         const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
         console.log(`Generation ${generation}: ${population.length} individuals; fittest: ${fittestIndividual?.fitness}`);
 

@@ -1,32 +1,22 @@
 import {ITeamNotYetPlayed, ITeamParticipant, ITeamPlayed, TeamMatchResult} from "./ITeamParticipant";
-
-/**
- * Represents a time slot for a match-up. A time slot is composed of a day and an ordinal referring to which time slot
- * in the day.
- * @example
- * If there are 3 time slots in a day, 8pm, 9pm, and 10pm, then the ordinal for 8pm is 0, 9pm is 1, and 10pm is 2. E.g.,
- * ["2021-09-01T00:00:00.000Z", 2]
- * represents the 10pm time slot on September 1st, 2021. Note that the day is ISO 8601 UTC, but the ordinal typically
- * refers to a local time for a specific region.
- */
-export type ITimeSlot = [day: Date, ordinal: number];
+import {ITimeSlot} from "./ITimeSlot";
 
 /**
  * See {@link ITeamMatchup}.
  */
 export interface ITeamMatchupBase {
     /**
-     * The day and the ordinal of the time slot in which the match-up occurred or is scheduled to occur.
+     * The time at which the matchup occurred or is scheduled to occur.
      */
     readonly time: ITimeSlot;
     /**
-     * The teams participating in the match-up. The length of this array should always be 2. The order of the teams is
+     * The teams participating in the matchup. The length of this array should always be 2 and the order of the teams is
      * arbitrary and should not be relied upon.
      */
     readonly teams: readonly [ITeamParticipant, ITeamParticipant];
     /**
      * Indicates whether the game has occurred or not; if true, additional properties are available on
-     * {@link IScheduledMatchup} (e.g. winner, loser, team elo changes)
+     * {@link IScheduledMatchup} (e.g. winner, loser, team elo changes).
      */
     readonly played: boolean;
 }
@@ -41,15 +31,24 @@ export interface IScheduledMatchup extends ITeamMatchupBase {
 
 /**
  * A matchup that has already occurred (i.e. {@link #played} is true). See {@link ITeamMatchup}.
+ *
+ * A default implementation for consumers to supply history on {@link ITeam.history} is provided by
+ * {@link PlayedMatchup}.
  */
 export interface IPlayedMatchup extends ITeamMatchupBase {
+    /**
+     * The time at which the matchup occurred or is scheduled to occur. Note that {@link ITimeSlot.date} should be set
+     * with the exact date and time of the matchup.
+     */
+    readonly time: ITimeSlot;
     readonly teams: readonly [ITeamPlayed, ITeamPlayed];
     readonly played: true;
 
     /**
-     * Indicates whether the game was a draw or not. If true, then the game was a draw for both teams.
+     * Indicates whether the matchup was a draw. If true, then the matchup was a draw for both teams; otherwise, one
+     * team won and the other lost. Note that this property is derived from {@link #teams}.
      */
-    get IsDraw(): boolean;
+    get isDraw(): boolean;
 
     /**
      * A shorthand property to grab the winning team reference in {@link #teams}. If the game was a draw, then this will
@@ -65,16 +64,18 @@ export interface IPlayedMatchup extends ITeamMatchupBase {
 }
 
 /**
- * Consumer implementation of {@link IPlayedMatchup} due to dynamic get properties.
+ * Consumer implementation of {@link IPlayedMatchup} for dynamic get properties.
  */
 export class PlayedMatchup implements IPlayedMatchup {
-    readonly time: ITimeSlot;
-    readonly teams: readonly [ITeamPlayed, ITeamPlayed];
-    readonly played: true;
+    public readonly time: ITimeSlot;
+    public readonly teams: readonly [ITeamPlayed, ITeamPlayed];
+    public readonly played: true;
+
+    constructor(time: ITimeSlot, teams: readonly ITeamPlayed[]);
 
     constructor(time: ITimeSlot, teams: readonly [ITeamPlayed, ITeamPlayed]) {
-        if (time === undefined || time.length !== 2)
-            throw new Error(`A time slot must be an array of length 2`);
+        if (time === undefined)
+            throw new Error(`A played matchup must have a time slot`);
         if (teams.length !== 2)
             throw new Error(`A played matchup must have exactly 2 teams; however, received ${teams.length} team(s)`);
         this.time = time;
@@ -82,22 +83,22 @@ export class PlayedMatchup implements IPlayedMatchup {
         this.played = true;
     }
 
-    get IsDraw(): boolean {
+    public get isDraw(): boolean {
         return this.teams.find(team => team.status === TeamMatchResult.Draw) !== undefined;
     }
 
-    get winner(): ITeamPlayed | undefined {
+    public get winner(): ITeamPlayed | undefined {
         return this.teams.find(team => team.status === TeamMatchResult.Won);
     }
 
-    get loser(): ITeamPlayed | undefined {
+    public get loser(): ITeamPlayed | undefined {
         return this.teams.find(team => team.status === TeamMatchResult.Lost);
     }
 }
 
 /**
  * A matchup between two teams. If {@link ITeamMatchupBase.played} is true, then this is a {@link PlayedMatchup}
- * (a matchup that has already been played). Otherwise, it is a {@link IScheduledMatchup} (a matchup that is scheduled in
- * the future).
+ * (a matchup that has already been played). Otherwise, it is a {@link IScheduledMatchup} (a matchup that is scheduled
+ * in the future).
  */
 export type ITeamMatchup = IPlayedMatchup | IScheduledMatchup;

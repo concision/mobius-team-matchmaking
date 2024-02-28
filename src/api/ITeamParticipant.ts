@@ -1,22 +1,24 @@
+import {ITeam} from "./ITeam";
+
 /**
- * Represents the status of a team in a match-up. This is used to indicate whether the team has won, lost, or even
- * drawn. See {@link ITeamBase.status}.
+ * Represents the result of a team in a matchup. This is used to indicate whether the team has won, lost, or even drawn.
+ * See {@link ITeamBase.status}.
  */
 export enum TeamMatchResult {
     /**
-     * The team has not yet played in the match-up, i.e. {@link ITeamNotYetPlayed}.
+     * The team has not yet played in the matchup, i.e. {@link ITeamNotYetPlayed}.
      */
     NotYetPlayed = 0,
     /**
-     * The team has lost the match-up. This implies the other competing team in the matchup has won.
+     * The team has lost the matchup. This implies the other competing team in the matchup has won.
      */
     Lost = 1,
     /**
-     * The team has won the match-up. This implies the other competing team in the matchup has lost.
+     * The team has won the matchup. This implies the other competing team in the matchup has lost.
      */
     Won = 2,
     /**
-     * The team has drawn the match-up (i.e. tied). This implies the other competing team in the matchup has also drawn.
+     * The team has drawn the matchup (i.e. tied). This implies the other competing team in the matchup has also drawn.
      */
     Draw = 3,
 }
@@ -26,14 +28,14 @@ export enum TeamMatchResult {
  */
 export interface ITeamBase {
     /**
-     * A Discord snowflake identifier that uniquely identifies a team.
+     * A Discord snowflake identifier that uniquely identifies a team; see {@link ITeam.snowflake}.
      * @example
      * "1181363728239841310"
      */
     readonly snowflake: string;
     /**
-     * The team's status in the match-up. For example, if the matchup has not yet occurred, then this will be
-     * {@link TeamMatchResult.NotYetPlayed}. If the match-up has occurred, then this could be {@link TeamMatchResult.Lost},
+     * The team's status in the matchup. For example, if the matchup has not yet occurred, then this will be
+     * {@link TeamMatchResult.NotYetPlayed}. If the matchup has occurred, then this could be {@link TeamMatchResult.Lost},
      * {@link TeamMatchResult.Won}, or {@link TeamMatchResult.Draw}.
      */
     readonly status: TeamMatchResult;
@@ -43,6 +45,13 @@ export interface ITeamBase {
  * See {@link ITeamParticipant}.
  */
 export interface ITeamNotYetPlayed extends ITeamBase {
+    /**
+     * A reference to the team's data. This is automatically provided by the output matchmaking API and returns the
+     * exact {@link ITeam} object that was input. This is useful for consumers to access the team's data without
+     * needing to perform a lookup.
+     */
+    readonly team?: ITeam;
+
     readonly status: TeamMatchResult.NotYetPlayed;
 }
 
@@ -60,38 +69,12 @@ export interface ITeamPlayed extends ITeamBase {
      * tie or cancelled in some way.
      */
     readonly postMatchElo: number;
-
-    /**
-     * A derived property calculated by {@link #postMatchElo} minus {@link #preMatchElo}.
-     */
-    get eloChange(): number;
-}
-
-/**
- * Consumer implementation of {@link ITeamPlayed} due to dynamic get properties.
- */
-export class TeamPlayed implements ITeamPlayed {
-    readonly snowflake: string;
-    readonly status: Exclude<TeamMatchResult, TeamMatchResult.NotYetPlayed>;
-    readonly preMatchElo: number;
-    readonly postMatchElo: number;
-
-    constructor(snowflake: string, status: Exclude<TeamMatchResult, TeamMatchResult.NotYetPlayed>, preMatchElo: number, postMatchElo: number) {
-        this.snowflake = snowflake;
-        this.status = status;
-        this.preMatchElo = preMatchElo;
-        this.postMatchElo = postMatchElo;
-    }
-
-    get eloChange(): number {
-        return this.postMatchElo - this.preMatchElo;
-    }
 }
 
 /**
  * Represents a data container for a specific team's match results for a specific matchup (i.e. a {@link ITeamMatchup}).
- * This type contains the team's unique identifier, and some additional properties if the game has match-up has already
- * been played.
+ * This type contains the team's unique identifier, and some additional properties if the game has matchup has already
+ * occurred.
  *
  * These types should not be used directly, but a refined type will be provided by other APIs. If the matchup has not
  * yet occurred, then this will be a {@link ITeamNotYetPlayed}, otherwise it will be a {@link ITeamPlayed} with additional
