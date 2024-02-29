@@ -4,22 +4,37 @@ import {
     ITeamMatchupsIndividual,
     type matchmakeTeams,
     type matchmakeTeamsByRegion
-} from "../api/Matchmaking";
+} from "../api/TeamMatchmaking";
 import {ITeam} from "../api/ITeam";
 import {IScheduledMatchup} from "../api/ITeamMatchup";
 import {ITeamNotYetPlayed, TeamMatchResult} from "../api/ITeamParticipant";
 import {
-    ChainedPopulationSelector,
-    geneticAlgorithm,
-    IndividualFitnessFunction,
-    KillInvalidPopulationSelector,
-    MultivariateFitnessFunction,
-    RepopulatePopulationSelector,
-    TournamentPopulationSelector,
-    WeightedRandomIndividualMutator
-} from "./GeneticAlgorithms";
-import {mutationAddNewMatchup, mutationRemoveMatchup, mutationSwapTimeSlotMatchup} from "./Mutators";
+    CrossOverCombineMatchups,
+    MutationAddNewMatchup,
+    MutationRemoveMatchup,
+    MutationSwapMatchupAcrossTimeSlots,
+    MutationSwapMatchupInTimeSlot
+} from "./MatchupIndividualMutators";
 import {Day} from "../api/ITimeSlot";
+import {WeightedRandomIndividualMutator} from "../api/genetic/IndividualMutator";
+import {geneticAlgorithm} from "./GeneticAlgorithmGenerator";
+import {MultivariateFitnessFunction} from "../api/genetic/FitnessFunction";
+import {
+    MaximizeAverageGamesPlayedPerTeam,
+    MaximizeTotalMatchups,
+    MinimizeEloDifferential,
+    MinimizeRecentDuplicateMatchups
+} from "./MatchupFitnessFunctions";
+import {
+    ChainedPopulationSelector,
+    DeduplicatePopulationSelector,
+    KillInvalidPopulationSelector,
+    ProportionalPopulationSelector,
+    RepopulatePopulationSelector,
+    RouletteWheelPopulationSelector,
+    TournamentPopulationSelector
+} from "../api/genetic/PopulationSelector";
+import {IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
 
 export {matchmakeTeams, matchmakeTeamsByRegion};
 
@@ -58,8 +73,6 @@ const matchmakeTeams: matchmakeTeams = ({teams, ...options}: IMatchmakingOptions
         throw new Error("The duplicate matchup week recency must be greater than 0 to be enabled, or 0 to be disabled.");
 
     const week = options.scheduledWeek ?? new Date();
-    const sunday = getSunday(week);
-    const recencyWeek = new Date(sunday.getTime() - 1000 * 60 * 60 * 24 * 7 * (options.preventDuplicateMatchupsInLastXWeeks ?? 2));
 
     const teamsByTimeSlots = partitionTeamsByTimeSlots(teams);
     // TODO: remove time slots that have already occurred
@@ -70,98 +83,54 @@ const matchmakeTeams: matchmakeTeams = ({teams, ...options}: IMatchmakingOptions
             console.log(`Time slot (${timeSlot.region}, ${timeSlot.day}, ${timeSlot.ordinal}) has ${teams.length} team(s) available`);
     }
 
-    const [{individual: {matchups, unmatchedTeams}}] = geneticAlgorithm<ITeamMatchupsIndividual>({
-        maximumGenerations: [...teamsByTimeSlots.values()].reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
+    const constraints: IGeneticOptions<ITeamMatchupsIndividual> = {
+        maximumGenerations: [...teamsByTimeSlots.values()]
+            .reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
         maximumPopulationSize: 1000,
         individualGenerator: () => ({unmatchedTeams: teamsByTimeSlots, matchups: []}),
-        individualMutator: WeightedRandomIndividualMutator<ITeamMatchupsIndividual>(
+        individualMutator: new WeightedRandomIndividualMutator<ITeamMatchupsIndividual>("bruhsuhv", [
             // add new valid team matchup
-            {weight: 2, mutator: mutationAddNewMatchup},
+            {weight: 2, mutator: new MutationAddNewMatchup()},
             // remove a team matchup
-            {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: mutationRemoveMatchup},
+            {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: new MutationRemoveMatchup()},
             // TODO: swap pairing (from the same time slot)
-            {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: mutationSwapTimeSlotMatchup},
+            {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: new MutationSwapMatchupInTimeSlot()},
             // TODO: swap pairing (team swap with 2 different timeslots)
+            {weight: 1, predicate: args => 2 <= args.matchups.length, mutator: new MutationSwapMatchupAcrossTimeSlots()},
             // TODO: crossover pairings (combine pairings from 2 different timeslots)
-        ),
-        fitnessFunction: MultivariateFitnessFunction(
+            {weight: 1, mutator: new CrossOverCombineMatchups()},
+        ]),
+        fitnessFunction: new MultivariateFitnessFunction<ITeamMatchupsIndividual>("", [
             // maximize total matchups
-            {
-                name: "totalMatchups",
-                weighting: 1,
-                normalizer: "gaussian", // TODO: better normalized formula, S-curve like, maybe 1 - 1/(ln(x + e)) or  1/(1 + e^(-x))
-                fitnessFunction: IndividualFitnessFunction(individual => individual.matchups.length),
-            },
+            {weighting: 1, normalizer: "gaussian", fitnessFunction: MaximizeTotalMatchups}, // TODO: better normalized formula, S-curve like, maybe 1 - 1/(ln(x + e)) or  1/(1 + e^(-x))
             // minimize ELO differential in team matchups
+            {weighting: 2, normalizer: "gaussian", fitnessFunction: MinimizeEloDifferential}, // TODO: inverse weight this - a higher score is worse
+            // favor scheduling games to teams who have played fewer games relative to their season join date
+            {weighting: 1, normalizer: "gaussian", fitnessFunction: MaximizeAverageGamesPlayedPerTeam}, // TODO: implement better normalizer
+            // strong penalty for matchups that have occurred in the last options.preventDuplicateMatchupsInLastXWeeks weeks
             {
-                weighting: 2,
-                normalizer: "gaussian", // TODO: inverse weight this - a higher score is worse
-                fitnessFunction: IndividualFitnessFunction(individual => individual.matchups
-                    .map(matchup => Math.abs(matchup.teams[0].elo - matchup.teams[1].elo))
-                    // TODO: determine better aggregation function
-                    .reduce((sum, eloDiff) => sum + eloDiff, 0)),
-            },
-            // strong penalty for matchups that have occurred in the last 2 weeks
-            {
-                // If options.duplicateMatchupRecencyInWeeks is 0, then this fitness function is disabled by a weight of 0
                 weighting: 0 < (options.preventDuplicateMatchupsInLastXWeeks ?? 0) ? 3 : 0,
                 normalizer: "gaussian", // TODO: inverse weight this - a higher score is worse
-                // count duplicate matchups
-                fitnessFunction: IndividualFitnessFunction(individual => individual.matchups
-                    .map(matchup => {
-                        const matchupTeamIds = matchup.teams.map(team => team.snowflake).sort();
-
-                        let duplicateMatchups = 0;
-                        for (const team of matchup.teams) {
-                            if (!("history" in team && Array.isArray(team.history)))
-                                continue;
-                            duplicateMatchups = Math.max(
-                                duplicateMatchups,
-                                team.history
-                                    // only games that have occurred in the last options.duplicateMatchupRecencyInWeeks weeks
-                                    .filter(playedMatchup => recencyWeek.getTime() <= playedMatchup.time.date!.getTime()) // TODO
-                                    // only historical matches that have the same teams as a new matchup
-                                    .filter(playedMatchup => playedMatchup.teams
-                                        .map(playedTeam => playedTeam.snowflake)
-                                        .sort()
-                                        .every((snowflake, index) => snowflake === matchupTeamIds[index])
-                                    )
-                                    .length
-                            );
-                        }
-                        return duplicateMatchups;
-                    })
-                    .reduce((sum, duplicateMatchups) => sum + duplicateMatchups, 0)
-                ),
+                fitnessFunction: MinimizeRecentDuplicateMatchups(week, options.preventDuplicateMatchupsInLastXWeeks),
             },
-            // favor scheduling games to teams who have played fewer games relative to their season join date
-            {
-                weighting: 1,
-                normalizer: "gaussian", // TODO: implement better normalizer
-                fitnessFunction: IndividualFitnessFunction(individual => {
-                    type X = { team: ITeam; joinTime: Date; matchesPlayed: number; };
-                    const x: X[] = [];
-                    teams.map(team => {
-                        x.push({
-                            team,
-                            joinTime: new Date(), // TODO: get join time
-                            matchesPlayed: individual.matchups.filter(matchup => matchup.teams.includes(team)).length,
-                        });
-                    });
-
-                    return 0;
-                })
-            },
-        ),
-        populationSelector: ChainedPopulationSelector(
-            // DeduplicatePopulationSelector(individual => Math.random().toString()),
+        ]),
+        populationSelector: new ChainedPopulationSelector<ITeamMatchupsIndividual>("", [
+            new DeduplicatePopulationSelector("", individual => Math.random().toString()),
             // TODO: kill invalid matchups (i.e. back to back scheduling)
-            KillInvalidPopulationSelector(individual => true),
-            TournamentPopulationSelector(.01),
-            // DeduplicatePopulationSelector(individual => Math.random().toString()),
-            RepopulatePopulationSelector(),
-        ),
-    }, 1);
+            new KillInvalidPopulationSelector("", individual => true, .30),
+            new ProportionalPopulationSelector("", [
+                {weight: .70, selector: new TournamentPopulationSelector("", 10)},
+                {weight: .30, selector: new RouletteWheelPopulationSelector("")},
+            ]),
+            new DeduplicatePopulationSelector("", individual => Math.random().toString()),
+            new RepopulatePopulationSelector(""),
+        ]),
+    };
+    if (typeof options.configure == 'function') {
+        options.configure(constraints);
+    }
+
+    const [{individual: {matchups, unmatchedTeams}}] = geneticAlgorithm<ITeamMatchupsIndividual>(constraints, 1);
     console.log(`Matches (${matchups.length}): \n${matchups.map(matchup =>
         ` - (${matchup.timeSlot.day}, ${matchup.timeSlot.ordinal}): [${matchup.teams[0].name} vs ${matchup.teams[1].name}]`
     ).join("\n")}`);

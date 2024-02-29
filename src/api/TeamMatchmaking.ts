@@ -1,7 +1,7 @@
 import {ITeam} from './ITeam';
 import {IScheduledMatchup} from './ITeamMatchup';
-import {IConstraints} from "../impl/GeneticAlgorithms";
 import {ITimeSlot} from "./ITimeSlot";
+import {IGeneticOptions} from "./genetic/GeneticAlgorithm";
 
 /**
  * Configurable options for the matchmaking algorithm for {@link matchmakeTeams} and {@link matchmakeTeamsByRegion}.
@@ -52,7 +52,7 @@ export interface IMatchmakingOptions {
      * is an optional property, and may be omitted if the default genetic algorithm is sufficient. If provided, then the
      * supplied function will be invoked to override the genetic algorithm's default configuration.
      */
-    readonly configure?: (options: IConstraints<ITeamMatchupsIndividual>) => void;
+    readonly configure?: (options: IGeneticOptions<ITeamMatchupsIndividual>) => void;
 }
 
 /**
