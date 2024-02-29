@@ -32,7 +32,7 @@ export interface IMatchmakingOptions {
      * Translates a time slot to an exact date and time. This is useful for consumers to override the default behavior
      * of setting the date to the first moment of the day, or for using non-standard keys in {@link ITeam.availability}.
      */
-    readonly availabilityTranslator?: (timeSlot: Omit<ITimeSlot, 'date'>) => Date;
+    readonly availabilityTranslator?: (timeSlot: Omit<ITimeSlot, 'date'>, week: Date) => Date | undefined;
 
     /**
      * The maximum number of games that a team can play during the week.

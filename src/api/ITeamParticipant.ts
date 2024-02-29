@@ -50,7 +50,7 @@ export interface ITeamNotYetPlayed extends ITeamBase {
      * exact {@link ITeam} object that was input. This is useful for consumers to access the team's data without
      * needing to perform a lookup.
      */
-    readonly team?: ITeam;
+    readonly team: ITeam;
 
     readonly status: TeamMatchResult.NotYetPlayed;
 }

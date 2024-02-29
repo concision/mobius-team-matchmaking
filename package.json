@@ -8,8 +8,8 @@
   "packageManager": "yarn@4.1.0",
   "scripts": {
     "compile": "tsc",
-    "debug": "node --inspect-brk -r ts-node/register/transpile-only src/TestDemo.ts",
-    "start": "node -r ts-node/register/transpile-only src/TestDemo.ts"
+    "debug": "node --inspect-brk -r ts-node/register/transpile-only src/MatchmakingDemo.ts",
+    "start": "node -r ts-node/register/transpile-only src/MatchmakingDemo.ts"
   },
   "engines": {
     "node": ">=20.0.0"

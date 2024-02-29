@@ -1,5 +1,5 @@
 import {IIndividualFitness} from "../api/genetic/FitnessFunction";
-import {IGeneticOptions, IGeneration} from "../api/genetic/GeneticAlgorithm";
+import {IGeneration, IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
 
 export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGeneticOptions<I>, individuals: number): readonly IIndividualFitness<I>[] {
     let lastGeneration: readonly IIndividualFitness<I>[] | undefined;
@@ -24,19 +24,20 @@ export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? nev
         individualMutator,
         fitnessFunction,
         populationSelector,
+        earlyStopping,
     } = constraints;
 
     // generate initial population
     let population: readonly IIndividualFitness<I>[] = fitnessFunction.evaluate(
         firstGeneration
-        || (typeof individualGenerator == 'function' ? Array.from({length: maximumPopulationSize}, constraints.individualGenerator!) : [])
+        || (typeof individualGenerator === 'function' ? Array.from({length: maximumPopulationSize}, constraints.individualGenerator!) : [])
     );
     // iterate generations
-    for (let generation = 1; maximumGenerations ? generation <= maximumGenerations : true; generation++) {
+    for (let generationIndex = 1; maximumGenerations ? generationIndex <= maximumGenerations : true; generationIndex++) {
         // perform selection of individuals for the next generation
         let selectedPopulation: readonly IIndividualFitness<I>[] = populationSelector.select(population, maximumPopulationSize);
-        if (selectedPopulation.length == 0)
-            throw new Error(`PopulationSelector provided no individuals for next generation ${generation + 1}`);
+        if (selectedPopulation.length === 0)
+            throw new Error(`PopulationSelector provided no individuals for next generation ${generationIndex + 1}`);
         // limit population size to maximumPopulationSize
         if (maximumPopulationSize < selectedPopulation.length) {
             const culledPopulation = [...selectedPopulation];
@@ -49,13 +50,16 @@ export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? nev
         const selectedIndividuals: I[] = selectedPopulation.map(individual => individual.individual);
         const nextGeneration: I[] = selectedPopulation.map(individual => individualMutator.mutate(individual.individual, selectedIndividuals))
             .filter((individual): individual is I => individual !== undefined);
-        if (nextGeneration.length == 0)
-            throw new Error(`No individuals spawned in next generation ${generation}`);
+        if (nextGeneration.length === 0)
+            throw new Error(`No individuals spawned in next generation ${generationIndex}`);
 
         // compute fitness of the next generation
         population = fitnessFunction.evaluate(nextGeneration);
+        const generation: IGeneration<I> = {generation: generationIndex, population};
 
         // compute updates
-        yield {generation, population};
+        yield generation;
+        if (typeof earlyStopping === 'function' && earlyStopping(generation))
+            break;
     }
 }

@@ -11,30 +11,40 @@ export const MinimizeEloDifferential = new IndividualFitnessFunction<ITeamMatchu
     "minimizeEloDifferential",
     individual => individual.matchups
         .map(matchup => Math.abs(matchup.teams[0].elo - matchup.teams[1].elo))
-        // TODO: determine better aggregation function
-        .reduce((sum, eloDiff) => sum + eloDiff, 0)
+        .reduce((sum, eloDiff) => sum + eloDiff, 0),
 );
 
 export const MaximizeAverageGamesPlayedPerTeam = new IndividualFitnessFunction<ITeamMatchupsIndividual>(
     "maximizeAverageGamesPlayedPerTeam",
     individual => {
-        type TeamType = { team: ITeam; joinTime: Date; matchesPlayed: number; };
-        const x: TeamType[] = [];
-        // teams.map(team => {
-        //     x.push({
-        //         team,
-        //         joinTime: new Date(), // TODO: get join time
-        //         matchesPlayed: individual.matchups.filter(matchup => matchup.teams.includes(team)).length,
-        //     });
-        // });
+        const scheduledMatchupsPerTeam: Map<ITeam, number> = Array.from(individual.matchups.values())
+            .flatMap(matchup => matchup.teams)
+            .reduce((map, team) => map.set(team, (map.get(team) ?? 0) + 1), new Map<ITeam, number>());
+        for (const matchup of individual.unmatchedTeams.values())
+            for (const team of matchup)
+                scheduledMatchupsPerTeam.set(team, 0);
 
-        return 0;
-    }
+        type TeamMetrics = { team: ITeam; joinTime: Date; matchesPlayed: number; };
+        const metrics: TeamMetrics[] = Array.from(scheduledMatchupsPerTeam.entries())
+            .map(([team, scheduledMatchups]) => ({
+                team,
+                // convert the team's snowflake to a join timestamp with Discord's epoch
+                joinTime: new Date(Number(BigInt(team.snowflake) >> 22n) + 1420070400000),
+                // count the number of matchups the team is scheduled for in addition to the current season's matchups
+                matchesPlayed: scheduledMatchups + (team.history?.length ?? 0),
+            }));
+        const averageMatchupsCount = metrics.reduce((sum, metric) => sum + metric.matchesPlayed, 0) / metrics.length;
+
+        // for each team, count the deviation from the average number of matchups
+        return metrics
+            .map(metric => Math.abs(metric.matchesPlayed - averageMatchupsCount))
+            .reduce((sum, deviation) => sum + deviation, 0);
+    },
 );
 
 export function MinimizeRecentDuplicateMatchups(date: Date, recentWeeks: number = 2) {
     const sunday = new Date(date);
-    sunday.setDate(sunday.getDate() - sunday.getDay());
+    sunday.setDate(sunday.getDate() - sunday.getDay()); // TODO: verify this works
     sunday.setHours(0);
     sunday.setMinutes(0);
     sunday.setSeconds(0);
@@ -58,7 +68,7 @@ export function MinimizeRecentDuplicateMatchups(date: Date, recentWeeks: number 
                             // only historical matches that have the same teams as a new matchup
                             .filter(playedMatchup => playedMatchup.teams
                                 .map(playedTeam => playedTeam.snowflake)
-                                .sort()
+                                .toSorted()
                                 .every((snowflake, index) => snowflake === matchupTeamIds[index])
                             )
                             .length

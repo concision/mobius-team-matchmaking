@@ -15,9 +15,9 @@ import {
     MutationSwapMatchupAcrossTimeSlots,
     MutationSwapMatchupInTimeSlot
 } from "./MatchupIndividualMutators";
-import {Day} from "../api/ITimeSlot";
+import {Day, ITimeSlot} from "../api/ITimeSlot";
 import {WeightedRandomIndividualMutator} from "../api/genetic/IndividualMutator";
-import {geneticAlgorithm} from "./GeneticAlgorithmGenerator";
+import {geneticAlgorithm} from "./GeneticAlgorithm";
 import {MultivariateFitnessFunction} from "../api/genetic/FitnessFunction";
 import {
     MaximizeAverageGamesPlayedPerTeam,
@@ -28,6 +28,7 @@ import {
 import {
     ChainedPopulationSelector,
     DeduplicatePopulationSelector,
+    ElitistPopulationSelector,
     KillInvalidPopulationSelector,
     ProportionalPopulationSelector,
     RepopulatePopulationSelector,
@@ -35,6 +36,9 @@ import {
     TournamentPopulationSelector
 } from "../api/genetic/PopulationSelector";
 import {IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
+import {TimeSlot, translateTimeSlotToDate} from "./TimeSlot";
+import {EnsureGrowthEarlyStopEvaluator} from "./MatchupEarlyStoppingEvaluator";
+import {invalidIndividualEvaluator, uniqueTeamMatchupIdentity} from "./MatchupPopulationSelectors";
 
 export {matchmakeTeams, matchmakeTeamsByRegion};
 
@@ -73,34 +77,31 @@ const matchmakeTeams: matchmakeTeams = ({teams, ...options}: IMatchmakingOptions
         throw new Error("The duplicate matchup week recency must be greater than 0 to be enabled, or 0 to be disabled.");
 
     const week = options.scheduledWeek ?? new Date();
+    const timeSlotToDateTranslator = typeof options.availabilityTranslator === 'function'
+        ? options.availabilityTranslator
+        : translateTimeSlotToDate;
 
     const teamsByTimeSlots = partitionTeamsByTimeSlots(teams);
     // TODO: remove time slots that have already occurred
-    if (0 < teamsByTimeSlots.size)
-        console.log(`Time slots: ${teamsByTimeSlots.size}`);
-    for (const [timeSlot, teams] of teamsByTimeSlots.entries()) {
-        if (2 <= teams.length)
-            console.log(`Time slot (${timeSlot.region}, ${timeSlot.day}, ${timeSlot.ordinal}) has ${teams.length} team(s) available`);
-    }
 
     const constraints: IGeneticOptions<ITeamMatchupsIndividual> = {
         maximumGenerations: [...teamsByTimeSlots.values()]
             .reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
         maximumPopulationSize: 1000,
         individualGenerator: () => ({unmatchedTeams: teamsByTimeSlots, matchups: []}),
-        individualMutator: new WeightedRandomIndividualMutator<ITeamMatchupsIndividual>("bruhsuhv", [
+        individualMutator: new WeightedRandomIndividualMutator("", 0.75, [
             // add new valid team matchup
             {weight: 2, mutator: new MutationAddNewMatchup()},
             // remove a team matchup
             {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: new MutationRemoveMatchup()},
-            // TODO: swap pairing (from the same time slot)
+            // swap pairing (from the same time slot)
             {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: new MutationSwapMatchupInTimeSlot()},
-            // TODO: swap pairing (team swap with 2 different timeslots)
+            // swap pairing (team swap with 2 different timeslots)
             {weight: 1, predicate: args => 2 <= args.matchups.length, mutator: new MutationSwapMatchupAcrossTimeSlots()},
-            // TODO: crossover pairings (combine pairings from 2 different timeslots)
+            // crossover pairings (combine pairings from 2 different timeslots)
             {weight: 1, mutator: new CrossOverCombineMatchups()},
         ]),
-        fitnessFunction: new MultivariateFitnessFunction<ITeamMatchupsIndividual>("", [
+        fitnessFunction: new MultivariateFitnessFunction("", [
             // maximize total matchups
             {weighting: 1, normalizer: "gaussian", fitnessFunction: MaximizeTotalMatchups}, // TODO: better normalized formula, S-curve like, maybe 1 - 1/(ln(x + e)) or  1/(1 + e^(-x))
             // minimize ELO differential in team matchups
@@ -114,99 +115,77 @@ const matchmakeTeams: matchmakeTeams = ({teams, ...options}: IMatchmakingOptions
                 fitnessFunction: MinimizeRecentDuplicateMatchups(week, options.preventDuplicateMatchupsInLastXWeeks),
             },
         ]),
-        populationSelector: new ChainedPopulationSelector<ITeamMatchupsIndividual>("", [
-            new DeduplicatePopulationSelector("", individual => Math.random().toString()),
-            // TODO: kill invalid matchups (i.e. back to back scheduling)
-            new KillInvalidPopulationSelector("", individual => true, .30),
-            new ProportionalPopulationSelector("", [
-                {weight: .70, selector: new TournamentPopulationSelector("", 10)},
-                {weight: .30, selector: new RouletteWheelPopulationSelector("")},
+        populationSelector: new ChainedPopulationSelector("chainedSelector", [
+            new DeduplicatePopulationSelector("deduplicate", uniqueTeamMatchupIdentity),
+            // kill invalid matchups (i.e. back to back scheduling)
+            new KillInvalidPopulationSelector("killInvalids", invalidIndividualEvaluator, .30),
+            // apply selective pressure
+            new ProportionalPopulationSelector("selectivePressure", [
+                // randomly select the best matchups
+                {weight: .75, selector: new TournamentPopulationSelector("tournament", 10)},
+                // preserve some of the best matchups without selective pressure
+                {weight: .05, selector: new ElitistPopulationSelector("elitism", 1)},
+                // preserve random individuals to maintain diversity
+                {weight: .20, selector: new RouletteWheelPopulationSelector("roulette")},
             ]),
-            new DeduplicatePopulationSelector("", individual => Math.random().toString()),
-            new RepopulatePopulationSelector(""),
+            // regrow the population cloned from selected individuals
+            new RepopulatePopulationSelector("repopulate"),
         ]),
+        // stop early if the fitness is not improving
+        earlyStopping: EnsureGrowthEarlyStopEvaluator(10),
     };
-    if (typeof options.configure == 'function') {
+    if (typeof options.configure === 'function')
         options.configure(constraints);
-    }
 
-    const [{individual: {matchups, unmatchedTeams}}] = geneticAlgorithm<ITeamMatchupsIndividual>(constraints, 1);
-    console.log(`Matches (${matchups.length}): \n${matchups.map(matchup =>
-        ` - (${matchup.timeSlot.day}, ${matchup.timeSlot.ordinal}): [${matchup.teams[0].name} vs ${matchup.teams[1].name}]`
-    ).join("\n")}`);
+    const [{individual}] = geneticAlgorithm<ITeamMatchupsIndividual>(constraints, 1);
 
-    return {
-        matchups: matchups.map(({timeSlot, teams}) => (<IScheduledMatchup>{
-            time: {
-                day: timeSlot.day,
-                ordinal: timeSlot.ordinal,
-                date: null,
-            }, // TODO: translate date
+    const teamMatchups = individual.matchups
+        .map(({timeSlot, teams}) => <IScheduledMatchup>({
+            time: {day: timeSlot.day, ordinal: timeSlot.ordinal, date: timeSlotToDateTranslator(timeSlot, week)},
             teams: <[ITeamNotYetPlayed, ITeamNotYetPlayed]>teams.map(team => ({
                 team: team,
                 snowflake: team.snowflake,
                 status: TeamMatchResult.NotYetPlayed,
             })),
             played: false,
-        })), // TODO sort by date
-        // TODO: distinct by snowflake
-        unmatched: [...unmatchedTeams.values()].flatMap(teams => teams)
-    };
+        }))
+        .toSorted((a, b) => {
+            const result = (a.time.date?.getTime() ?? Infinity) - (b.time.date?.getTime() ?? Infinity);
+            return result === 0 ? a.time.ordinal - b.time.ordinal : result;
+        });
+    const unmatchedTeams = Array.from([...individual.unmatchedTeams.values()]
+        .flatMap(teams => teams)
+        .reduce((uniqueTeams, team) => uniqueTeams.has(team.snowflake) ? uniqueTeams : uniqueTeams.set(team.snowflake, team), new Map<string, ITeam>())
+        .values()
+    );
+    return {matchups: teamMatchups, unmatched: unmatchedTeams};
 }
 
 
-function getSunday(startDate: Date) {
-    const sunday = new Date(startDate);
-    sunday.setDate(sunday.getDate() - sunday.getDay());
-    sunday.setHours(0);
-    sunday.setSeconds(0);
-    return sunday;
-}
-
-const partitionTeamsByTimeSlots = (teams: readonly ITeam[]): ReadonlyMap<TimeSlot, readonly ITeam[]> => {
-    const allTimeSlots = teams
+function partitionTeamsByTimeSlots(teams: readonly ITeam[]): ReadonlyMap<ITimeSlot, readonly ITeam[]> {
+    const uniqueTimeSlots: Set<ITimeSlot> = teams
         .flatMap((team: ITeam) => (<Day[]>Object.keys(team.availability))
             .flatMap(day => team.availability[day]!
-                .map((isAvailable: boolean, ordinal: number) => isAvailable ? new TimeSlot(team.region, day, ordinal) : null)
-                .filter((timeSlot): timeSlot is TimeSlot => timeSlot !== null)
+                .map((isAvailable: boolean, ordinal: number) => isAvailable ? TimeSlot.of(day, ordinal) : null)
+                .filter((timeSlot): timeSlot is ITimeSlot => timeSlot !== null)
             )
         )
-        .reduce((map, timeSlot) => map.set(timeSlot.identifier.description!, timeSlot), new Map<string, TimeSlot>());
-    // console.log(`Discovered ${allTimeSlots.size} used time slots: [${[...allTimeSlots.values()].map(timeSlot => `(${timeSlot.day}, ${timeSlot.ordinal})`).join(", ")}]`);
+        .reduce((map, timeSlot) => map.add(timeSlot), new Set<ITimeSlot>());
 
-    const teamsByTimeSlot = new Map<TimeSlot, ITeam[]>();
-    for (const timeSlot of allTimeSlots.values())
+    const teamsByTimeSlot = new Map<ITimeSlot, ITeam[]>();
+    for (const timeSlot of uniqueTimeSlots.values())
         teamsByTimeSlot.set(timeSlot, []);
 
     for (const team of teams) {
         const teamTimeSlots = (<Day[]>Object.keys(team.availability))
             .flatMap(day => team.availability[day]!
-                .map((isAvailable: boolean, ordinal: number) => isAvailable ? new TimeSlot(team.region, day, ordinal) : null)
-                .filter((timeSlot): timeSlot is TimeSlot => timeSlot !== null)
-            ).map(timeSlot => allTimeSlots.get(timeSlot.identifier.description!)!);
-
-        // if (0 < teamTimeSlots.length) {
-        //     console.log(`Team '${team.name}' is available at ${teamTimeSlots.length} time slots: [${teamTimeSlots.map(timeSlot => `(${timeSlot.day}, ${timeSlot.ordinal})`).join(", ")}]`);
-        // }
+                .map((isAvailable: boolean, ordinal: number) => isAvailable ? TimeSlot.of(day, ordinal) : null)
+                .filter((timeSlot): timeSlot is ITimeSlot => timeSlot !== null)
+            );
 
         for (const teamTimeSlot of teamTimeSlots)
             teamsByTimeSlot.get(teamTimeSlot)!.push(team);
     }
 
     return teamsByTimeSlot;
-}
-
-
-export class TimeSlot {
-    public readonly region: string;
-    public readonly day: Day;
-    public readonly ordinal: number;
-    public readonly identifier: symbol;
-
-    constructor(region: string, day: Day, ordinal: number) {
-        this.region = region;
-        this.day = <Day>day.toLowerCase();
-        this.ordinal = ordinal;
-        this.identifier = Symbol(JSON.stringify({region, day, ordinal}));
-    }
 }

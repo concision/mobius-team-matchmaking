@@ -1,8 +1,5 @@
 import {IIndividualFitness} from "./FitnessFunction";
-import {ReplaceReturnType} from "./Types";
-
-// proportional selection: fill X% of the next generation with the results from Z selection
-// raw selectors: roulette wheel selection, tournament selection, rank selection, steady state, elitist, kill invalid individuals % of the time
+import {ReplaceReturnType} from "./TypescriptTypes";
 
 export abstract class PopulationSelector<I> {
     public constructor(
@@ -13,7 +10,6 @@ export abstract class PopulationSelector<I> {
     public abstract select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[];
 }
 
-
 export class ChainedPopulationSelector<I> extends PopulationSelector<I> {
     public readonly selectors: PopulationSelector<I>[];
 
@@ -23,17 +19,16 @@ export class ChainedPopulationSelector<I> extends PopulationSelector<I> {
     }
 
     public override select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        for (const selector of this.selectors) {
+        for (const selector of this.selectors)
             population = selector.select(population, maximumPopulation);
-        }
         return population;
     }
 }
 
 export interface IWeightedPopulationSelector<I> {
-    weight: number;
-    predicate?: ReplaceReturnType<PopulationSelector<I>["select"], boolean>;
-    selector: PopulationSelector<I>;
+    readonly weight: number;
+    readonly predicate?: ReplaceReturnType<PopulationSelector<I>["select"], boolean>;
+    readonly selector: PopulationSelector<I>;
 }
 
 export class ProportionalPopulationSelector<I> extends PopulationSelector<I> {
@@ -45,12 +40,27 @@ export class ProportionalPopulationSelector<I> extends PopulationSelector<I> {
     }
 
     public override select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        // TODO: implement proportional selection
-        return this.selectors[0].selector.select(population, maximumPopulation);
+        const nextPopulation: IIndividualFitness<I>[] = [];
+
+        const enabledSelectors = this.selectors.filter(({predicate}) => predicate?.(population, maximumPopulation) ?? true);
+        const totalWeight = enabledSelectors.reduce((sum, {weight}) => sum + Math.max(0, weight), 0);
+        for (const enabledSelector of enabledSelectors) {
+            const selectedPopulation = enabledSelector.selector.select(population, maximumPopulation);
+            const individualCount = Math.min(selectedPopulation.length, Math.max(1, Math.ceil(maximumPopulation * enabledSelector.weight / totalWeight)));
+
+            for (let i = 0; i < individualCount; i++) {
+                const individual = selectedPopulation[Math.floor(Math.random() * selectedPopulation.length)];
+                nextPopulation.push(individual);
+            }
+        }
+
+        // remove any excess individuals
+        while (maximumPopulation < nextPopulation.length)
+            nextPopulation.splice(Math.floor(Math.random() * nextPopulation.length), 1);
+
+        return nextPopulation;
     }
 }
-
-// maybe TODO: implement a population selector that only culls/selects every N generations to allow more state transitions for a population before selective pressure is applied
 
 export class RepopulatePopulationSelector<I> extends PopulationSelector<I> {
     public constructor(name: string) {
@@ -58,10 +68,24 @@ export class RepopulatePopulationSelector<I> extends PopulationSelector<I> {
     }
 
     public override select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        const newPopulation: IIndividualFitness<I>[] = [...population];
-        while (newPopulation.length < maximumPopulation)
-            newPopulation.push(population[Math.floor(Math.random() * population.length)]);
+        const selectedPopulation: IIndividualFitness<I>[] = [...population];
+        while (selectedPopulation.length < maximumPopulation)
+            selectedPopulation.push(population[Math.floor(Math.random() * population.length)]);
         return population;
+    }
+}
+
+export class ElitistPopulationSelector<I> extends PopulationSelector<I> {
+    public constructor(
+        name: string,
+        public readonly elitismProportion: number,
+    ) {
+        super(name);
+    }
+
+    public override select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[] {
+        return population.toSorted((a, b) => b.fitness - a.fitness)
+            .slice(0, Math.max(1, Math.ceil(maximumPopulation * this.elitismProportion)));
     }
 }
 
@@ -83,16 +107,15 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
                 // TODO: implement a binary search optimization for large populations
                 for (const individual of population) {
                     choice -= individual.fitness;
-                    if (choice < 0) {
+                    if (choice <= 0) {
                         selectedPopulation.push(individual);
                         break;
                     }
                 }
             }
         } else {
-            for (let i = 0; i < maximumPopulation; i++) {
+            for (let i = 0; i < maximumPopulation; i++)
                 selectedPopulation.push(population[Math.floor(Math.random() * population.length)]);
-            }
         }
 
         return selectedPopulation;
@@ -114,7 +137,7 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
                 {length: Math.max(2, this.tournamentSize < 1 ? Math.ceil(Math.random() * population.length) : this.tournamentSize)},
                 () => population[Math.floor(Math.random() * population.length)]
             );
-            const winner = tournament.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, tournament[0]);
+            const winner = tournament.reduce((max, individual) => max.fitness < individual.fitness ? individual : max, tournament[0]);
             selectedPopulation.push(winner);
         }
         return selectedPopulation;
@@ -132,6 +155,7 @@ export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
     public override select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[] {
         const seen = new Map<string, IIndividualFitness<I>>();
         for (const individual of population) {
+            // all individual with the same key should be identical
             const key = this.identity(individual.individual);
             if (!seen.has(key))
                 seen.set(key, individual);
@@ -143,13 +167,13 @@ export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
 export class KillInvalidPopulationSelector<I> extends PopulationSelector<I> {
     public constructor(
         name: string,
-        public readonly predicate: (individual: IIndividualFitness<I>) => boolean,
-        public readonly chanceToKill: number = 1,
+        public readonly killPredicate: (individual: IIndividualFitness<I>) => boolean,
+        public readonly killProbability: number = 1,
     ) {
         super(name);
     }
 
     public override select(population: readonly IIndividualFitness<I>[], maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        return population.filter(individual => this.predicate(individual) || Math.random() <= this.chanceToKill);
+        return population.filter(individual => !this.killPredicate(individual) || Math.random() <= this.killProbability);
     }
 }
