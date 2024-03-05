@@ -109,6 +109,10 @@ export enum FailedMatchupReason {
      */
     UNSCHEDULED_AVAILABILITY = 1,
     /**
+     * Indicates that the team has some availability, but all of their available time slots are in the past.
+     */
+    ALL_AVAILABILITY_BEFORE_SCHEDULED_DATE = 2,
+    /**
      * Indicates that there are not enough competing teams in the time slots to match with the team.
      */
     NOT_ENOUGH_COMPETITION_IN_TIME_SLOTS = 3,

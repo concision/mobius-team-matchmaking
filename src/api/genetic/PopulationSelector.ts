@@ -190,17 +190,20 @@ export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
 export type KillPredicate<I> = (individual: IIndividualFitness<I>) => boolean;
 
 export class KillInvalidPopulationSelector<I> extends PopulationSelector<I> {
+    public readonly killPredicates: KillPredicate<I>[];
+
     public constructor(
         name: string,
-        public readonly killPredicate: KillPredicate<I>,
-        public readonly killProbability: number | ((generation: number) => number),
+        killPredicate: KillPredicate<I> | readonly KillPredicate<I>[],
+        public readonly killProbability: number | ((generation: number) => number) = 1,
     ) {
         super(name);
+        this.killPredicates = Array.isArray(killPredicate) ? killPredicate : [killPredicate];
     }
 
     public override select({population, generation}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
         return population.filter(individual =>
-            !this.killPredicate(individual)
+            this.killPredicates.filter(predicate => predicate(individual)).length === 0
             || (typeof this.killProbability === "function" ? this.killProbability(generation) : this.killProbability) <= Math.random()
         );
     }

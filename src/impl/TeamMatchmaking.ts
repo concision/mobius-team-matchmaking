@@ -34,7 +34,11 @@ import {
 import {IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
 import {partitionTeamsByTimeSlots, sortScheduledMatchupsByTime, translateTimeSlotToDate} from "./TimeSlot";
 import {ensureGrowthEarlyStopEvaluator} from "./geneticHooks/MatchupEarlyStoppingEvaluator";
-import {maximumGamesKillPredicate, uniqueTeamMatchupIdentity} from "./geneticHooks/MatchupPopulationSelectors";
+import {
+    backToBackMatchupKillPredicate,
+    maximumGamesKillPredicate,
+    uniqueTeamMatchupIdentity
+} from "./geneticHooks/MatchupPopulationSelectors";
 
 export {matchmakeTeams, matchmakeTeamsByRegion};
 
@@ -77,7 +81,8 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
 
     const parameters = validateAndCreateParameters(defaultParameters);
 
-    const {teamsByTimeSlot, unavailableTeams} = partitionTeamsByTimeSlots(
+    // TODO: implement FailedMatchupReason.ALL_AVAILABILITY_BEFORE_SCHEDULED_DATE
+    let {teamsByTimeSlot, unavailableTeams} = partitionTeamsByTimeSlots(
         parameters.scheduledDate, parameters.timeSlotToDateTranslator, teams
     );
 
@@ -105,7 +110,7 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
             {
                 weighting: 10,
                 normalizer: Normalizer.GAUSSIAN, // TODO: implement better normalizer
-                fitnessFunction: maximizeAverageGamesPlayedPerTeam(parameters.scheduledDate, parameters.countGamesPlayedInLastXDays)
+                fitnessFunction: maximizeAverageGamesPlayedPerTeam(parameters.scheduledDate, parameters.countGamesPlayedInLastXDays),
             },
             // strong penalty for matchups that have occurred in the last options.preventDuplicateMatchupsInLastXWeeks weeks
             {
@@ -117,22 +122,22 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
         populationSelector: new ChainedPopulationSelector("chainedSelector", [
             new DeduplicatePopulationSelector("deduplicate", uniqueTeamMatchupIdentity),
             // kill invalid matchups (i.e. back to back scheduling)
-            new KillInvalidPopulationSelector("killInvalids", maximumGamesKillPredicate(parameters.maximumGames), 1),
+            new KillInvalidPopulationSelector("killMatchupsExceedingMaximumGames", [
+                maximumGamesKillPredicate(parameters.maximumGames),
+                backToBackMatchupKillPredicate(),
+            ]),
             // apply selective pressure
             new ProportionalPopulationSelector("selectivePressure", [
                 // randomly select the best matchups
-                {weight: .75, selector: new TournamentPopulationSelector("tournament", 10)},
+                {weight: .50, selector: new TournamentPopulationSelector("tournament", 10)},
                 // preserve some of the best matchups without selective pressure
-                {weight: .05, selector: new ElitistPopulationSelector("elitism", 1)},
-                // preserve random individuals to maintain diversity
+                {weight: .10, selector: new ElitistPopulationSelector("elitism", 1)},
+                // preserve individuals to maintain diversity (proportional by fitness)
                 {weight: .20, selector: new RouletteWheelPopulationSelector("roulette")},
+                // preserve random-selected individuals to maintain diversity
+                {weight: .20, selector: new RouletteWheelPopulationSelector("roulette", false)},
             ]),
-            new KillInvalidPopulationSelector("killInvalids",
-                maximumGamesKillPredicate(parameters.maximumGames),
-                // kill the worst matchups if the growth is failing
-                () => .5 + .5 * earlyStopEvaluator.growthFailureProportion,
-            ),
-            // regrow the population cloned from selected individuals
+            // always regrow the population if necessary
             new RepopulatePopulationSelector("repopulate"),
         ]),
         // stop early if the fitness is not improving
@@ -183,7 +188,7 @@ function validateAndCreateParameters(defaultParameters?: IDefaultMatchmakingPara
         timeSlotToDateTranslator: translateTimeSlotToDate,
 
         minimumGames: 0,
-        maximumGames: 5,
+        maximumGames: 3,
 
         preventDuplicateMatchupsInLastXDays: 14,
         countGamesPlayedInLastXDays: 21,

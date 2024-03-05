@@ -15,6 +15,9 @@ export const minimizeEloDifferential = new IndividualFitnessFunction<ITeamMatchu
 );
 
 export function maximizeAverageGamesPlayedPerTeam(date: Date, recentDays: number): IndividualFitnessFunction<ITeamMatchupsIndividual> {
+    const xDaysAgo = new Date(date);
+    xDaysAgo.setDate(xDaysAgo.getDate() - recentDays);
+
     return new IndividualFitnessFunction<ITeamMatchupsIndividual>(
         "maximizeAverageGamesPlayedPerTeam",
         individual => {
@@ -31,8 +34,11 @@ export function maximizeAverageGamesPlayedPerTeam(date: Date, recentDays: number
                     team,
                     // convert the team's snowflake to a join timestamp with Discord's epoch
                     joinTime: new Date(Number(BigInt(team.snowflake) >> 22n) + 1420070400000),
-                    // count the number of matchups the team is scheduled for in addition to the current season's matchups
-                    matchesPlayed: scheduledMatchups + (team.history?.length ?? 0), // TODO: filter by countGamesPlayedInLastXDays
+                    // count the number of matchups the team is scheduled for
+                    // in addition, count the current season's matchups in the last X days
+                    matchesPlayed: scheduledMatchups + (team.history
+                            ?.filter(playedMatchup => xDaysAgo.getTime() <= (playedMatchup.time.date?.getTime() ?? 0))
+                            .length ?? 0),
                 }));
             const averageMatchupsCount = metrics.reduce((sum, metric) => sum + metric.matchesPlayed, 0) / metrics.length;
 
@@ -45,12 +51,8 @@ export function maximizeAverageGamesPlayedPerTeam(date: Date, recentDays: number
 }
 
 export function minimizeRecentDuplicateMatchups(date: Date, recentDays: number): IndividualFitnessFunction<ITeamMatchupsIndividual> {
-    const sunday = new Date(date);
-    sunday.setDate(sunday.getDate() - sunday.getDay()); // TODO: verify this works
-    sunday.setHours(0);
-    sunday.setMinutes(0);
-    sunday.setSeconds(0);
-    const sundayXWeeksAgo = new Date(sunday.getTime() - 1000 * 60 * 60 * 24 * 7 * Math.max(0, recentDays));
+    const xDaysAgo = new Date(date);
+    xDaysAgo.setDate(xDaysAgo.getDate() - recentDays);
 
     return new IndividualFitnessFunction<ITeamMatchupsIndividual>(
         "minimizeRecentDuplicateMatchups",
@@ -66,7 +68,7 @@ export function minimizeRecentDuplicateMatchups(date: Date, recentDays: number):
                         duplicateMatchups,
                         team.history
                             // only games that have occurred in the last options.duplicateMatchupRecencyInWeeks weeks
-                            .filter(playedMatchup => sundayXWeeksAgo.getTime() <= playedMatchup.time.date!.getTime()) // TODO
+                            .filter(playedMatchup => xDaysAgo.getTime() <= playedMatchup.time.date!.getTime()) // TODO
                             // only historical matches that have the same teams as a new matchup
                             .filter(playedMatchup => playedMatchup.teams
                                 .map(playedTeam => playedTeam.snowflake)

@@ -64,7 +64,7 @@ function ofTimeSlot(cache: Map<string, ITimeSlot>, day: Day, ordinal: number): W
 }
 
 
-const days: readonly Day[] = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+const days: readonly Day[] = Object.freeze(["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]);
 
 export const translateTimeSlotToDate: TimeSlotToDateTranslator =
     (timeSlot: Omit<ITimeSlot, 'date'>, scheduledDate: Date): Date => {
