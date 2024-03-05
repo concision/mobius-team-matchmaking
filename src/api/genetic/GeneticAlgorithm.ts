@@ -2,20 +2,25 @@ import {IndividualGenerator} from "./IndividualGenerator";
 import {IndividualMutator} from "./IndividualMutator";
 import {FitnessFunction, IIndividualFitness} from "./FitnessFunction";
 import {PopulationSelector} from "./PopulationSelector";
-import {EarlyStopEvaluator} from "./EarlyStopEvaluator";
+import {EarlyStoppingEvaluator} from "./EarlyStoppingEvaluator";
 
-export interface IGeneticOptions<I> {
+export type IGeneticOptions<I> = {
+    readonly debugMode?: boolean;
+
     readonly maximumGenerations?: number;
     readonly maximumPopulationSize: number;
-
-    readonly firstGeneration?: readonly I[];
-    readonly individualGenerator?: IndividualGenerator<I>;
 
     readonly individualMutator: IndividualMutator<I>;
     readonly fitnessFunction: FitnessFunction<I>;
     readonly populationSelector: PopulationSelector<I>;
-    readonly earlyStopping?: EarlyStopEvaluator<I>;
-}
+    readonly earlyStopping?: EarlyStoppingEvaluator<I>;
+} & ({
+    readonly firstGeneration: readonly I[];
+    readonly individualGenerator?: undefined;
+} | {
+    readonly firstGeneration?: undefined;
+    readonly individualGenerator: IndividualGenerator<I>;
+});
 
 export interface IGeneration<I> {
     readonly generation: number;

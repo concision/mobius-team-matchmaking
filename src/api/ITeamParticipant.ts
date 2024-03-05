@@ -33,6 +33,7 @@ export interface ITeamBase {
      * "1181363728239841310"
      */
     readonly snowflake: string;
+
     /**
      * The team's status in the matchup. For example, if the matchup has not yet occurred, then this will be
      * {@link TeamMatchResult.NotYetPlayed}. If the matchup has occurred, then this could be {@link TeamMatchResult.Lost},
@@ -60,6 +61,7 @@ export interface ITeamNotYetPlayed extends ITeamBase {
  */
 export interface ITeamPlayed extends ITeamBase {
     readonly status: Exclude<TeamMatchResult, TeamMatchResult.NotYetPlayed>;
+
     /**
      * The team's Elo rating before the match occurred.
      */

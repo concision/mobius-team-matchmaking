@@ -1,13 +1,8 @@
 export interface IIndividualFitness<I> {
-    readonly individual: I;
+    readonly solution: I;
     readonly fitness: number;
 }
 
-/**
- * A fitness function receives a population of individuals and returns a list of individuals with their fitness scores.
- * Some fitness functions may require the entire population to be evaluated to return any fitness scores (e.g. when a
- * fitness score is not absolute, but relative).
- */
 export abstract class FitnessFunction<I> {
     public constructor(
         public readonly name: string,
@@ -17,13 +12,8 @@ export abstract class FitnessFunction<I> {
     public abstract evaluate(population: readonly I[]): readonly IIndividualFitness<I>[];
 }
 
+
 export class IndividualFitnessFunction<I> extends FitnessFunction<I> {
-    /**
-     * A fitness functions that evaluates the fitness of an individual independent of the population. This is useful for fitness functions that return absolute
-     * fitness scores.
-     * @param name A human-readable name for the fitness function.
-     * @param fitnessFunction A function that takes an individual and returns a number fitness score.
-     */
     public constructor(
         name: string,
         public readonly fitnessFunction: (individual: I) => number,
@@ -32,41 +22,75 @@ export class IndividualFitnessFunction<I> extends FitnessFunction<I> {
     }
 
     public override evaluate(population: readonly I[]): readonly IIndividualFitness<I>[] {
-        return population.map(individual => ({individual, fitness: this.fitnessFunction(individual)}));
+        return population.map(individual => ({solution: individual, fitness: this.fitnessFunction(individual)}));
     }
 }
 
-export interface IFitnessFunctionWeighting<I> {
-    weighting: number;
-    // TODO: account for gaussian, linear unbounded distributions, normal distributions, etc
-    // normalizer: "linear" | "gaussian" | "normal" | "exponential" | "logarithmic" | "sigmoid" | "tanh" | "none";
-    normalizer: "gaussian";
-    fitnessFunction: FitnessFunction<I>;
-    // TODO: implement predicate for fitness functions?
+
+export enum Normalizer {
+    GAUSSIAN = "gaussian",
+    LINEAR = "linear",
+    EXPONENTIAL = "exponential",
+    LOGARITHMIC = "logarithmic",
+    SIGMOID = "sigmoid",
+    TANH = "tanh",
 }
 
-export class MultivariateFitnessFunction<I> extends FitnessFunction<I> {
-    public readonly fitnessFunctions: IFitnessFunctionWeighting<I>[];
+export interface IWeightedFitnessFunction<I> {
+    weighting: number;
+    normalizer: Normalizer;
+    fitnessFunction: FitnessFunction<I>;
+}
 
-    public constructor(name: string, fitnessFunctions: readonly IFitnessFunctionWeighting<I>[]) {
+export abstract class WeightedFitnessReducer<I> {
+    public constructor(
+        public readonly name: string,
+    ) {
+    }
+
+    public abstract reduce(weightings: number[], fitnessScores: number[]): number;
+}
+
+export class LinearWeightedFitnessReducer<I> extends WeightedFitnessReducer<I> {
+    public constructor() {
+        super("linear");
+    }
+
+    public override reduce(weightings: number[], fitnessScores: number[]): number {
+        return weightings.map((weight, index) => weight * fitnessScores[index])
+            .reduce((sum, fitness) => sum + fitness, 0) / weightings.length;
+    }
+}
+
+
+export class MultivariateFitnessFunction<I> extends FitnessFunction<I> {
+    public readonly fitnessFunctions: IWeightedFitnessFunction<I>[];
+
+    public constructor(
+        name: string,
+        public readonly reducer: WeightedFitnessReducer<I>,
+        fitnessFunctions: readonly IWeightedFitnessFunction<I>[]
+    ) {
         super(name);
         this.fitnessFunctions = [...fitnessFunctions];
     }
 
     public override evaluate(population: readonly I[]): readonly IIndividualFitness<I>[] {
-        // TODO: implement weighting for fitness functions
-        const fitnessFunctionValues: ReadonlyArray<ReadonlyArray<number>> = this.fitnessFunctions.map(
+        const fitnessFunctionWeights = this.fitnessFunctions.map(({weighting}) => weighting);
+        const populationFitnessScores: ReadonlyArray<ReadonlyArray<number>> = this.fitnessFunctions.map(
             ({fitnessFunction}) => fitnessFunction.evaluate(population).map(({fitness}) => fitness)
         );
+        // TODO
 
         const fitness: IIndividualFitness<I>[] = [];
         for (let i = 0; i < population.length; i++) {
-            const individualFitness = Array.from({length: this.fitnessFunctions.length}, (_, f) => fitnessFunctionValues[f][i]);
+            const fitnessScores = Array.from({length: this.fitnessFunctions.length}, (_, f) => populationFitnessScores[f][i]);
+
+            const aggregatedFitness = this.reducer.reduce(fitnessFunctionWeights, fitnessScores);
 
             fitness.push({
-                individual: population[i],
-                // TODO: actually implement multivariate fitness function, this is just a placeholder
-                fitness: individualFitness.reduce((sum, fitness) => sum + fitness, 0) / individualFitness.length,
+                solution: population[i],
+                fitness: aggregatedFitness,
             });
         }
         return fitness;

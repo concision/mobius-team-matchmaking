@@ -6,10 +6,13 @@ export class MutationAddNewMatchup extends IndividualMutator<ITeamMatchupsIndivi
         super(name);
     }
 
-    public override mutate(parent: ITeamMatchupsIndividual, population: readonly ITeamMatchupsIndividual[]): ITeamMatchupsIndividual | undefined {
+    public override mutate(
+        parent: ITeamMatchupsIndividual,
+        population: readonly ITeamMatchupsIndividual[],
+    ): ITeamMatchupsIndividual | undefined {
         // find a timeslot to add a new matchup
         const possiblePairingsByTimeSlots = [...parent.unmatchedTeams.entries()]
-            .filter(([timeSlot, teams]) => 2 <= teams.length)
+            .filter(([, teams]) => 2 <= teams.length)
             .map(([timeSlot, teams]) => ({timeSlot, pairs: teams.length * (teams.length + 1) / 2}));
         const totalPossiblePairings = possiblePairingsByTimeSlots.reduce((sum, slot) => sum + slot.pairs, 0);
         if (totalPossiblePairings <= 0)
@@ -18,7 +21,7 @@ export class MutationAddNewMatchup extends IndividualMutator<ITeamMatchupsIndivi
         let random = Math.floor(Math.random() * totalPossiblePairings);
         for (let pairing of possiblePairingsByTimeSlots) {
             random -= pairing.pairs;
-            if (random < 0) {
+            if (random <= 0) {
                 chosenPair = pairing;
                 break;
             }
@@ -48,7 +51,10 @@ export class MutationRemoveMatchup extends IndividualMutator<ITeamMatchupsIndivi
         super(name);
     }
 
-    public override mutate(parent: ITeamMatchupsIndividual, population: readonly ITeamMatchupsIndividual[]): ITeamMatchupsIndividual | undefined {
+    public override mutate(
+        parent: ITeamMatchupsIndividual,
+        population: readonly ITeamMatchupsIndividual[],
+    ): ITeamMatchupsIndividual | undefined {
         if (0 < parent.matchups.length) {
             const matchups = [...parent.matchups];
             const removedMatchup = matchups.splice(Math.floor(Math.random() * matchups.length), 1)[0];
@@ -65,7 +71,10 @@ export class MutationSwapMatchupInTimeSlot extends IndividualMutator<ITeamMatchu
         super(name);
     }
 
-    public override mutate(parent: ITeamMatchupsIndividual, population: readonly ITeamMatchupsIndividual[]): ITeamMatchupsIndividual | undefined {
+    public override mutate(
+        parent: ITeamMatchupsIndividual,
+        population: readonly ITeamMatchupsIndividual[],
+    ): ITeamMatchupsIndividual | undefined {
         return undefined; // TODO
     }
 }
@@ -75,7 +84,10 @@ export class MutationSwapMatchupAcrossTimeSlots extends IndividualMutator<ITeamM
         super(name);
     }
 
-    public override mutate(parent: ITeamMatchupsIndividual, population: readonly ITeamMatchupsIndividual[]): ITeamMatchupsIndividual | undefined {
+    public override mutate(
+        parent: ITeamMatchupsIndividual,
+        population: readonly ITeamMatchupsIndividual[],
+    ): ITeamMatchupsIndividual | undefined {
         return undefined; // TODO
     }
 }
@@ -85,7 +97,10 @@ export class CrossOverCombineMatchups extends IndividualMutator<ITeamMatchupsInd
         super(name);
     }
 
-    public override mutate(parent: ITeamMatchupsIndividual, population: readonly ITeamMatchupsIndividual[]): ITeamMatchupsIndividual | undefined {
+    public override mutate(
+        parent: ITeamMatchupsIndividual,
+        population: readonly ITeamMatchupsIndividual[],
+    ): ITeamMatchupsIndividual | undefined {
         return undefined; // TODO
     }
 }

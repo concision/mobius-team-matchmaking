@@ -1,8 +1,10 @@
+import {IDefaultMatchmakingParameters} from "./TeamMatchmaking";
+
 /**
  * Represents a day of the week, which is used to indicate the availability of a team in {@link ITeam.availability}
  * and the time slot in {@link ITimeSlot.day}.
  *
- * Note while
+ * Note that these values should typically be a day of the week in lowercase, but may be any string.
  */
 export type Day = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | string;
 
@@ -35,14 +37,14 @@ export interface ITimeSlot {
     readonly ordinal: number;
 
     /**
-     * The exact date and time of the time slot.
+     * The exact date and time of the time slot, or null if not yet set.
      *
      * Consumers should set this value with the exact time for any {@link IPlayedMatchup.time}.
      *
      * This property may be provided by the output of the matchmaking API for {@link IScheduledMatchup.time} and is
-     * computed by {@link IMatchmakingOptions.availabilityTranslator}. By default, this translates all known days of the
-     * week to the first moment of the day (at UTC time, not local time). This callback may be overridden to provide an
-     * exact date and time for the time slot.
+     * computed by {@link IDefaultMatchmakingParameters.timeSlotToDateTranslator}. By default, this translates all known
+     * days of the week to the first moment of the day (at UTC time, not local time). This callback may be overridden to
+     * provide an exact date and time for the time slot.
      */
     readonly date?: Date | null;
 }

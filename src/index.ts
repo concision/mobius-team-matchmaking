@@ -6,7 +6,7 @@ export * from "./api/ITimeSlot";
 export {type IMatchmakingOptions, type ITeamMatchups, type ITeamMatchupGene, type ITeamMatchupsIndividual} from "./api/TeamMatchmaking";
 
 // API: genetic algorithm
-export * from "./api/genetic/EarlyStopEvaluator";
+export * from "./api/genetic/EarlyStoppingEvaluator";
 export * from "./api/genetic/FitnessFunction";
 export * from "./api/genetic/GeneticAlgorithm";
 export * from "./api/genetic/IndividualGenerator";

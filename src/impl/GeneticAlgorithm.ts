@@ -4,8 +4,10 @@ import {IGeneration, IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
 export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGeneticOptions<I>, individuals: number): readonly IIndividualFitness<I>[] {
     let lastGeneration: readonly IIndividualFitness<I>[] | undefined;
     for (const {generation, population} of geneticAlgorithmGenerator(constraints)) {
-        const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
-        console.log(`Generation ${generation}: ${population.length} individuals; fittest: ${fittestIndividual?.fitness}`);
+        if (constraints.debugMode) {
+            const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
+            console.log(`Generation ${generation}: ${population.length} individuals; maximum fitness: ${fittestIndividual?.fitness}`);
+        }
 
         lastGeneration = population;
     }
@@ -28,14 +30,15 @@ export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? nev
     } = constraints;
 
     // generate initial population
-    let population: readonly IIndividualFitness<I>[] = fitnessFunction.evaluate(
+    const population: readonly IIndividualFitness<I>[] = fitnessFunction.evaluate(
         firstGeneration
         || (typeof individualGenerator === 'function' ? Array.from({length: maximumPopulationSize}, constraints.individualGenerator!) : [])
     );
+    let generation: IGeneration<I> = {generation: 0, population};
     // iterate generations
     for (let generationIndex = 1; maximumGenerations ? generationIndex <= maximumGenerations : true; generationIndex++) {
         // perform selection of individuals for the next generation
-        let selectedPopulation: readonly IIndividualFitness<I>[] = populationSelector.select(population, maximumPopulationSize);
+        let selectedPopulation: readonly IIndividualFitness<I>[] = populationSelector.select(generation, maximumPopulationSize);
         if (selectedPopulation.length === 0)
             throw new Error(`PopulationSelector provided no individuals for next generation ${generationIndex + 1}`);
         // limit population size to maximumPopulationSize
@@ -47,15 +50,17 @@ export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? nev
         }
 
         // modify selected population via mutations (individual state transitions)
-        const selectedIndividuals: I[] = selectedPopulation.map(individual => individual.individual);
-        const nextGeneration: I[] = selectedPopulation.map(individual => individualMutator.mutate(individual.individual, selectedIndividuals))
-            .filter((individual): individual is I => individual !== undefined);
+        const selectedIndividuals: I[] = selectedPopulation.map(individual => individual.solution);
+        const nextGeneration: I[] = selectedPopulation.map(individual =>
+            // attempt to mutate individual, otherwise keep it as is
+            individualMutator.mutate(individual.solution, selectedIndividuals) ?? individual.solution
+        );
         if (nextGeneration.length === 0)
             throw new Error(`No individuals spawned in next generation ${generationIndex}`);
 
         // compute fitness of the next generation
-        population = fitnessFunction.evaluate(nextGeneration);
-        const generation: IGeneration<I> = {generation: generationIndex, population};
+        let population = fitnessFunction.evaluate(nextGeneration);
+        generation = {generation: generationIndex, population};
 
         // compute updates
         yield generation;

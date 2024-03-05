@@ -18,10 +18,12 @@ export interface ITeam {
      * const date = new Date(Number(BigInt(snowflake) >> 22n) + discordEpoch);
      */
     readonly snowflake: string;
+
     /**
      * A human-readable display name, selected by the team owner.
      */
     readonly name: string;
+
     /**
      * The geographic region in which the team is located. This is used by the matchmaking algorithm to prevent
      * scheduling teams across different regions (due to latency fairness concerns).

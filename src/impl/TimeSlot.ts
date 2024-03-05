@@ -1,5 +1,5 @@
 import {Day, ITimeSlot} from "../api/ITimeSlot";
-import {IMatchmakingOptions} from "../api/TeamMatchmaking";
+import {IDefaultMatchmakingParameters} from "../api/TeamMatchmaking";
 
 export class TimeSlot implements ITimeSlot {
     private static readonly Cache = new Map<string, TimeSlot>();
@@ -29,12 +29,13 @@ export class TimeSlot implements ITimeSlot {
 
 const days: readonly Day[] = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
-export const translateTimeSlotToDate: Exclude<IMatchmakingOptions["availabilityTranslator"], undefined> = (timeSlot: Omit<ITimeSlot, 'date'>, week: Date): Date | undefined => {
-    const dayOfWeekIndex = days.indexOf(timeSlot.day.toLowerCase());
-    if (0 <= dayOfWeekIndex) {
-        const date = new Date(week);
-        // TODO: fix
-        date.setDate(date.getDate() + (dayOfWeekIndex - date.getDay()));
-        return date;
+export const translateTimeSlotToDate: Exclude<IDefaultMatchmakingParameters["timeSlotToDateTranslator"], undefined> =
+    (timeSlot: Omit<ITimeSlot, 'date'>, week: Date): Date | undefined => {
+        const dayOfWeekIndex = days.indexOf(timeSlot.day.toLowerCase());
+        if (0 <= dayOfWeekIndex) {
+            const date = new Date(week);
+            // TODO: fix
+            date.setDate(date.getDate() + (dayOfWeekIndex - date.getDay()));
+            return date;
+        }
     }
-}
