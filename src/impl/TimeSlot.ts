@@ -7,7 +7,7 @@ export class TimeSlot implements ITimeSlot {
     public readonly day: Day;
     public readonly ordinal: number;
 
-    public readonly date?: undefined;
+    public readonly date?: never;
 
     private constructor(day: Day, ordinal: number) {
         this.day = day;
@@ -30,11 +30,10 @@ export class TimeSlot implements ITimeSlot {
 const days: readonly Day[] = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 export const translateTimeSlotToDate: Exclude<IDefaultMatchmakingParameters["timeSlotToDateTranslator"], undefined> =
-    (timeSlot: Omit<ITimeSlot, 'date'>, week: Date): Date | undefined => {
+    (timeSlot: Omit<ITimeSlot, 'date'>, scheduledDate: Date): Date | undefined => {
         const dayOfWeekIndex = days.indexOf(timeSlot.day.toLowerCase());
         if (0 <= dayOfWeekIndex) {
-            const date = new Date(week);
-            // TODO: fix
+            const date = new Date(scheduledDate);
             date.setDate(date.getDate() + (dayOfWeekIndex - date.getDay()));
             return date;
         }

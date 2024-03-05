@@ -102,17 +102,18 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
         const selectedPopulation: IIndividualFitness<I>[] = [];
 
         if (this.proportional) {
-            const totalFitness = population.reduce((sum, individual) => sum + individual.fitness, 0);
+            const minFitness: number = population.reduce((min, individual) => Math.min(min, individual.fitness), 0);
+            const cumulativeFitness: number[] = [];
+            for (let i = 0; i < selectedPopulation.length; i++)
+                cumulativeFitness[i] = (cumulativeFitness[i - 1] ?? 0) + (selectedPopulation[i].fitness - minFitness);
+            const aggregateFitness: number = cumulativeFitness[cumulativeFitness.length - 1] ?? 0;
+
             for (let i = 0; i < maximumPopulation; i++) {
-                let choice = Math.random() * totalFitness;
-                // TODO: implement a binary search optimization for large populations
-                for (const individual of population) {
-                    choice -= individual.fitness;
-                    if (choice <= 0) {
-                        selectedPopulation.push(individual);
-                        break;
-                    }
-                }
+                let choiceIndex = RouletteWheelPopulationSelector.binarySearch(cumulativeFitness, Math.random() * aggregateFitness);
+                if (choiceIndex < 0)
+                    choiceIndex = ~choiceIndex;
+
+                selectedPopulation.push(population[choiceIndex]);
             }
         } else {
             for (let i = 0; i < maximumPopulation; i++)
@@ -120,6 +121,26 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
         }
 
         return selectedPopulation;
+    }
+
+    /**
+     * {@link https://stackoverflow.com/a/29018745/14352161}
+     */
+    private static binarySearch(array: number[], value: number): number {
+        let min = 0;
+        let max = array.length - 1;
+        while (min <= max) {
+            const index = (max + min) >> 1;
+            const cmp = value - array[index];
+            if (0 < cmp) {
+                min = index + 1;
+            } else if (cmp < 0) {
+                max = index - 1;
+            } else {
+                return index;
+            }
+        }
+        return ~min;
     }
 }
 
