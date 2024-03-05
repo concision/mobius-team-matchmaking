@@ -1,6 +1,7 @@
 import {IIndividualFitness} from "./FitnessFunction";
 import {ReplaceReturnType} from "./TypescriptTypes";
 import {IGeneration} from "./GeneticAlgorithm";
+import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../../impl/lib/Random";
 
 export abstract class PopulationSelector<I> {
     public constructor(
@@ -50,14 +51,13 @@ export class ProportionalPopulationSelector<I> extends PopulationSelector<I> {
             const individualCount = Math.min(selectedPopulation.length, Math.max(1, Math.ceil(maximumPopulation * enabledSelector.weight / totalWeight)));
 
             for (let i = 0; i < individualCount; i++) {
-                const individual = selectedPopulation[Math.floor(Math.random() * selectedPopulation.length)];
-                nextPopulation.push(individual);
+                nextPopulation.push(selectRandomElement(selectedPopulation)!);
             }
         }
 
         // remove any excess individuals
         while (maximumPopulation < nextPopulation.length)
-            nextPopulation.splice(Math.floor(Math.random() * nextPopulation.length), 1);
+            nextPopulation.splice(randomIndex(nextPopulation), 1);
 
         return nextPopulation;
     }
@@ -71,7 +71,7 @@ export class RepopulatePopulationSelector<I> extends PopulationSelector<I> {
     public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
         const selectedPopulation: IIndividualFitness<I>[] = [...population];
         while (selectedPopulation.length < maximumPopulation)
-            selectedPopulation.push(population[Math.floor(Math.random() * population.length)]);
+            selectedPopulation.push(selectRandomElement(population)!);
         return population;
     }
 }
@@ -117,7 +117,7 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
             }
         } else {
             for (let i = 0; i < maximumPopulation; i++)
-                selectedPopulation.push(population[Math.floor(Math.random() * population.length)]);
+                selectedPopulation.push(selectRandomElement(population)!);
         }
 
         return selectedPopulation;
@@ -153,12 +153,11 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
     }
 
     public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
+        const tournamentSize = Math.max(2, this.tournamentSize < 1 ? Math.ceil(Math.random() * population.length) : this.tournamentSize);
+
         const selectedPopulation: IIndividualFitness<I>[] = [];
         for (let i = 0; i < maximumPopulation; i++) {
-            const tournament: IIndividualFitness<I>[] = Array.from(
-                {length: Math.max(2, this.tournamentSize < 1 ? Math.ceil(Math.random() * population.length) : this.tournamentSize)},
-                () => population[Math.floor(Math.random() * population.length)]
-            );
+            const tournament = selectUniqueRandomElements(population, Math.min(population.length, tournamentSize));
             const winner = tournament.reduce((max, individual) => max.fitness < individual.fitness ? individual : max, tournament[0]);
             selectedPopulation.push(winner);
         }
@@ -166,10 +165,12 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
     }
 }
 
+export type DeduplicationIdentityFunction<I> = (individual: I) => string;
+
 export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
     public constructor(
         name: string,
-        public readonly identity: (individual: I) => string,
+        public readonly identity: DeduplicationIdentityFunction<I>,
     ) {
         super(name);
     }

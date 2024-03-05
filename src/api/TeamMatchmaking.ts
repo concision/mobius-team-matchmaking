@@ -31,11 +31,17 @@ export interface IMatchmakingOptions {
     /**
      * Configures the default parameters for the default implementation of the matchmaking algorithm. This may be useful
      * for tweaking the default behavior of the matchmaking algorithm without having to provide a fully custom genetic
-     * algorithm configuration. Note that if {@link configure} provides a new genetic algorithm configuration, then this
-     * property will have no effect.
+     * algorithm configuration. Note that if {@link configure} provides a new genetic algorithm configuration, then some
+     * properties will have no effect.
      */
     readonly defaultParameters?: IDefaultMatchmakingParameters;
 }
+
+/**
+ * Translates a consumer time slot to an exact date and time. See
+ * {@link IDefaultMatchmakingParameters.timeSlotToDateTranslator}.
+ */
+export type TimeSlotToDateTranslator = (timeSlot: Omit<ITimeSlot, 'date'>, week: Date) => Date;
 
 /**
  * The supported parameters that customize the default matchmaking algorithm's behavior, settable in
@@ -61,7 +67,7 @@ export interface IDefaultMatchmakingParameters {
      * Translates a time slot to an exact date and time. This is useful for consumers to override the default behavior
      * of setting the date to the first moment of the day, or for using non-standard keys in {@link ITeam.availability}.
      */
-    readonly timeSlotToDateTranslator?: (timeSlot: Omit<ITimeSlot, 'date'>, week: Date) => Date | undefined;
+    readonly timeSlotToDateTranslator?: TimeSlotToDateTranslator;
 
     /**
      * The minimum number of games that a team can play during the week.

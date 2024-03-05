@@ -46,5 +46,5 @@ export interface ITimeSlot {
      * days of the week to the first moment of the day (at UTC time, not local time). This callback may be overridden to
      * provide an exact date and time for the time slot.
      */
-    readonly date?: Date | null;
+    readonly date?: Date;
 }

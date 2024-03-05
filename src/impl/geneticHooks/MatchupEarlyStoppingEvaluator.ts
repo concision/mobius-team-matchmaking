@@ -1,11 +1,15 @@
-import {IGeneration} from "../api/genetic/GeneticAlgorithm";
-import {EarlyStoppingEvaluator} from "../api/genetic/EarlyStoppingEvaluator";
+import {IGeneration} from "../../api/genetic/GeneticAlgorithm";
+import {EarlyStoppingEvaluator} from "../../api/genetic/EarlyStoppingEvaluator";
 
-export function ensureGrowthEarlyStopEvaluator<I>(maximumGrowthFailures: number): EarlyStoppingEvaluator<I> {
+export type EnsureGrowthEarlyStopEvaluator<I> = EarlyStoppingEvaluator<I> & {
+    growthFailureProportion: number,
+};
+
+export function ensureGrowthEarlyStopEvaluator<I>(maximumGrowthFailures: number): EnsureGrowthEarlyStopEvaluator<I> {
     let previousMaximumFitness: number | undefined;
     let growthFailures = 0;
 
-    return (generation: IGeneration<I>): boolean => {
+    const earlyStoppingEvaluator = function (generation: IGeneration<I>): boolean {
         const newMaximumFitness = generation.population
             .map(individual => individual.fitness)
             .reduce((max, fitness) => Math.max(max, fitness), 0);
@@ -23,4 +27,8 @@ export function ensureGrowthEarlyStopEvaluator<I>(maximumGrowthFailures: number)
             previousMaximumFitness = newMaximumFitness
         }
     }
+    Object.defineProperty(earlyStoppingEvaluator.prototype, 'proportion', {
+        get: () => growthFailures / maximumGrowthFailures,
+    });
+    return <EnsureGrowthEarlyStopEvaluator<I>>earlyStoppingEvaluator;
 }

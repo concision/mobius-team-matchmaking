@@ -1,5 +1,5 @@
 import {readFileSync} from "fs";
-import {IGeneticOptions, ITeam, ITeamMatchupsIndividual, matchmakeTeams, Writeable} from "./index";
+import {ITeam, matchmakeTeams} from "./index";
 import {FailedMatchupReason} from "./api/TeamMatchmaking";
 
 const teams: ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));

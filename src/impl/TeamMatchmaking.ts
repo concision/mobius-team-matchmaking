@@ -10,23 +10,17 @@ import {
 import {ITeam} from "../api/ITeam";
 import {IScheduledMatchup} from "../api/ITeamMatchup";
 import {ITeamNotYetPlayed, TeamMatchResult} from "../api/ITeamParticipant";
-import {
-    CrossOverCombineMatchups,
-    MutationAddNewMatchup,
-    MutationRemoveMatchup,
-    MutationSwapMatchupAcrossTimeSlots,
-    MutationSwapMatchupInTimeSlot
-} from "./MatchupIndividualMutators";
-import {Day, ITimeSlot} from "../api/ITimeSlot";
+import {MutationAddNewMatchup, MutationRemoveMatchup, MutationSwapMatchupInTimeSlot} from "./geneticHooks/MatchupIndividualMutators";
+import {ITimeSlot} from "../api/ITimeSlot";
 import {WeightedRandomIndividualMutator} from "../api/genetic/IndividualMutator";
-import {geneticAlgorithm} from "./GeneticAlgorithm";
+import {geneticAlgorithm} from "./lib/GeneticAlgorithm";
 import {LinearWeightedFitnessReducer, MultivariateFitnessFunction, Normalizer} from "../api/genetic/FitnessFunction";
 import {
     maximizeAverageGamesPlayedPerTeam,
     maximizeTotalMatchups,
     minimizeEloDifferential,
     minimizeRecentDuplicateMatchups
-} from "./MatchupFitnessFunctions";
+} from "./geneticHooks/MatchupFitnessFunctions";
 import {
     ChainedPopulationSelector,
     DeduplicatePopulationSelector,
@@ -38,9 +32,9 @@ import {
     TournamentPopulationSelector
 } from "../api/genetic/PopulationSelector";
 import {IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
-import {TimeSlot, translateTimeSlotToDate} from "./TimeSlot";
-import {ensureGrowthEarlyStopEvaluator} from "./MatchupEarlyStoppingEvaluator";
-import {invalidIndividualEvaluator, uniqueTeamMatchupIdentity} from "./MatchupPopulationSelectors";
+import {partitionTeamsByTimeSlots, sortScheduledMatchupsByTime, translateTimeSlotToDate} from "./TimeSlot";
+import {ensureGrowthEarlyStopEvaluator} from "./geneticHooks/MatchupEarlyStoppingEvaluator";
+import {maximumGamesKillPredicate, uniqueTeamMatchupIdentity} from "./geneticHooks/MatchupPopulationSelectors";
 
 export {matchmakeTeams, matchmakeTeamsByRegion};
 
@@ -82,11 +76,15 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
             + `[${[...new Set(teams.map((team) => team.region))].join(", ")}]; `);
 
     const parameters = validateAndCreateParameters(defaultParameters);
-    const {teamsByTimeSlot, unavailableTeams} = partitionTeamsByTimeSlots(teams);
-    // TODO: remove time slots that have already occurred
 
+    const {teamsByTimeSlot, unavailableTeams} = partitionTeamsByTimeSlots(
+        parameters.scheduledDate, parameters.timeSlotToDateTranslator, teams
+    );
+
+    const earlyStopEvaluator = ensureGrowthEarlyStopEvaluator(10);
     let constraints: IGeneticOptions<ITeamMatchupsIndividual> = {
-        maximumGenerations: [...teamsByTimeSlot.values()]
+        // Estimate of the upper bound of the number of generations needed to find a solution
+        maximumGenerations: 2 * [...teamsByTimeSlot.values()]
             .reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
         maximumPopulationSize: 1000,
         individualGenerator: () => ({unmatchedTeams: teamsByTimeSlot, matchups: []}),
@@ -97,10 +95,6 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
             {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: new MutationRemoveMatchup()},
             // swap pairing (from the same time slot)
             {weight: 1, predicate: args => 1 <= args.matchups.length, mutator: new MutationSwapMatchupInTimeSlot()},
-            // swap pairing (team swap with 2 different timeslots)
-            {weight: 1, predicate: args => 2 <= args.matchups.length, mutator: new MutationSwapMatchupAcrossTimeSlots()},
-            // crossover pairings (combine pairings from 2 different timeslots)
-            {weight: 1, mutator: new CrossOverCombineMatchups()},
         ]),
         fitnessFunction: new MultivariateFitnessFunction("fitness", new LinearWeightedFitnessReducer(), [
             // maximize total matchups
@@ -123,7 +117,7 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
         populationSelector: new ChainedPopulationSelector("chainedSelector", [
             new DeduplicatePopulationSelector("deduplicate", uniqueTeamMatchupIdentity),
             // kill invalid matchups (i.e. back to back scheduling)
-            new KillInvalidPopulationSelector("killInvalids", invalidIndividualEvaluator(parameters.maximumGames), 1),
+            new KillInvalidPopulationSelector("killInvalids", maximumGamesKillPredicate(parameters.maximumGames), 1),
             // apply selective pressure
             new ProportionalPopulationSelector("selectivePressure", [
                 // randomly select the best matchups
@@ -133,12 +127,16 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
                 // preserve random individuals to maintain diversity
                 {weight: .20, selector: new RouletteWheelPopulationSelector("roulette")},
             ]),
-            new KillInvalidPopulationSelector("killInvalids", invalidIndividualEvaluator(parameters.maximumGames), 1),
+            new KillInvalidPopulationSelector("killInvalids",
+                maximumGamesKillPredicate(parameters.maximumGames),
+                // kill the worst matchups if the growth is failing
+                () => .5 + .5 * earlyStopEvaluator.growthFailureProportion,
+            ),
             // regrow the population cloned from selected individuals
             new RepopulatePopulationSelector("repopulate"),
         ]),
         // stop early if the fitness is not improving
-        earlyStopping: ensureGrowthEarlyStopEvaluator(10),
+        earlyStopping: earlyStopEvaluator,
     };
     if (typeof options.configure === 'function')
         constraints = options.configure(constraints) ?? constraints;
@@ -207,42 +205,4 @@ function validateAndCreateParameters(defaultParameters?: IDefaultMatchmakingPara
         throw new Error("The games played day recency must be greater than 0 to be enabled, or 0 to be disabled.");
 
     return parameters;
-}
-
-function partitionTeamsByTimeSlots(teams: readonly ITeam[]):
-    { teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly ITeam[]>, unavailableTeams: readonly ITeam[] } {
-    const uniqueTimeSlots: Set<ITimeSlot> = teams
-        .flatMap((team: ITeam) => (<Day[]>Object.keys(team.availability))
-            .flatMap(day => team.availability[day]!
-                .map((isAvailable: boolean, ordinal: number) => isAvailable ? TimeSlot.of(day, ordinal) : null)
-                .filter((timeSlot): timeSlot is ITimeSlot => timeSlot !== null)
-            )
-        )
-        .reduce((map, timeSlot) => map.add(timeSlot), new Set<ITimeSlot>());
-
-    const teamsByTimeSlot = new Map<ITimeSlot, ITeam[]>();
-    for (const timeSlot of uniqueTimeSlots.values())
-        teamsByTimeSlot.set(timeSlot, []);
-    const unavailableTeams: ITeam[] = [];
-
-    for (const team of teams) {
-        const teamTimeSlots = (<Day[]>Object.keys(team.availability))
-            .flatMap(day => team.availability[day]!
-                .map((isAvailable: boolean, ordinal: number) => isAvailable ? TimeSlot.of(day, ordinal) : null)
-                .filter((timeSlot): timeSlot is ITimeSlot => timeSlot !== null)
-            );
-
-        if (teamTimeSlots.length !== 0)
-            for (const teamTimeSlot of teamTimeSlots)
-                teamsByTimeSlot.get(teamTimeSlot)!.push(team);
-        else
-            unavailableTeams.push(team);
-    }
-
-    return {teamsByTimeSlot, unavailableTeams};
-}
-
-function sortScheduledMatchupsByTime(a: IScheduledMatchup, b: IScheduledMatchup): number {
-    const result = (a.time.date?.getTime() ?? Infinity) - (b.time.date?.getTime() ?? Infinity);
-    return result === 0 ? a.time.ordinal - b.time.ordinal : result;
 }

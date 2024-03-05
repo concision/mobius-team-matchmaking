@@ -1,6 +1,6 @@
-import {IndividualFitnessFunction} from "../api/genetic/FitnessFunction";
-import {ITeamMatchupsIndividual} from "../api/TeamMatchmaking";
-import {ITeam} from "../api/ITeam";
+import {IndividualFitnessFunction} from "../../api/genetic/FitnessFunction";
+import {ITeamMatchupsIndividual} from "../../api/TeamMatchmaking";
+import {ITeam} from "../../api/ITeam";
 
 export const maximizeTotalMatchups = new IndividualFitnessFunction<ITeamMatchupsIndividual>(
     "maximizeTotalMatchups",
@@ -14,7 +14,7 @@ export const minimizeEloDifferential = new IndividualFitnessFunction<ITeamMatchu
         .reduce((sum, eloDiff) => sum + eloDiff, 0),
 );
 
-export function maximizeAverageGamesPlayedPerTeam(date: Date, recentDays: number): IndividualFitnessFunction<ITeamMatchupsIndividual>{
+export function maximizeAverageGamesPlayedPerTeam(date: Date, recentDays: number): IndividualFitnessFunction<ITeamMatchupsIndividual> {
     return new IndividualFitnessFunction<ITeamMatchupsIndividual>(
         "maximizeAverageGamesPlayedPerTeam",
         individual => {
