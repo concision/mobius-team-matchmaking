@@ -27,6 +27,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@types/node", "npm:20.11.19"],\
+          ["ansi-colors", "npm:4.1.3"],\
           ["ts-node", "virtual:fef506f98bdfa5e4ff39d4e0a95b3ef9d817a87b13f14c7a91130970b54bb257f78bf58a044c81bedf5a9c049bdbf2895947cba9075d7fe74e8b2b01edff1257#npm:10.9.2"],\
           ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
         ],\
@@ -136,6 +137,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["ansi-colors", [\
+      ["npm:4.1.3", {\
+        "packageLocation": "./.yarn/cache/ansi-colors-npm-4.1.3-8ffd0ae6c7-ec87a2f599.zip/node_modules/ansi-colors/",\
+        "packageDependencies": [\
+          ["ansi-colors", "npm:4.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["arg", [\
       ["npm:4.1.3", {\
         "packageLocation": "./.yarn/cache/arg-npm-4.1.3-1748b966a8-070ff801a9.zip/node_modules/arg/",\
@@ -178,6 +188,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["mobius-team-matchmaking", "workspace:."],\
           ["@types/node", "npm:20.11.19"],\
+          ["ansi-colors", "npm:4.1.3"],\
           ["ts-node", "virtual:fef506f98bdfa5e4ff39d4e0a95b3ef9d817a87b13f14c7a91130970b54bb257f78bf58a044c81bedf5a9c049bdbf2895947cba9075d7fe74e8b2b01edff1257#npm:10.9.2"],\
           ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
         ],\
