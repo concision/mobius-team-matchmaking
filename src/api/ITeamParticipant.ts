@@ -21,6 +21,10 @@ export enum TeamMatchResult {
      * The team has drawn the matchup (i.e. tied). This implies the other competing team in the matchup has also drawn.
      */
     Draw = 3,
+    /**
+     * The team did not show up to play in the matchup. The other competing team in the matchup may have won by default.
+     */
+    NoShow = 4,
 }
 
 /**

@@ -1,4 +1,4 @@
-import {type PlayedMatchup} from './ITeamMatchup';
+import {IPlayedMatchup} from './ITeamMatchup';
 import {Day} from "./ITimeSlot";
 
 /**
@@ -67,5 +67,5 @@ export interface ITeam {
      *
      * This is an optional property, and may be omitted if the history is not available or not needed.
      */
-    readonly history?: PlayedMatchup[];
+    readonly history?: IPlayedMatchup[];
 }

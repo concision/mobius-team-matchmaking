@@ -2,7 +2,7 @@ import {
     FailedMatchupReason,
     IDefaultMatchmakingParameters,
     IMatchmakingOptions,
-    ITeamMatchups,
+    IMatchmakingResults,
     ITeamMatchupsIndividual,
     type matchmakeTeams,
     type matchmakeTeamsByRegion
@@ -42,7 +42,7 @@ import {
 
 export {matchmakeTeams, matchmakeTeamsByRegion};
 
-const matchmakeTeamsByRegion: matchmakeTeamsByRegion = ({teams, defaultParameters, ...options}: IMatchmakingOptions): ITeamMatchups => {
+const matchmakeTeamsByRegion: matchmakeTeamsByRegion = ({teams, defaultParameters, ...options}: IMatchmakingOptions): IMatchmakingResults => {
     const parameters = validateAndCreateParameters(defaultParameters);
 
     const teamsByRegion: ReadonlyMap<string, ITeam[]> = teams.reduce((map, team) => {
@@ -56,7 +56,7 @@ const matchmakeTeamsByRegion: matchmakeTeamsByRegion = ({teams, defaultParameter
 
     let matchups: IScheduledMatchup[] = [];
     let unmatchedTeams: Map<ITeam, FailedMatchupReason> = new Map<ITeam, FailedMatchupReason>();
-    for (const [region, regionTeams] of teamsByRegion) {
+    for (const regionTeams of teamsByRegion.values()) {
         const regionalMatchups = matchmakeTeams({
             ...options,
             teams: regionTeams,
@@ -74,7 +74,7 @@ const matchmakeTeamsByRegion: matchmakeTeamsByRegion = ({teams, defaultParameter
 }
 
 
-const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: IMatchmakingOptions): ITeamMatchups => {
+const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: IMatchmakingOptions): IMatchmakingResults => {
     if (0 < teams.length && teams.some(team => team.region !== teams[0].region))
         throw new Error("All teams must be in the same region, encountered unique regions: "
             + `[${[...new Set(teams.map((team) => team.region))].join(", ")}]; `);
@@ -93,7 +93,7 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
             .reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
         maximumPopulationSize: 1000,
         individualGenerator: () => ({unmatchedTeams: teamsByTimeSlot, matchups: []}),
-        individualMutator: new WeightedRandomIndividualMutator("", 0.75, [
+        individualMutator: new WeightedRandomIndividualMutator("mutator", 0.75, [
             // add new valid team matchup
             {weight: 2, mutator: new MutationAddNewMatchup()},
             // remove a team matchup

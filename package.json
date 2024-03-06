@@ -4,12 +4,23 @@
   "description": "A competitive team-matchmaking algorithm for the melee game Mobius that utilizes a genetic algorithm to optimize for balanced team fights by analyzing criteria such as Elo differential, availability, frequency of games played, etc.",
   "author": "Concision <contact@concision.me>",
   "license": "GPL-3.0-only",
-  "repository": "https://github.com/concision/mobius-team-matchmaking.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/concision/mobius-team-matchmaking.git"
+  },
+  "homepage": "https://github.com/concision/mobius-team-matchmaking#readme",
+  "bugs": {
+    "url": "https://github.com/concision/mobius-team-matchmaking/issues"
+  },
   "packageManager": "yarn@4.1.0",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "compile": "tsc",
-    "debug": "node --inspect-brk -r ts-node/register/transpile-only src/MatchmakingDemo.ts",
-    "start": "node -r ts-node/register/transpile-only src/MatchmakingDemo.ts"
+    "build": "tsc",
+    "prepack": "yarn run build",
+    "demo": "node -r ts-node/register/transpile-only src/demo/MatchmakingDemo.ts",
+    "demo:debug": "node --inspect-brk -r ts-node/register/transpile-only src/demo/MatchmakingDemo.ts"
   },
   "engines": {
     "node": ">=20.0.0"

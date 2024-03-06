@@ -92,7 +92,7 @@ export class PlayedMatchup implements IPlayedMatchup {
     }
 
     public get loser(): ITeamPlayed | undefined {
-        return this.teams.find(team => team.status === TeamMatchResult.Lost);
+        return this.teams.find(team => team.status === TeamMatchResult.Lost || team.status === TeamMatchResult.NoShow);
     }
 }
 

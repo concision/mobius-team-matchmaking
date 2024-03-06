@@ -112,17 +112,13 @@ export enum FailedMatchupReason {
      * Indicates that the team has some availability, but all of their available time slots are in the past.
      */
     ALL_AVAILABILITY_BEFORE_SCHEDULED_DATE = 2,
-    /**
-     * Indicates that there are not enough competing teams in the time slots to match with the team.
-     */
-    NOT_ENOUGH_COMPETITION_IN_TIME_SLOTS = 3,
 }
 
 /**
  * Represents the result of executing the matchmaking algorithm on a set of teams. This structure contains the matchups
  * that have been scheduled, as well as any teams that were unable to be matched.
  */
-export interface ITeamMatchups {
+export interface IMatchmakingResults {
     /**
      * A list of paired team matchups that have been scheduled by the matchmaking algorithm. Any teams that are unable
      * to be matched with another competing team will be placed in {@link #unmatchedTeams}.
@@ -146,7 +142,7 @@ export interface ITeamMatchups {
  * @exception Error If input teams are not all in the same region, then an exception will be thrown.
  * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
  */
-export type matchmakeTeams = (options: IMatchmakingOptions) => ITeamMatchups;
+export type matchmakeTeams = (options: IMatchmakingOptions) => IMatchmakingResults;
 
 /**
  * Performs the matchmaking algorithm on a set of teams, automatically partitioning them by region. This is a
@@ -156,7 +152,7 @@ export type matchmakeTeams = (options: IMatchmakingOptions) => ITeamMatchups;
  * @param options The input options for the matchmaking algorithm. See {@link IMatchmakingOptions}.
  * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
  */
-export type matchmakeTeamsByRegion = (options: IMatchmakingOptions) => ITeamMatchups;
+export type matchmakeTeamsByRegion = (options: IMatchmakingOptions) => IMatchmakingResults;
 
 
 // matchmaking genetic algorithm types

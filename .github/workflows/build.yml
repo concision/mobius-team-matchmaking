@@ -1,0 +1,47 @@
+name: "Continuous Integration"
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - 'v*'
+  pull_request:
+
+jobs:
+  build:
+    name: "Build (Node.js v${{ matrix.node-version }})"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ "20" ]
+    env:
+      NODE_ENV: "production"
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup Node.js v${{ matrix.node-version }}"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: "Enable Corepack" # Yarn 2 dependency
+        run: "corepack enable"
+
+      - name: "Validate Yarn 2's Zero-Install Configuration"
+        run: "yarn install --immutable --immutable-cache --check-cache"
+        env:
+          # Define whether Yarn should exclusively read package metadata from its cache
+          YARN_ENABLE_OFFLINE_MODE: 1
+
+      - name: "Compile Package"
+        run: "yarn pack --out dist/mobius-team-matchmaking.tgz"
+
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v4
+        # Only upload the artifact for the first workflow job; see https://github.com/actions/upload-artifact/issues/478
+        if: ${{ matrix.node-version == '20' }}
+        with:
+          name: "mobius-team-matchmaking.tgz"
+          path: "dist/mobius-team-matchmaking.tgz"

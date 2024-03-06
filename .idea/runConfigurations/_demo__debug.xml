@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="[demo] debug" type="CompoundRunConfigurationType">
+    <toRun name="[demo] node.js attach" type="ChromiumRemoteDebugType" />
+    <toRun name="yarn demo:debug" type="ShConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

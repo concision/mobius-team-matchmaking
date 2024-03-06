@@ -1,6 +1,6 @@
 import {readFileSync} from "fs";
-import {IScheduledMatchup, ITeam, matchmakeTeams} from "./index";
-import {FailedMatchupReason} from "./api/TeamMatchmaking";
+import {IScheduledMatchup, ITeam, matchmakeTeams} from "../index";
+import {FailedMatchupReason} from "../api/TeamMatchmaking";
 import {bold, cyan, gray, greenBright, red, redBright} from "ansi-colors";
 
 const teams: ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));
@@ -8,9 +8,13 @@ const teams: ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));
 const naTeams = teams.filter(({region}) => region === 'NA');
 console.log(bold(`Loaded ${greenBright(naTeams.length.toString())} teams from the NA region`));
 
+const date = new Date();
+date.setDate(date.getDate() - date.getDay());
+console.log(`For day: ${date}`)
 const {scheduledMatchups, unmatchedTeams} = debugLog(() => matchmakeTeams({
     teams: naTeams,
     defaultParameters: {
+        scheduledDate: date,
         maximumGames: 3,
     },
     configure: constraints => {
@@ -24,7 +28,7 @@ for (const {time, teams} of scheduledMatchups)
 console.log();
 
 const unavailableTeamCount: number = [...unmatchedTeams.entries()]
-    .filter(([team, reasonOrdinal]) => reasonOrdinal === FailedMatchupReason.UNSCHEDULED_AVAILABILITY)
+    .filter(([, reasonOrdinal]) => reasonOrdinal === FailedMatchupReason.UNSCHEDULED_AVAILABILITY)
     .length;
 console.log(`${bold("Unmatched teams:")} (${greenBright(unmatchedTeams.size.toString())} total; ${redBright(unavailableTeamCount.toString())} teams lack availability)`);
 for (const [team, reasonOrdinal] of unmatchedTeams) {

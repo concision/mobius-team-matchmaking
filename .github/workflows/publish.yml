@@ -1,0 +1,63 @@
+name: "Continuous Delivery"
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: "Build (Node.js v20)"
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: "production"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v2
+
+      - name: "Setup Node.js v20"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          token: ${{ github.token }}
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: "Enable Corepack" # Yarn 2 dependency
+        run: "corepack enable"
+
+      - name: "Validate Yarn 2's Zero-Install Configuration"
+        run: "yarn install --immutable --immutable-cache --check-cache"
+
+      - name: "Compile Package"
+        run: "yarn pack --out dist/mobius-team-matchmaking.tgz"
+
+      - name: "Upload Package Artifact"
+        uses: actions/upload-artifact@v2
+        with:
+          name: "esm-loader-chaining-polyfill.tgz"
+          path: "dist/esm-loader-chaining-polyfill.tgz"
+
+      - name: "Yarn Login"
+        run: yarn npm login --publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ github.token }}
+          YARN_NPM_PUBLISH_REGISTRY: "https://npm.pkg.github.com"
+
+      - name: "Publish to NPM Registry"
+        run: yarn npm publish --tolerate-republish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ github.token }}
+          YARN_NPM_PUBLISH_REGISTRY: "https://npm.pkg.github.com"
+
+      - name: "Create Release"
+        # https://github.com/softprops/action-gh-release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: "dist/mobius-team-matchmaking.tgz"
