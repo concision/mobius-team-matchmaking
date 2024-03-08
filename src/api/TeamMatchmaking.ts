@@ -2,7 +2,7 @@ import {ITeam} from './ITeam';
 import {IScheduledMatchup} from './ITeamMatchup';
 import {ITimeSlot} from "./ITimeSlot";
 import {IGeneticOptions} from "./genetic/GeneticAlgorithm";
-import {Writeable} from "./genetic/TypescriptTypes";
+import {Writeable} from "./TypescriptTypes";
 
 /**
  * Configurable options for the matchmaking algorithm for {@link matchmakeTeams} and {@link matchmakeTeamsByRegion}.
@@ -26,7 +26,7 @@ export interface IMatchmakingOptions {
      * configuration properties to customize the genetic algorithm's behavior. Or, the consumer may return an entirely
      * different custom configuration object.
      */
-    readonly configure?: (options: Writeable<IGeneticOptions<ITeamMatchupsIndividual>>) => IGeneticOptions<ITeamMatchupsIndividual> | void;
+    readonly configure?: (options: Writeable<IGeneticOptions<IMatchupScheduleIndividual>>) => IGeneticOptions<IMatchupScheduleIndividual> | void;
 
     /**
      * Configures the default parameters for the default implementation of the matchmaking algorithm. This may be useful
@@ -68,7 +68,6 @@ export interface IDefaultMatchmakingParameters {
      * of setting the date to the first moment of the day, or for using non-standard keys in {@link ITeam.availability}.
      */
     readonly timeSlotToDateTranslator?: TimeSlotToDateTranslator;
-
     /**
      * Ignores any time slots that have already occurred. If true, then any time slots that have already occurred will be
      * ignored and no matches will be made for those time slots. If false, then the algorithm will attempt to match teams
@@ -76,17 +75,28 @@ export interface IDefaultMatchmakingParameters {
      *
      * By default, this value is true.
      */
-    readonly excludeTimeSlotsAlreadyOccurred?: boolean;
+    readonly excludeTimeSlotsThatAlreadyOccurred?: boolean;
 
     /**
-     * The minimum number of games that a team can play during the week.
-     * TODO: THIS IS NOT YET IMPLEMENTED
+     * The number of best matchups to keep in the "hall of fame" from the genetic algorithm's population. At the end of
+     * the genetic algorithm's execution, the matchup schedule with the minimal amount of unmatched teams will be
+     * selected from the hall of fame. Moderate numbers will increase the likelihood of finding a better matchup
+     * schedule; however, larger numbers will provide potentially worse results.
+     *
+     * By default, this value is 32.
      */
-    readonly minimumGames?: number;
+    readonly hallOfFame?: number;
+
     /**
      * The maximum number of games that a team can play during the week.
      */
-    readonly maximumGames?: number;
+    readonly maximumGamesPerTeam?: number;
+    /**
+     * The maximum permitted difference between the ELO ratings of two teams in a matchup.
+     *
+     * By default, this value is 300.
+     */
+    readonly hardEloDifferentialLimit?: number;
 
     /**
      * The number of days in which a rematch is considered a duplicate. If a team has played another team within this
@@ -108,7 +118,7 @@ export interface IDefaultMatchmakingParameters {
 /**
  * Indicates the reason why a team was unable to be matched with any other competing team.
  */
-export enum FailedMatchupReason {
+export enum MatchupFailureReason {
     /**
      * Indicates that the team has no ideal matchups available. This could be due to a variety of reasons that the
      * matchmaking implementation decided not to match-make the team.
@@ -121,7 +131,7 @@ export enum FailedMatchupReason {
     /**
      * Indicates that the team has some availability, but all of their available time slots are in the past.
      */
-    ALL_AVAILABILITY_BEFORE_SCHEDULED_DATE = 2,
+    ALL_AVAILABILITY_ALREADY_OCCURRED = 2,
 }
 
 /**
@@ -140,7 +150,7 @@ export interface IMatchmakingResults {
      * variety of reasons, such as lack of team availability, or lack of teams in the region. The keys are a subset of
      * the input teams {@link IMatchmakingOptions.teams}, and the values are the reasons that matchmaking failed.
      */
-    readonly unmatchedTeams: ReadonlyMap<ITeam, FailedMatchupReason>;
+    readonly unmatchedTeams: ReadonlyMap<ITeam, MatchupFailureReason>;
 }
 
 
@@ -172,7 +182,7 @@ export interface ITeamMatchupGene {
     readonly teams: readonly ITeam[];
 }
 
-export interface ITeamMatchupsIndividual {
+export interface IMatchupScheduleIndividual {
     readonly unmatchedTeams: ReadonlyMap<ITimeSlot, readonly ITeam[]>;
     readonly matchups: readonly ITeamMatchupGene[];
 }

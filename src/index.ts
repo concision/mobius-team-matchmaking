@@ -1,4 +1,3 @@
-
 // API: team matchmaking
 export * from "./api/ITeam";
 export * from "./api/ITeamMatchup";
@@ -8,10 +7,10 @@ export {
     type IMatchmakingOptions,
     type IDefaultMatchmakingParameters,
     type TimeSlotToDateTranslator,
-    type FailedMatchupReason,
+    type MatchupFailureReason,
     type IMatchmakingResults,
     type ITeamMatchupGene,
-    type ITeamMatchupsIndividual
+    type IMatchupScheduleIndividual
 } from "./api/TeamMatchmaking";
 
 // API: genetic algorithm
@@ -19,9 +18,10 @@ export * from "./api/genetic/EarlyStoppingEvaluator";
 export * from "./api/genetic/FitnessFunction";
 export * from "./api/genetic/GeneticAlgorithm";
 export * from "./api/genetic/IndividualGenerator";
+export * from "./api/genetic/IndividualIdentityFunction";
 export * from "./api/genetic/IndividualMutator";
 export * from "./api/genetic/PopulationSelector";
-export * from "./api/genetic/TypescriptTypes";
+export * from "./api/TypescriptTypes";
 
 
 // Implementation: team matchmaking

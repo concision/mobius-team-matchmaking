@@ -3,12 +3,15 @@ import {IndividualMutator} from "./IndividualMutator";
 import {FitnessFunction, IIndividualFitness} from "./FitnessFunction";
 import {PopulationSelector} from "./PopulationSelector";
 import {EarlyStoppingEvaluator} from "./EarlyStoppingEvaluator";
+import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 
 export type IGeneticOptions<I> = {
-    readonly debugMode?: boolean;
+    readonly debugLogging?: boolean;
 
     readonly maximumGenerations?: number;
     readonly maximumPopulationSize: number;
+
+    readonly individualIdentity: IndividualIdentityFunction<I>;
 
     readonly individualMutator: IndividualMutator<I>;
     readonly fitnessFunction: FitnessFunction<I>;

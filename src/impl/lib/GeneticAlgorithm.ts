@@ -5,12 +5,22 @@ import {randomIndex} from "./Random";
 export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGeneticOptions<I>, individuals: number): readonly IIndividualFitness<I>[] {
     let fittest: IIndividualFitness<I>[] = [];
     for (const {generation, population} of geneticAlgorithmGenerator(constraints)) {
-        if (constraints.debugMode) {
+        if (constraints.debugLogging) {
             const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
             console.log(`Generation ${generation}: ${population.length} individuals; maximum fitness: ${fittestIndividual?.fitness}`);
         }
 
-        fittest = fittest.concat(population).toSorted((a, b) => b.fitness - a.fitness).slice(0, individuals);
+        // keep track of the fittest individuals across all generations
+        const seen = new Map<string, IIndividualFitness<I>>();
+        for (const individual of fittest.concat(population)) {
+            // all individual with the same key should be identical
+            const key = constraints.individualIdentity(individual.solution);
+            if (!seen.has(key))
+                seen.set(key, individual);
+        }
+        fittest = Array.from(seen.values())
+            .toSorted((a, b) => b.fitness - a.fitness)
+            .slice(0, individuals);
     }
 
     return fittest;

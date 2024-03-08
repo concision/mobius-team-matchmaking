@@ -28,7 +28,8 @@ export class IndividualFitnessFunction<I> extends FitnessFunction<I> {
 
 
 export enum Normalizer {
-    GAUSSIAN = "gaussian",
+    NONE = "none",
+    // TODO: implement these
     LINEAR = "linear",
     EXPONENTIAL = "exponential",
     LOGARITHMIC = "logarithmic",
@@ -38,22 +39,7 @@ export enum Normalizer {
 
 type NormalizerFunction = (scores: readonly number[]) => readonly number[];
 const normalizers: ReadonlyMap<Normalizer, NormalizerFunction> = new Map()
-    .set(Normalizer.GAUSSIAN, (scores: readonly number[]) => {
-        return scores; // TODO: absolute
-        const mean = scores.reduce((sum, fitness) => sum + fitness, 0) / scores.length;
-        const variance = scores.reduce((sum, fitness) => sum + (fitness - mean) ** 2, 0) / scores.length;
-        const standardDeviation = Math.sqrt(variance);
-        return scores.map(fitness => (fitness - mean) / (standardDeviation !== 0 ? standardDeviation : 1));
-    })
-    .set(Normalizer.LINEAR, (scores: readonly number[]) => {
-        const max = scores.reduce((max, fitness) => Math.max(max, fitness), 0);
-        const min = scores.reduce((min, fitness) => Math.min(min, fitness), max);
-        return scores.map(fitness => (fitness - min) / (max - min));
-    })
-    .set(Normalizer.EXPONENTIAL, (scores: readonly number[]) => {
-        const max = scores.reduce((max, fitness) => Math.max(max, fitness), 0);
-        return scores.map(fitness => Math.exp(fitness / max));
-    });
+    .set(Normalizer.NONE, (scores: readonly number[]) => scores);
 
 export abstract class WeightedFitnessReducer {
     public constructor(
@@ -77,7 +63,7 @@ export class LinearWeightedFitnessReducer extends WeightedFitnessReducer {
 
 export interface IWeightedFitnessFunction<I> {
     weighting: number;
-    normalizer: Normalizer;
+    normalizer?: Normalizer;
     fitnessFunction: FitnessFunction<I>;
 }
 
@@ -98,9 +84,11 @@ export class MultivariateFitnessFunction<I> extends FitnessFunction<I> {
         const populationFitnessScores: ReadonlyArray<ReadonlyArray<number>> = this.fitnessFunctions.map(
             ({fitnessFunction, normalizer}) => {
                 let scores: readonly number[] = fitnessFunction.evaluate(population).map(({fitness}) => fitness);
-                const normalizerFunction = normalizers.get(normalizer);
-                if (normalizerFunction)
-                    scores = normalizerFunction(scores);
+                if (normalizer !== undefined) {
+                    const normalizerFunction = normalizers.get(normalizer);
+                    if (normalizerFunction)
+                        scores = normalizerFunction(scores);
+                }
                 return scores;
             }
         );

@@ -1,7 +1,8 @@
 import {IIndividualFitness} from "./FitnessFunction";
-import {ReplaceReturnType} from "./TypescriptTypes";
+import {ReplaceReturnType} from "../TypescriptTypes";
 import {IGeneration} from "./GeneticAlgorithm";
 import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../../impl/lib/Random";
+import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 
 export abstract class PopulationSelector<I> {
     public constructor(
@@ -165,12 +166,11 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
     }
 }
 
-export type DeduplicationIdentityFunction<I> = (individual: I) => string;
 
 export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
     public constructor(
         name: string,
-        public readonly identity: DeduplicationIdentityFunction<I>,
+        public readonly identity: IndividualIdentityFunction<I>,
     ) {
         super(name);
     }
