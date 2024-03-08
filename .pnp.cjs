@@ -10,14 +10,14 @@ const RAW_RUNTIME_STATE =
   ],\
   "dependencyTreeRoots": [\
     {\
-      "name": "mobius-team-matchmaking",\
+      "name": "@concision/mobius-team-matchmaking",\
       "reference": "workspace:."\
     }\
   ],\
   "enableTopLevelFallback": true,\
   "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
   "fallbackExclusionList": [\
-    ["mobius-team-matchmaking", ["workspace:."]]\
+    ["@concision/mobius-team-matchmaking", ["workspace:."]]\
   ],\
   "fallbackPool": [\
   ],\
@@ -28,7 +28,20 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@types/node", "npm:20.11.19"],\
           ["ansi-colors", "npm:4.1.3"],\
-          ["ts-node", "virtual:fef506f98bdfa5e4ff39d4e0a95b3ef9d817a87b13f14c7a91130970b54bb257f78bf58a044c81bedf5a9c049bdbf2895947cba9075d7fe74e8b2b01edff1257#npm:10.9.2"],\
+          ["ts-node", "virtual:e71da47a7e9a48acab5b63227945cfd566c661ff7596f1c68ac9d57241e739234444c15969907582e6c71e4fd4d535a2f5b6c8a8bd58d1d3990e70075c64c6ec#npm:10.9.2"],\
+          ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@concision/mobius-team-matchmaking", [\
+      ["workspace:.", {\
+        "packageLocation": "./",\
+        "packageDependencies": [\
+          ["@concision/mobius-team-matchmaking", "workspace:."],\
+          ["@types/node", "npm:20.11.19"],\
+          ["ansi-colors", "npm:4.1.3"],\
+          ["ts-node", "virtual:e71da47a7e9a48acab5b63227945cfd566c661ff7596f1c68ac9d57241e739234444c15969907582e6c71e4fd4d535a2f5b6c8a8bd58d1d3990e70075c64c6ec#npm:10.9.2"],\
           ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
         ],\
         "linkType": "SOFT"\
@@ -182,19 +195,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["mobius-team-matchmaking", [\
-      ["workspace:.", {\
-        "packageLocation": "./",\
-        "packageDependencies": [\
-          ["mobius-team-matchmaking", "workspace:."],\
-          ["@types/node", "npm:20.11.19"],\
-          ["ansi-colors", "npm:4.1.3"],\
-          ["ts-node", "virtual:fef506f98bdfa5e4ff39d4e0a95b3ef9d817a87b13f14c7a91130970b54bb257f78bf58a044c81bedf5a9c049bdbf2895947cba9075d7fe74e8b2b01edff1257#npm:10.9.2"],\
-          ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
-        ],\
-        "linkType": "SOFT"\
-      }]\
-    ]],\
     ["ts-node", [\
       ["npm:10.9.2", {\
         "packageLocation": "./.yarn/cache/ts-node-npm-10.9.2-3f3890b9ac-5f29938489.zip/node_modules/ts-node/",\
@@ -203,10 +203,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:fef506f98bdfa5e4ff39d4e0a95b3ef9d817a87b13f14c7a91130970b54bb257f78bf58a044c81bedf5a9c049bdbf2895947cba9075d7fe74e8b2b01edff1257#npm:10.9.2", {\
-        "packageLocation": "./.yarn/__virtual__/ts-node-virtual-e823637ebd/0/cache/ts-node-npm-10.9.2-3f3890b9ac-5f29938489.zip/node_modules/ts-node/",\
+      ["virtual:e71da47a7e9a48acab5b63227945cfd566c661ff7596f1c68ac9d57241e739234444c15969907582e6c71e4fd4d535a2f5b6c8a8bd58d1d3990e70075c64c6ec#npm:10.9.2", {\
+        "packageLocation": "./.yarn/__virtual__/ts-node-virtual-73df7832ee/0/cache/ts-node-npm-10.9.2-3f3890b9ac-5f29938489.zip/node_modules/ts-node/",\
         "packageDependencies": [\
-          ["ts-node", "virtual:fef506f98bdfa5e4ff39d4e0a95b3ef9d817a87b13f14c7a91130970b54bb257f78bf58a044c81bedf5a9c049bdbf2895947cba9075d7fe74e8b2b01edff1257#npm:10.9.2"],\
+          ["ts-node", "virtual:e71da47a7e9a48acab5b63227945cfd566c661ff7596f1c68ac9d57241e739234444c15969907582e6c71e4fd4d535a2f5b6c8a8bd58d1d3990e70075c64c6ec#npm:10.9.2"],\
           ["@cspotcode/source-map-support", "npm:0.8.1"],\
           ["@swc/core", null],\
           ["@swc/wasm", null],\
