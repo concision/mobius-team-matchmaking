@@ -82,8 +82,9 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
     const parameters = validateAndCreateParameters(defaultParameters);
 
     // TODO: implement FailedMatchupReason.ALL_AVAILABILITY_BEFORE_SCHEDULED_DATE
-    let {teamsByTimeSlot, unavailableTeams} = partitionTeamsByTimeSlots(
-        parameters.scheduledDate, parameters.timeSlotToDateTranslator, teams
+    const {teamsByTimeSlot, unavailableTeams} = partitionTeamsByTimeSlots(
+        parameters.scheduledDate, parameters.timeSlotToDateTranslator, parameters.excludeTimeSlotsAlreadyOccurred,
+        teams
     );
 
     const earlyStopEvaluator = ensureGrowthEarlyStopEvaluator(10);
@@ -108,7 +109,7 @@ const matchmakeTeams: matchmakeTeams = ({teams, defaultParameters, ...options}: 
             {weighting: 2, normalizer: Normalizer.LOGARITHMIC, fitnessFunction: minimizeEloDifferential}, // TODO: inverse weight this - a higher score is worse
             // favor scheduling games to teams who have played fewer games relative to their season join date
             {
-                weighting: 10,
+                weighting: 3,
                 normalizer: Normalizer.GAUSSIAN, // TODO: implement better normalizer
                 fitnessFunction: maximizeAverageGamesPlayedPerTeam(parameters.scheduledDate, parameters.countGamesPlayedInLastXDays),
             },
@@ -186,6 +187,8 @@ function validateAndCreateParameters(defaultParameters?: IDefaultMatchmakingPara
     const parameters: Required<IDefaultMatchmakingParameters> = Object.assign({
         scheduledDate: new Date(),
         timeSlotToDateTranslator: translateTimeSlotToDate,
+
+        excludeTimeSlotsAlreadyOccurred: true,
 
         minimumGames: 0,
         maximumGames: 3,

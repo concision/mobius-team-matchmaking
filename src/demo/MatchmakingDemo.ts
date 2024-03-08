@@ -1,20 +1,25 @@
 import {readFileSync} from "fs";
 import {IScheduledMatchup, ITeam, matchmakeTeams} from "../index";
 import {FailedMatchupReason} from "../api/TeamMatchmaking";
-import {bold, cyan, gray, greenBright, red, redBright} from "ansi-colors";
+import {bold, cyan, gray, greenBright, red, redBright, yellow} from "ansi-colors";
 
 const teams: ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));
 
 const naTeams = teams.filter(({region}) => region === 'NA');
 console.log(bold(`Loaded ${greenBright(naTeams.length.toString())} teams from the NA region`));
 
+// change this date to change scheduling week
 const date = new Date();
-date.setDate(date.getDate() - date.getDay());
-console.log(`For day: ${date}`)
+date.setDate(date.getDate() - date.getDay()); // set to sunday of this week
+// date.setDate(date.getDate() + 7 * 2); // uncomment this for 2 weeks from now
+console.log(bold("Matchmaking at sunday of week: ") + yellow(date.toString()))
+
 const {scheduledMatchups, unmatchedTeams} = debugLog(() => matchmakeTeams({
     teams: naTeams,
     defaultParameters: {
         scheduledDate: date,
+        // indicates that all time slots are available for the week, don't exclude any already occurred time slots for this week
+        excludeTimeSlotsAlreadyOccurred: false,
         maximumGames: 3,
     },
     configure: constraints => {
@@ -30,7 +35,7 @@ console.log();
 const unavailableTeamCount: number = [...unmatchedTeams.entries()]
     .filter(([, reasonOrdinal]) => reasonOrdinal === FailedMatchupReason.UNSCHEDULED_AVAILABILITY)
     .length;
-console.log(`${bold("Unmatched teams:")} (${greenBright(unmatchedTeams.size.toString())} total; ${redBright(unavailableTeamCount.toString())} teams lack availability)`);
+console.log(`${bold("Unmatched teams:")} (${redBright(unmatchedTeams.size.toString())}/${greenBright(naTeams.length.toString())} total; ${redBright(unavailableTeamCount.toString())} teams lack availability and are omitted for brevity)`);
 for (const [team, reasonOrdinal] of unmatchedTeams) {
     if (reasonOrdinal === FailedMatchupReason.UNSCHEDULED_AVAILABILITY)
         continue;

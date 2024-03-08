@@ -12,6 +12,7 @@ export interface ITeamsPartitionedByTimeSlot {
 export function partitionTeamsByTimeSlots(
     scheduledDate: Date,
     dateTranslator: TimeSlotToDateTranslator,
+    excludeTimeSlotsAlreadyOccurred: boolean,
     teams: readonly ITeam[],
 ): ITeamsPartitionedByTimeSlot {
     const currentTime = Date.now();
@@ -39,7 +40,7 @@ export function partitionTeamsByTimeSlots(
                 .map((isAvailable: boolean, ordinal: number) => isAvailable ? ofTimeSlot(timeSlotCache, day, ordinal) : null)
                 .filter((timeSlot): timeSlot is ITimeSlot => timeSlot !== null)
             )
-            .filter(timeSlot => currentTime < (timeSlot.date?.getTime() ?? Infinity));
+            .filter(timeSlot => !excludeTimeSlotsAlreadyOccurred || currentTime < (timeSlot.date?.getTime() ?? Infinity));
 
         if (teamTimeSlots.length !== 0)
             for (const teamTimeSlot of teamTimeSlots)

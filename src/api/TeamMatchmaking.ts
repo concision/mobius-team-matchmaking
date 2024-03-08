@@ -70,7 +70,17 @@ export interface IDefaultMatchmakingParameters {
     readonly timeSlotToDateTranslator?: TimeSlotToDateTranslator;
 
     /**
+     * Ignores any time slots that have already occurred. If true, then any time slots that have already occurred will be
+     * ignored and no matches will be made for those time slots. If false, then the algorithm will attempt to match teams
+     * for all time slots, regardless of whether they have already occurred.
+     *
+     * By default, this value is true.
+     */
+    readonly excludeTimeSlotsAlreadyOccurred?: boolean;
+
+    /**
      * The minimum number of games that a team can play during the week.
+     * TODO: THIS IS NOT YET IMPLEMENTED
      */
     readonly minimumGames?: number;
     /**

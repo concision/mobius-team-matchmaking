@@ -39,6 +39,7 @@ export enum Normalizer {
 type NormalizerFunction = (scores: readonly number[]) => readonly number[];
 const normalizers: ReadonlyMap<Normalizer, NormalizerFunction> = new Map()
     .set(Normalizer.GAUSSIAN, (scores: readonly number[]) => {
+        return scores; // TODO: absolute
         const mean = scores.reduce((sum, fitness) => sum + fitness, 0) / scores.length;
         const variance = scores.reduce((sum, fitness) => sum + (fitness - mean) ** 2, 0) / scores.length;
         const standardDeviation = Math.sqrt(variance);
