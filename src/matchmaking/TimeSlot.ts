@@ -1,8 +1,8 @@
-import {Day, ITimeSlot} from "../api/ITimeSlot";
-import {MatchupFailureReason, TimeSlotToDateTranslator} from "../api/TeamMatchmaking";
-import {ITeam} from "../api/ITeam";
-import {IScheduledMatchup} from "../api/ITeamMatchup";
-import {Writeable} from "../api/TypescriptTypes";
+import {Day, ITimeSlot} from "./api/ITimeSlot";
+import {MatchupFailureReason, TimeSlotToDateTranslator} from "./api/TeamMatchmaking";
+import {ITeam} from "./api/ITeam";
+import {IScheduledMatchup} from "./api/ITeamMatchup";
+import {Writeable} from "../types/TypescriptTypes";
 
 export interface ITeamsPartitionedByTimeSlot {
     teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly ITeam[]>;

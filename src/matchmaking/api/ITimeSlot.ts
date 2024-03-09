@@ -1,5 +1,3 @@
-import {IDefaultMatchmakingParameters} from "./TeamMatchmaking";
-
 /**
  * Represents a day of the week, which is used to indicate the availability of a team in {@link ITeam.availability}
  * and the time slot in {@link ITimeSlot.day}.

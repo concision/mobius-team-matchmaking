@@ -2,28 +2,28 @@ import {
     IDefaultMatchmakingParameters,
     IMatchmakingOptions,
     IMatchmakingResults,
-    IMatchupScheduleIndividual,
-    type matchmakeTeams,
-    type matchmakeTeamsByRegion,
+    IMatchupSchedule,
+    type matchmakeTeams as matchmakeTeamsApi,
+    type matchmakeTeamsByRegion as matchmakeTeamsByRegionApi,
     MatchupFailureReason
-} from "../api/TeamMatchmaking";
-import {ITeam} from "../api/ITeam";
-import {IScheduledMatchup} from "../api/ITeamMatchup";
-import {ITeamNotYetPlayed, TeamMatchResult} from "../api/ITeamParticipant";
-import {geneticAlgorithm} from "./lib/GeneticAlgorithm";
-import {IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
+} from "./api/TeamMatchmaking";
+import {ITeam} from "./api/ITeam";
+import {IScheduledMatchup} from "./api/ITeamMatchup";
+import {ITeamNotYetPlayed, TeamMatchResult} from "./api/ITeamParticipant";
+import {geneticAlgorithm} from "../genetic/GeneticAlgorithm";
+import {IGeneticOptions} from "../genetic/api/GeneticAlgorithm";
 import {
     filterTimeSlotsThatAlreadyOccurred,
     partitionTeamsByTimeSlots,
     sortScheduledMatchupsByTime,
     translateTimeSlotToDate
 } from "./TimeSlot";
-import {selectBestMatchupSchedule} from "./geneticHooks/MatchupPopulationSelectors";
+import {selectBestMatchupSchedule} from "./operators/MatchupPopulationSelectors";
 import {defaultConstraints} from "./GeneticConstraints";
 
 export {matchmakeTeams, matchmakeTeamsByRegion};
 
-const matchmakeTeamsByRegion: matchmakeTeamsByRegion = (
+const matchmakeTeamsByRegion: typeof matchmakeTeamsByRegionApi = (
     {teams, defaultParameters, ...options}: IMatchmakingOptions
 ): IMatchmakingResults => {
     const parameters = validateAndCreateParameters(defaultParameters);
@@ -57,7 +57,7 @@ const matchmakeTeamsByRegion: matchmakeTeamsByRegion = (
 }
 
 
-const matchmakeTeams: matchmakeTeams = (
+const matchmakeTeams: typeof matchmakeTeamsApi = (
     {teams, defaultParameters, ...options}: IMatchmakingOptions
 ): IMatchmakingResults => {
     if (0 < teams.length && teams.some(team => team.region !== teams[0].region))
@@ -80,12 +80,12 @@ const matchmakeTeams: matchmakeTeams = (
         return {scheduledMatchups: [], unmatchedTeams: unavailableTeams};
 
     // prepare genetic algorithm constraints
-    let constraints: IGeneticOptions<IMatchupScheduleIndividual> = defaultConstraints(parameters, teamsByTimeSlot);
+    let constraints: IGeneticOptions<IMatchupSchedule> = defaultConstraints(parameters, teamsByTimeSlot);
     if (typeof options.configure === 'function')
         constraints = options.configure(constraints) ?? constraints;
 
     // run the genetic algorithm to compute matchmaking results
-    const solutions = geneticAlgorithm<IMatchupScheduleIndividual>(constraints, parameters.hallOfFame);
+    const solutions = geneticAlgorithm<IMatchupSchedule>(constraints, parameters.hallOfFame);
     const solution = selectBestMatchupSchedule(solutions.map(({solution}) => solution));
 
     // translate matchups into a format that is more useful for the consumer
@@ -135,7 +135,7 @@ function validateAndCreateParameters(parameterOverrides?: IDefaultMatchmakingPar
 function convertToMatchmakingResults(
     teams: readonly ITeam[],
     unavailableTeams: ReadonlyMap<ITeam, MatchupFailureReason>,
-    solution: IMatchupScheduleIndividual,
+    solution: IMatchupSchedule,
 ): IMatchmakingResults {
     const scheduledMatchups = solution.matchups
         .map(({timeSlot, teams}) => <IScheduledMatchup>({

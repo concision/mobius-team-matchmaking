@@ -1,13 +1,13 @@
-import {IndividualFitnessFunction} from "../../api/genetic/FitnessFunction";
-import {IMatchupScheduleIndividual} from "../../api/TeamMatchmaking";
-import {ITeam} from "../../api/ITeam";
+import {IndividualFitnessFunction} from "../../genetic/api/FitnessFunction";
+import {IMatchupSchedule} from "../api/TeamMatchmaking";
+import {ITeam} from "../api/ITeam";
 
-export const countTotalMatchups = new IndividualFitnessFunction<IMatchupScheduleIndividual>(
+export const countTotalMatchups = new IndividualFitnessFunction<IMatchupSchedule>(
     "maximizeTotalMatchups",
     ({matchups}) => matchups.length,
 );
 
-export const eloDifferentialStandardDeviation = new IndividualFitnessFunction<IMatchupScheduleIndividual>(
+export const eloDifferentialStandardDeviation = new IndividualFitnessFunction<IMatchupSchedule>(
     "minimizeEloDifferential",
     ({matchups}) => {
         const eloDifferentials = matchups.map(matchup => Math.abs(matchup.teams[0].elo - matchup.teams[1].elo));
@@ -19,11 +19,11 @@ export const eloDifferentialStandardDeviation = new IndividualFitnessFunction<IM
     },
 );
 
-export function averageGamesPlayedPerTeamVariance(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupScheduleIndividual> {
+export function averageGamesPlayedPerTeamVariance(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupSchedule> {
     const xDaysAgo = new Date(date);
     xDaysAgo.setDate(xDaysAgo.getDate() - recentDays);
 
-    return new IndividualFitnessFunction<IMatchupScheduleIndividual>(
+    return new IndividualFitnessFunction<IMatchupSchedule>(
         "maximizeAverageGamesPlayedPerTeam",
         ({matchups, unmatchedTeams}) => {
             const scheduledMatchupsPerTeam: Map<ITeam, number> = Array.from(matchups.values())
@@ -56,11 +56,11 @@ export function averageGamesPlayedPerTeamVariance(date: Date, recentDays: number
     );
 }
 
-export function countRecentDuplicateMatchups(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupScheduleIndividual> {
+export function countRecentDuplicateMatchups(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupSchedule> {
     const xDaysAgo = new Date(date);
     xDaysAgo.setDate(xDaysAgo.getDate() - recentDays);
 
-    return new IndividualFitnessFunction<IMatchupScheduleIndividual>(
+    return new IndividualFitnessFunction<IMatchupSchedule>(
         "minimizeRecentDuplicateMatchups",
         ({matchups}) => {
             let duplicateMatchups = 0;

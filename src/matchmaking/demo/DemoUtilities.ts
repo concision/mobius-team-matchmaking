@@ -1,10 +1,21 @@
-import {gray} from "ansi-colors";
+import {cyan, gray, yellowBright} from "ansi-colors";
+import {ITeam} from "../api/ITeam";
 
-let seed = 1;
+export function seededRandom(seed: number) {
+    return () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    }
+}
 
-export function seededRandom() {
-    const x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
+export function rangedRandom(random: () => number, min: number, max: number) {
+    return min + random() * (max - min);
+}
+
+
+export function formatTeam(team: ITeam, color?: (text: string) => string) {
+    color ??= cyan;
+    return `[${yellowBright(team.elo.toString())}]${color(team.name)}`;
 }
 
 

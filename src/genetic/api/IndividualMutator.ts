@@ -1,5 +1,5 @@
-import {ReplaceReturnType} from "../TypescriptTypes";
-import {selectRandomWeightedElement} from "../../impl/lib/Random";
+import {ReplaceReturnType} from "../../types/TypescriptTypes";
+import {selectRandomWeightedElement} from "../library/Random";
 
 export abstract class IndividualMutator<I> {
     public constructor(

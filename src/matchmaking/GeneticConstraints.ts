@@ -1,21 +1,21 @@
-import {ensureGrowthEarlyStopEvaluator} from "./geneticHooks/MatchupEarlyStoppingEvaluator";
-import {IGeneticOptions} from "../api/genetic/GeneticAlgorithm";
-import {IDefaultMatchmakingParameters, IMatchupScheduleIndividual} from "../api/TeamMatchmaking";
+import {ensureGrowthEarlyStopEvaluator} from "./operators/MatchupEarlyStoppingEvaluator";
+import {IGeneticOptions} from "../genetic/api/GeneticAlgorithm";
+import {IDefaultMatchmakingParameters, IMatchupSchedule} from "./api/TeamMatchmaking";
 import {
     backToBackMatchupKillPredicate,
     hardEloDifferentialLimitKillPredicate,
     maximumGamesPerTeamKillPredicate,
     uniqueTeamMatchupIdentity
-} from "./geneticHooks/MatchupPopulationSelectors";
-import {WeightedRandomIndividualMutator} from "../api/genetic/IndividualMutator";
-import {MutationAddNewMatchup, MutationRemoveMatchup, MutationSwapMatchupInTimeSlot} from "./geneticHooks/MatchupIndividualMutators";
-import {LinearWeightedFitnessReducer, MultivariateFitnessFunction, Normalizer} from "../api/genetic/FitnessFunction";
+} from "./operators/MatchupPopulationSelectors";
+import {WeightedRandomIndividualMutator} from "../genetic/api/IndividualMutator";
+import {MutationAddNewMatchup, MutationRemoveMatchup, MutationSwapMatchupInTimeSlot} from "./operators/MatchupIndividualMutators";
+import {LinearWeightedFitnessReducer, MultivariateFitnessFunction, Normalizer} from "../genetic/api/FitnessFunction";
 import {
     averageGamesPlayedPerTeamVariance,
     countRecentDuplicateMatchups,
     countTotalMatchups,
     eloDifferentialStandardDeviation
-} from "./geneticHooks/MatchupFitnessFunctions";
+} from "./operators/MatchupFitnessFunctions";
 import {
     ChainedPopulationSelector,
     DeduplicatePopulationSelector,
@@ -25,14 +25,14 @@ import {
     RepopulatePopulationSelector,
     RouletteWheelPopulationSelector,
     TournamentPopulationSelector
-} from "../api/genetic/PopulationSelector";
-import {ITimeSlot} from "../api/ITimeSlot";
-import {ITeam} from "../api/ITeam";
+} from "../genetic/api/PopulationSelector";
+import {ITimeSlot} from "./api/ITimeSlot";
+import {ITeam} from "./api/ITeam";
 
 export function defaultConstraints(
     parameters: Required<IDefaultMatchmakingParameters>,
     teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly ITeam[]>,
-): IGeneticOptions<IMatchupScheduleIndividual> {
+): IGeneticOptions<IMatchupSchedule> {
     const earlyStoppingEvaluator = ensureGrowthEarlyStopEvaluator(16);
     return {
         // an upper bound estimate of the number of generations needed to find a decent solution
@@ -53,11 +53,11 @@ export function defaultConstraints(
         ]),
         fitnessFunction: new MultivariateFitnessFunction("fitness", new LinearWeightedFitnessReducer(), [
             // maximize total matchups
-            {weighting: 2, normalizer: Normalizer.NONE, fitnessFunction: countTotalMatchups},
+            {weighting: 1.5, normalizer: Normalizer.NONE, fitnessFunction: countTotalMatchups},
             // minimize ELO differential in team matchups
             // elo standard deviation is likely proportional to parameters.hardEloDifferentialLimit
             {
-                weighting: -1 / Math.pow(parameters.hardEloDifferentialLimit, .5),
+                weighting: -1 / Math.pow(parameters.hardEloDifferentialLimit, .4),
                 normalizer: Normalizer.NONE,
                 fitnessFunction: eloDifferentialStandardDeviation,
             },

@@ -1,19 +1,19 @@
-import {IMatchupScheduleIndividual} from "../../api/TeamMatchmaking";
-import {KillPredicate} from "../../api/genetic/PopulationSelector";
-import {IIndividualFitness} from "../../api/genetic/FitnessFunction";
-import {ITeam} from "../../api/ITeam";
-import {ITimeSlot} from "../../api/ITimeSlot";
-import {IndividualIdentityFunction} from "../../api/genetic/IndividualIdentityFunction";
+import {IMatchupSchedule} from "../api/TeamMatchmaking";
+import {KillPredicate} from "../../genetic/api/PopulationSelector";
+import {ITeam} from "../api/ITeam";
+import {ITimeSlot} from "../api/ITimeSlot";
+import {IndividualIdentityFunction} from "../../genetic/api/IndividualIdentityFunction";
+import {IFitness} from "../../genetic/api/GeneticAlgorithm";
 
-export const uniqueTeamMatchupIdentity: IndividualIdentityFunction<IMatchupScheduleIndividual> =
-    (individual: IMatchupScheduleIndividual): string => {
+export const uniqueTeamMatchupIdentity: IndividualIdentityFunction<IMatchupSchedule> =
+    (individual: IMatchupSchedule): string => {
         return JSON.stringify(individual.matchups
             .map(matchup => matchup.teams.map(team => team.snowflake).sort().join(","))
             .sort())
     };
 
-export function backToBackMatchupKillPredicate(ordinalRecency: number = 1): KillPredicate<IMatchupScheduleIndividual> {
-    return ({solution}: IIndividualFitness<IMatchupScheduleIndividual>): boolean => {
+export function backToBackMatchupKillPredicate(ordinalRecency: number = 1): KillPredicate<IMatchupSchedule> {
+    return ({solution}: IFitness<IMatchupSchedule>): boolean => {
         const teamTimeSlots = new Map<ITeam, ITimeSlot[]>();
         for (const matchup of solution.matchups) {
             for (const team of matchup.teams) {
@@ -40,8 +40,8 @@ export function backToBackMatchupKillPredicate(ordinalRecency: number = 1): Kill
     };
 }
 
-export function maximumGamesPerTeamKillPredicate(maximumGames: number): KillPredicate<IMatchupScheduleIndividual> {
-    return ({solution}: IIndividualFitness<IMatchupScheduleIndividual>): boolean => {
+export function maximumGamesPerTeamKillPredicate(maximumGames: number): KillPredicate<IMatchupSchedule> {
+    return ({solution}: IFitness<IMatchupSchedule>): boolean => {
         const scheduledMatchupsPerTeam: Map<ITeam, number> = solution.matchups
             .flatMap(matchup => matchup.teams)
             .reduce((map, team) => map.set(team, (map.get(team) ?? 0) + 1), new Map<ITeam, number>());
@@ -54,8 +54,8 @@ export function maximumGamesPerTeamKillPredicate(maximumGames: number): KillPred
     };
 }
 
-export function hardEloDifferentialLimitKillPredicate(hardEloDifferentialLimit: number): KillPredicate<IMatchupScheduleIndividual> {
-    return ({solution: {matchups}}: IIndividualFitness<IMatchupScheduleIndividual>): boolean => {
+export function hardEloDifferentialLimitKillPredicate(hardEloDifferentialLimit: number): KillPredicate<IMatchupSchedule> {
+    return ({solution: {matchups}}: IFitness<IMatchupSchedule>): boolean => {
         for (const matchup of matchups) {
             if (hardEloDifferentialLimit < Math.abs(matchup.teams[0].elo - matchup.teams[1].elo))
                 return true;
@@ -65,7 +65,7 @@ export function hardEloDifferentialLimitKillPredicate(hardEloDifferentialLimit: 
 }
 
 
-export function selectBestMatchupSchedule(solutions: readonly IMatchupScheduleIndividual[]): IMatchupScheduleIndividual {
+export function selectBestMatchupSchedule(solutions: readonly IMatchupSchedule[]): IMatchupSchedule {
     const solutionsRankedByMinimalUnmatchedTeams = solutions
         .map(solution => {
             const matchmadeTeams = new Set(solution.matchups.flatMap(matchup => matchup.teams));

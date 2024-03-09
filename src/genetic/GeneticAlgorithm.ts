@@ -1,9 +1,8 @@
-import {IIndividualFitness} from "../../api/genetic/FitnessFunction";
-import {IGeneration, IGeneticOptions} from "../../api/genetic/GeneticAlgorithm";
-import {randomIndex} from "./Random";
+import {IFitness, IGeneration, IGeneticOptions} from "./api/GeneticAlgorithm";
+import {randomIndex} from "./library/Random";
 
-export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGeneticOptions<I>, individuals: number): readonly IIndividualFitness<I>[] {
-    let fittest: IIndividualFitness<I>[] = [];
+export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGeneticOptions<I>, individuals: number): readonly IFitness<I>[] {
+    let fittest: IFitness<I>[] = [];
     for (const {generation, population} of geneticAlgorithmGenerator(constraints)) {
         if (constraints.debugLogging) {
             const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
@@ -11,7 +10,7 @@ export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGene
         }
 
         // keep track of the fittest individuals across all generations
-        const seen = new Map<string, IIndividualFitness<I>>();
+        const seen = new Map<string, IFitness<I>>();
         for (const individual of fittest.concat(population)) {
             // all individual with the same key should be identical
             const key = constraints.individualIdentity(individual.solution);
@@ -61,7 +60,7 @@ export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? nev
         const populationFitness = fitnessFunction.evaluate(nextGeneration);
 
         // perform selection of individuals for the next generation
-        let selectedPopulation: readonly IIndividualFitness<I>[] = populationSelector.select(
+        let selectedPopulation: readonly IFitness<I>[] = populationSelector.select(
             {generation: generationIndex, population: populationFitness},
             maximumPopulationSize
         );

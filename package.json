@@ -22,8 +22,8 @@
   "scripts": {
     "build": "tsc",
     "prepack": "yarn run build",
-    "demo": "node -r ts-node/register/transpile-only src/demo/MatchmakingDemo.ts",
-    "demo:debug": "node --inspect-brk -r ts-node/register/transpile-only src/demo/MatchmakingDemo.ts"
+    "demo": "node -r ts-node/register/transpile-only src/matchmaking/demo/MatchmakingDemo.ts",
+    "demo:debug": "node --inspect-brk -r ts-node/register/transpile-only src/matchmaking/demo/MatchmakingDemo.ts"
   },
   "engines": {
     "node": ">=20.0.0"

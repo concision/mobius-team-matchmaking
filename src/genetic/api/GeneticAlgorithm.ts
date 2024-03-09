@@ -1,11 +1,15 @@
 import {IndividualGenerator} from "./IndividualGenerator";
 import {IndividualMutator} from "./IndividualMutator";
-import {FitnessFunction, IIndividualFitness} from "./FitnessFunction";
+import {FitnessFunction} from "./FitnessFunction";
 import {PopulationSelector} from "./PopulationSelector";
 import {EarlyStoppingEvaluator} from "./EarlyStoppingEvaluator";
 import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 
-export type IGeneticOptions<I> = {
+export declare function geneticAlgorithm<I>(options: IGeneticOptions<I>, individuals: number): readonly IFitness<I>[];
+
+export declare function geneticAlgorithmGenerator<I>(constraints: I extends any[] ? never : IGeneticOptions<I>): Generator<IGeneration<I>>;
+
+export type IGeneticOptions<I> = { // TODO: make everything a genetic operator
     readonly debugLogging?: boolean;
 
     readonly maximumGenerations?: number;
@@ -27,5 +31,10 @@ export type IGeneticOptions<I> = {
 
 export interface IGeneration<I> {
     readonly generation: number;
-    readonly population: readonly IIndividualFitness<I>[];
+    readonly population: readonly IFitness<I>[];
+}
+
+export interface IFitness<I> {
+    readonly solution: I;
+    readonly fitness: number;
 }

@@ -1,8 +1,8 @@
 import {ITeam} from './ITeam';
 import {IScheduledMatchup} from './ITeamMatchup';
 import {ITimeSlot} from "./ITimeSlot";
-import {IGeneticOptions} from "./genetic/GeneticAlgorithm";
-import {Writeable} from "./TypescriptTypes";
+import {IGeneticOptions} from "../../genetic/api/GeneticAlgorithm";
+import {Writeable} from "../../types/TypescriptTypes";
 
 /**
  * Configurable options for the matchmaking algorithm for {@link matchmakeTeams} and {@link matchmakeTeamsByRegion}.
@@ -26,7 +26,11 @@ export interface IMatchmakingOptions {
      * configuration properties to customize the genetic algorithm's behavior. Or, the consumer may return an entirely
      * different custom configuration object.
      */
-    readonly configure?: (options: Writeable<IGeneticOptions<IMatchupScheduleIndividual>>) => IGeneticOptions<IMatchupScheduleIndividual> | void;
+    readonly configure?: (options: Writeable<IGeneticOptions<IMatchupSchedule>>) => IGeneticOptions<IMatchupSchedule> | void;
+
+    readonly partitioner?: (teams: readonly ITeam[]) => Map<string, readonly ITeam[]>;
+
+    readonly async?: boolean;
 
     /**
      * Configures the default parameters for the default implementation of the matchmaking algorithm. This may be useful
@@ -151,6 +155,8 @@ export interface IMatchmakingResults {
      * the input teams {@link IMatchmakingOptions.teams}, and the values are the reasons that matchmaking failed.
      */
     readonly unmatchedTeams: ReadonlyMap<ITeam, MatchupFailureReason>;
+
+    // readonly teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly ITeam[]>;
 }
 
 
@@ -162,7 +168,7 @@ export interface IMatchmakingResults {
  * @exception Error If input teams are not all in the same region, then an exception will be thrown.
  * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
  */
-export type matchmakeTeams = (options: IMatchmakingOptions) => IMatchmakingResults;
+export declare function matchmakeTeams(options: IMatchmakingOptions): IMatchmakingResults;
 
 /**
  * Performs the matchmaking algorithm on a set of teams, automatically partitioning them by region. This is a
@@ -172,7 +178,7 @@ export type matchmakeTeams = (options: IMatchmakingOptions) => IMatchmakingResul
  * @param options The input options for the matchmaking algorithm. See {@link IMatchmakingOptions}.
  * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
  */
-export type matchmakeTeamsByRegion = (options: IMatchmakingOptions) => IMatchmakingResults;
+export declare function matchmakeTeamsByRegion(options: IMatchmakingOptions): IMatchmakingResults;
 
 
 // matchmaking genetic algorithm types
@@ -182,7 +188,7 @@ export interface ITeamMatchupGene {
     readonly teams: readonly ITeam[];
 }
 
-export interface IMatchupScheduleIndividual {
+export interface IMatchupSchedule {
     readonly unmatchedTeams: ReadonlyMap<ITimeSlot, readonly ITeam[]>;
     readonly matchups: readonly ITeamMatchupGene[];
 }

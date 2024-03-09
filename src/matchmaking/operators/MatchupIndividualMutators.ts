@@ -1,18 +1,18 @@
-import {IMatchupScheduleIndividual, ITeamMatchupGene} from "../../api/TeamMatchmaking";
-import {IndividualMutator} from "../../api/genetic/IndividualMutator";
-import {ITimeSlot} from "../../api/ITimeSlot";
-import {randomIndex, selectRandomWeightedElement, selectUniqueRandomElements} from "../lib/Random";
+import {IMatchupSchedule, ITeamMatchupGene} from "../api/TeamMatchmaking";
+import {IndividualMutator} from "../../genetic/api/IndividualMutator";
+import {ITimeSlot} from "../api/ITimeSlot";
+import {randomIndex, selectRandomWeightedElement, selectUniqueRandomElements} from "../../genetic/library/Random";
 
 
-export class MutationAddNewMatchup extends IndividualMutator<IMatchupScheduleIndividual> {
+export class MutationAddNewMatchup extends IndividualMutator<IMatchupSchedule> {
     public constructor(name: string = "addNewMatchup") {
         super(name);
     }
 
     public override mutate(
-        parent: IMatchupScheduleIndividual,
-        population: readonly IMatchupScheduleIndividual[],
-    ): IMatchupScheduleIndividual | undefined {
+        parent: IMatchupSchedule,
+        population: readonly IMatchupSchedule[],
+    ): IMatchupSchedule | undefined {
         // find a timeslot to add a new matchup
         const chosen = selectRandomWeightedElement(
             [...parent.unmatchedTeams.entries()].filter(([, teams]) => 2 <= teams.length),
@@ -33,15 +33,15 @@ export class MutationAddNewMatchup extends IndividualMutator<IMatchupScheduleInd
     }
 }
 
-export class MutationRemoveMatchup extends IndividualMutator<IMatchupScheduleIndividual> {
+export class MutationRemoveMatchup extends IndividualMutator<IMatchupSchedule> {
     public constructor(name: string = "removeMatchup") {
         super(name);
     }
 
     public override mutate(
-        parent: IMatchupScheduleIndividual,
-        population: readonly IMatchupScheduleIndividual[],
-    ): IMatchupScheduleIndividual | undefined {
+        parent: IMatchupSchedule,
+        population: readonly IMatchupSchedule[],
+    ): IMatchupSchedule | undefined {
         if (0 < parent.matchups.length) {
             const matchups = [...parent.matchups];
             const removedMatchup = matchups.splice(randomIndex(matchups), 1)[0];
@@ -53,15 +53,15 @@ export class MutationRemoveMatchup extends IndividualMutator<IMatchupScheduleInd
     }
 }
 
-export class MutationSwapMatchupInTimeSlot extends IndividualMutator<IMatchupScheduleIndividual> {
+export class MutationSwapMatchupInTimeSlot extends IndividualMutator<IMatchupSchedule> {
     public constructor(name: string = "swapTimeSlotMatchup") {
         super(name);
     }
 
     public override mutate(
-        parent: IMatchupScheduleIndividual,
-        population: readonly IMatchupScheduleIndividual[],
-    ): IMatchupScheduleIndividual | undefined {
+        parent: IMatchupSchedule,
+        population: readonly IMatchupSchedule[],
+    ): IMatchupSchedule | undefined {
         const matchupsByTimeSlot: ReadonlyMap<ITimeSlot, ITeamMatchupGene[]> = parent.matchups.reduce((map, matchup) => {
             const teams = map.get(matchup.timeSlot);
             if (teams)

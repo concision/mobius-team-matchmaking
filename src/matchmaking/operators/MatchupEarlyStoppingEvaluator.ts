@@ -1,5 +1,5 @@
-import {IGeneration} from "../../api/genetic/GeneticAlgorithm";
-import {EarlyStoppingEvaluator} from "../../api/genetic/EarlyStoppingEvaluator";
+import {IGeneration} from "../../genetic/api/GeneticAlgorithm";
+import {EarlyStoppingEvaluator} from "../../genetic/api/EarlyStoppingEvaluator";
 
 export type EnsureGrowthEarlyStopEvaluator<I> = EarlyStoppingEvaluator<I> & {
     growthFailureProportion: number,

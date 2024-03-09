@@ -1,7 +1,6 @@
-import {IIndividualFitness} from "./FitnessFunction";
-import {ReplaceReturnType} from "../TypescriptTypes";
-import {IGeneration} from "./GeneticAlgorithm";
-import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../../impl/lib/Random";
+import {ReplaceReturnType} from "../../types/TypescriptTypes";
+import {IFitness, IGeneration} from "./GeneticAlgorithm";
+import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../library/Random";
 import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 
 export abstract class PopulationSelector<I> {
@@ -10,7 +9,7 @@ export abstract class PopulationSelector<I> {
     ) {
     }
 
-    public abstract select(population: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[];
+    public abstract select(population: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[];
 }
 
 export class ChainedPopulationSelector<I> extends PopulationSelector<I> {
@@ -21,7 +20,7 @@ export class ChainedPopulationSelector<I> extends PopulationSelector<I> {
         this.selectors = [...selectors];
     }
 
-    public override select({generation, population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
+    public override select({generation, population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         for (const selector of this.selectors)
             population = selector.select({generation, population}, maximumPopulation);
         return population;
@@ -42,8 +41,8 @@ export class ProportionalPopulationSelector<I> extends PopulationSelector<I> {
         this.selectors = [...selectors];
     }
 
-    public override select(population: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        const nextPopulation: IIndividualFitness<I>[] = [];
+    public override select(population: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
+        const nextPopulation: IFitness<I>[] = [];
 
         const enabledSelectors = this.selectors.filter(({predicate}) => predicate?.(population, maximumPopulation) ?? true);
         const totalWeight = enabledSelectors.reduce((sum, {weight}) => sum + Math.max(0, weight), 0);
@@ -69,8 +68,8 @@ export class RepopulatePopulationSelector<I> extends PopulationSelector<I> {
         super(name);
     }
 
-    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        const selectedPopulation: IIndividualFitness<I>[] = [...population];
+    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
+        const selectedPopulation: IFitness<I>[] = [...population];
         while (selectedPopulation.length < maximumPopulation)
             selectedPopulation.push(selectRandomElement(population)!);
         return population;
@@ -85,7 +84,7 @@ export class ElitistPopulationSelector<I> extends PopulationSelector<I> {
         super(name);
     }
 
-    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
+    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         return population.toSorted((a, b) => b.fitness - a.fitness)
             .slice(0, Math.max(1, Math.ceil(maximumPopulation * this.elitismProportion)));
     }
@@ -99,8 +98,8 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
         super(name);
     }
 
-    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        const selectedPopulation: IIndividualFitness<I>[] = [];
+    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
+        const selectedPopulation: IFitness<I>[] = [];
 
         if (this.proportional) {
             const minFitness: number = population.reduce((min, individual) => Math.min(min, individual.fitness), 0);
@@ -153,10 +152,10 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
         super(name);
     }
 
-    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
+    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         const tournamentSize = Math.max(2, this.tournamentSize < 1 ? Math.ceil(Math.random() * population.length) : this.tournamentSize);
 
-        const selectedPopulation: IIndividualFitness<I>[] = [];
+        const selectedPopulation: IFitness<I>[] = [];
         for (let i = 0; i < maximumPopulation; i++) {
             const tournament = selectUniqueRandomElements(population, Math.min(population.length, tournamentSize));
             const winner = tournament.reduce((max, individual) => max.fitness < individual.fitness ? individual : max, tournament[0]);
@@ -175,8 +174,8 @@ export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
         super(name);
     }
 
-    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
-        const seen = new Map<string, IIndividualFitness<I>>();
+    public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
+        const seen = new Map<string, IFitness<I>>();
         for (const individual of population) {
             // all individual with the same key should be identical
             const key = this.identity(individual.solution);
@@ -187,7 +186,7 @@ export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
     }
 }
 
-export type KillPredicate<I> = (individual: IIndividualFitness<I>) => boolean;
+export type KillPredicate<I> = (individual: IFitness<I>) => boolean;
 
 export class KillInvalidPopulationSelector<I> extends PopulationSelector<I> {
     public readonly killPredicates: KillPredicate<I>[];
@@ -201,7 +200,7 @@ export class KillInvalidPopulationSelector<I> extends PopulationSelector<I> {
         this.killPredicates = Array.isArray(killPredicate) ? killPredicate : [killPredicate];
     }
 
-    public override select({population, generation}: IGeneration<I>, maximumPopulation: number): readonly IIndividualFitness<I>[] {
+    public override select({population, generation}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         return population.filter(individual =>
             this.killPredicates.filter(predicate => predicate(individual)).length === 0
             || (typeof this.killProbability === "function" ? this.killProbability(generation) : this.killProbability) <= Math.random()

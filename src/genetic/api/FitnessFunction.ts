@@ -1,7 +1,4 @@
-export interface IIndividualFitness<I> {
-    readonly solution: I;
-    readonly fitness: number;
-}
+import {IFitness} from "./GeneticAlgorithm";
 
 export abstract class FitnessFunction<I> {
     public constructor(
@@ -9,7 +6,7 @@ export abstract class FitnessFunction<I> {
     ) {
     }
 
-    public abstract evaluate(population: readonly I[]): readonly IIndividualFitness<I>[];
+    public abstract evaluate(population: readonly I[]): readonly IFitness<I>[];
 }
 
 
@@ -21,7 +18,7 @@ export class IndividualFitnessFunction<I> extends FitnessFunction<I> {
         super(name);
     }
 
-    public override evaluate(population: readonly I[]): readonly IIndividualFitness<I>[] {
+    public override evaluate(population: readonly I[]): readonly IFitness<I>[] {
         return population.map(individual => ({solution: individual, fitness: this.fitnessFunction(individual)}));
     }
 }
@@ -29,12 +26,7 @@ export class IndividualFitnessFunction<I> extends FitnessFunction<I> {
 
 export enum Normalizer {
     NONE = "none",
-    // TODO: implement these
-    LINEAR = "linear",
-    EXPONENTIAL = "exponential",
-    LOGARITHMIC = "logarithmic",
-    SIGMOID = "sigmoid",
-    TANH = "tanh",
+    // TODO: implement various normalizers, e.g. linear, exponential, logarithmic, sigmoid, tanh
 }
 
 type NormalizerFunction = (scores: readonly number[]) => readonly number[];
@@ -68,18 +60,16 @@ export interface IWeightedFitnessFunction<I> {
 }
 
 export class MultivariateFitnessFunction<I> extends FitnessFunction<I> {
+    public readonly reducer: WeightedFitnessReducer;
     public readonly fitnessFunctions: IWeightedFitnessFunction<I>[];
 
-    public constructor(
-        name: string,
-        public readonly reducer: WeightedFitnessReducer,
-        fitnessFunctions: readonly IWeightedFitnessFunction<I>[]
-    ) {
+    public constructor(name: string, reducer: WeightedFitnessReducer, fitnessFunctions: readonly IWeightedFitnessFunction<I>[]) {
         super(name);
+        this.reducer = reducer;
         this.fitnessFunctions = [...fitnessFunctions];
     }
 
-    public override evaluate(population: readonly I[]): readonly IIndividualFitness<I>[] {
+    public override evaluate(population: readonly I[]): readonly IFitness<I>[] {
         const fitnessFunctionWeights = this.fitnessFunctions.map(({weighting}) => weighting);
         const populationFitnessScores: ReadonlyArray<ReadonlyArray<number>> = this.fitnessFunctions.map(
             ({fitnessFunction, normalizer}) => {
@@ -93,7 +83,7 @@ export class MultivariateFitnessFunction<I> extends FitnessFunction<I> {
             }
         );
 
-        const fitness: IIndividualFitness<I>[] = [];
+        const fitness: IFitness<I>[] = [];
         for (let i = 0; i < population.length; i++) {
             const fitnessScores = Array.from({length: this.fitnessFunctions.length}, (_, f) => populationFitnessScores[f][i]);
             const aggregatedFitness = this.reducer.reduce(fitnessFunctionWeights, fitnessScores);

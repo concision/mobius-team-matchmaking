@@ -1,15 +1,15 @@
 import {readFileSync} from "fs";
-import {ITeam, matchmakeTeamsByRegion} from "../index";
-import {MatchupFailureReason} from "../api/TeamMatchmaking";
-import {blueBright, bold, cyan, gray, greenBright, magentaBright, red, redBright, yellow, yellowBright} from "ansi-colors";
-import {debugLog, groupBy, seededRandom} from "./DemoUtilities";
+import {ITeam, matchmakeTeamsByRegion, MatchupFailureReason, Writeable} from "../../index";
+import {debugLog, formatTeam, groupBy, rangedRandom, seededRandom} from "./DemoUtilities";
+import {blueBright, bold, gray, greenBright, magentaBright, red, redBright, yellow, yellowBright} from "ansi-colors";
 
-// load teams from dataset file
-const teams: ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));
+// load dataset containing teams data structure
+const teams: readonly ITeam[] = JSON.parse(readFileSync('data/teams.json', 'utf8'));
 
 // randomize team ELOs
-for (const team of teams)
-    (<any>team).elo = 1500 + Math.floor(400 * (seededRandom() - .5));
+const random = seededRandom(42);
+for (const team of <Writeable<ITeam>[]>teams)
+    team.elo = Math.floor(rangedRandom(random, 1200, 1900));
 
 
 // list team counts by region
@@ -64,7 +64,7 @@ for (const [region, regionTeams] of teamsByRegion.entries()) {
         if (reasonOrdinal === MatchupFailureReason.UNSCHEDULED_AVAILABILITY)
             continue;
         const reason = ["No matchups found", "Unscheduled availability", "All availability already occurred"][reasonOrdinal] ?? `Code ${reasonOrdinal}`;
-        console.log(`   - [${yellowBright(team.elo.toString())}]${cyan(team.name)}: ${reason}`);
+        console.log(`   - ${formatTeam(team)}: ${reason}`);
     }
 }
 console.log();
@@ -77,7 +77,7 @@ for (const [region, matchups] of matchupsByRegion.entries()) {
     for (const {time, teams} of matchups)
         console.log(
             `   - (${blueBright(time.day)}, ${yellow(time.ordinal.toString())}): `
-            + teams.map(({team}) => `[${yellowBright(team.elo.toString())}]${cyan(team.name)}`).join(" vs ")
+            + teams.map(({team}) => formatTeam(team)).join(" vs ")
             + ` (${redBright(Math.abs(teams[0].team.elo - teams[1].team.elo).toString())} ELO differential)`
         );
 }
@@ -96,10 +96,10 @@ for (const [region, regionTeams] of teamsByRegion.entries()) {
     for (const scheduledTeam of matchmadeTeams) {
         const matchups = matchupsByTeam.get(scheduledTeam)!;
         console.log(
-            `   - ${greenBright(matchups.length.toString())} matches for [${yellowBright(scheduledTeam.elo.toString())}]${cyan(scheduledTeam.name)}: `
+            `   - ${greenBright(matchups.length.toString())} matches for ${formatTeam(scheduledTeam)}: `
             + matchups.map(({time, teams}) => {
                 const competingTeam = teams.filter(team => team.team !== scheduledTeam)[0].team;
-                return `[${yellowBright(competingTeam.elo.toString())}]${red(competingTeam.name)} (${gray(`${time.day}:${time.ordinal}`)})`;
+                return `${formatTeam(competingTeam, red)} ${gray(`(${time.day}:${time.ordinal})`)}`;
             }).join(gray(", "))
         );
     }
