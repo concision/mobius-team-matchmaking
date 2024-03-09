@@ -11,6 +11,7 @@
 - [Motivations](#motivations)
 - [Build Instructions](#build-instructions)
 - [Usage](#usage)
+- [TODOs](#todos)
 - [License](#license)
 
 <hr>
@@ -51,8 +52,8 @@ for balanced team match-ups for all teams.
 
 ## Build Instructions
 
-This project uses [Node.js v20](https://nodejs.org/en/download)
-and [Yarn v2](https://yarnpkg.com/getting-started/install) for development. To build the project, run the following
+This project uses [Node.js v20](https://nodejs.org/en/download) and
+[Yarn v2](https://yarnpkg.com/getting-started/install) for development. To build the project, run the following
 commands:
 
 ```bash
@@ -65,30 +66,73 @@ yarn run build
 
 See the [Releases](https://github.com/concision/mobius-team-matchmaking/releases)
 and [Packages](https://github.com/concision?tab=packages&repo_name=mobius-team-matchmaking) pages for pre-built
-Node.js/NPM packages.
+NPM packages.
 
 ## Usage
 
 There are two "entrypoint" API functions that are exported from this module:
 
-- [`matchmakeTeams(options: IMatchmakingOptions): IMatchmakingResult`](./src/api/TeamMatchmaking.ts#L141C1-L149C78):
+- [`matchmakeTeams(options: IMatchmakingOptions): IMatchmakingResult`](src/matchmaking/api/TeamMatchmaking.ts#L141C1-L149C78):
   Matchmakes teams without partitioning by region - all teams must be from the same region.
-- [`matchmakeTeamsByRegion(options: IMatchmakingOptions): IMatchmakingResult`](./src/api/TeamMatchmaking.ts#L151C1-L159C86):
+- [`matchmakeTeamsByRegion(options: IMatchmakingOptions): IMatchmakingResult`](src/matchmaking/api/TeamMatchmaking.ts#L151C1-L159C86):
   Partitions teams by region and matchmakes each region separately.
 
-See [`./src/demo/MatchmakingDemo`](./src/demo/MatchmakingDemo.ts#L11C1-L19C5) for an example usage of these functions
-with the existing dataset in `./data/teams.json`. To run the matchmaking demo with the existing dataset
-in `./data/teams.json`, follow the [build instructions](#build-instructions) and then run the following command:
+To run the [matchmaking demo](src/matchmaking/demo/MatchmakingDemo.ts) with the existing dataset in `./data/teams.json`,
+follow the [build instructions](#build-instructions) and then run the following command:
 
 ```bash
 yarn run demo
 ```
 
-## TODO
-- [ ] Improve code quality (improve/add documentation, separate classes into separate files)
-- [ ] Add `eslint` linter and `prettier` formatter
-- [ ] Improve documentation (e.g. explain algorithm criteria / format, add GitHub badges)
-- [ ] Add unit tests
+## TODOs
+
+A non-exhaustive list of tasks (in no particular order) to maybe be completed:
+
+- [x] Initial experimental matchmaking API v0.1.0
+    - [x] Implement genetic programming library
+    - [x] Implement matchmaking API contracts (i.e. inputs, outputs, constraints/options, etc.)
+    - [x] Implement default matchmaking algorithm with custom genetic operators
+    - [x] Implement matchmaking API
+    - [x] Implement demonstration example with existing Mobius dataset
+    - [x] Automated CI/CD:
+        - [x] Automatic build validation on new commits
+        - [x] Publish to GitHub NPM Packages on new semver tags
+
+- [ ] Significantly improve repository quality
+    - [ ] Comprehensively document all TypeScript types and functions
+    - [ ] Simplify complex data aggregations by using `lodash` and abstracting mathematical operations
+    - [ ] Improve README documentation
+        - Shorten ['Motivations'](#motivations) section
+        - Explain matchmaking criteria and difficulty
+        - Explain genetic algorithm approach and optimization criteria
+        - Explain the API and its supported options
+        - Add silly GitHub badges and ✨flair✨
+    - [ ] Implement unit tests for all trivial library functions
+
+- [ ] Implement new library features
+    - [ ] Merge the region-partitioned matchmaking API with the non-partitioned API; expose a configuration option
+      lambda for partitioning (defaulting to team region for Mobius)
+
+    - [ ] Rewrite all genetic algorithm types to be more modular, extensible, and serializable
+        - [ ] Abstract all genetic algorithm types to a tree-traversable `GeneticOperator` class (including
+          root `IGeneticOptions`)
+        - [ ] Implement various helpful functions for tweaking `GeneticOperator` properties/weights without needing to
+          rewrite an entire genetic operator configuration
+        - [ ] Improve debuggability of genetic algorithm types (e.g. weighted fitness functions are difficult to debug)
+        - [ ] Maybe abstract to a separate NPM module?
+
+    - [ ] Implement configurable asynchronous multithreading pool using Node.js workers
+      > The current implementation blocks the main thread for a non-negligible amount of time, e.g. up to 10 seconds for
+      larger datasets
+        - [ ] Implement configuration option for asynchronous and worker pool size
+        - [ ] Determine how to pass consumer genetic operators to worker threads (e.g. pure functions and class
+          definitions that are serializable?)
+        - [ ] Auto-parallelize matchmaking partitions to different workers
+
+- [ ] Improve Node.js project architecture
+    - [ ] Integrate `eslint` linter for TypeScript
+    - [ ] Integrate `prettier` formatter for TypeScript with IDE integration
+    - [ ] Integrate unit test framework
 
 ## License
 
