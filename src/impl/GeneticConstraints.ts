@@ -72,14 +72,14 @@ export function defaultConstraints(
                 weighting: -100,
                 normalizer: Normalizer.NONE,
                 fitnessFunction: countRecentDuplicateMatchups(parameters.scheduledDate, parameters.preventDuplicateMatchupsInLastXDays),
-            }] : [])
+            }] : []),
         ]),
         populationSelector: new ChainedPopulationSelector("chainedSelector", [
             // remove any duplicate matchup schedules
             new DeduplicatePopulationSelector("deduplicate", uniqueTeamMatchupIdentity),
             // kill any matchups that are invalid, i.e. violate hard rules
             new KillInvalidPopulationSelector("killMatchupsExceedingMaximumGames", [
-                // remove any matchups that are back-to-back scheduled (teams need a break)
+                // remove any matchups that are bac k-to-back scheduled (teams need a break)
                 backToBackMatchupKillPredicate(),
                 // enforce a maximum number of games for each team
                 maximumGamesPerTeamKillPredicate(parameters.maximumGamesPerTeam),

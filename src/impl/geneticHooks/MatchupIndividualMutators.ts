@@ -26,7 +26,7 @@ export class MutationAddNewMatchup extends IndividualMutator<IMatchupScheduleInd
         return {
             // remove the teams from the unmatched list
             unmatchedTeams: new Map(parent.unmatchedTeams)
-                .set(timeSlot, possibleTeams.filter((team) => team !== firstTeam && team !== secondTeam)),
+                .set(timeSlot, possibleTeams.filter(team => team !== firstTeam && team !== secondTeam)),
             // add new matchup
             matchups: [...parent.matchups, {timeSlot, teams: [firstTeam, secondTeam]}],
         };
@@ -83,7 +83,7 @@ export class MutationSwapMatchupInTimeSlot extends IndividualMutator<IMatchupSch
             unmatchedTeams: parent.unmatchedTeams,
             // swap teams in the time slot
             matchups: parent.matchups
-                .filter((team) => team !== firstTeam && team !== secondTeam)
+                .filter(team => team !== firstTeam && team !== secondTeam)
                 .concat([
                     {timeSlot, teams: [firstTeam.teams[0], secondTeam.teams[0]]},
                     {timeSlot, teams: [firstTeam.teams[1], secondTeam.teams[1]]}

@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-    <i>A competitive team-matchmaking algorithm for the melee game <a href="https://store.steampowered.com/app/1766450/Mobius/">Mobius</a> that utilizes a genetic algorithm to optimize for balanced team match-ups.</i>.
+    <i>A competitive team-matchmaking algorithm for the melee game <a href="https://store.steampowered.com/app/1766450/Mobius/">Mobius</a> that utilizes a genetic algorithm to optimize for balanced team match-ups.</i>
 </p>
 
 ## Table of Contents
@@ -83,6 +83,12 @@ in `./data/teams.json`, follow the [build instructions](#build-instructions) and
 ```bash
 yarn run demo
 ```
+
+## TODO
+- [ ] Improve code quality (improve/add documentation, separate classes into separate files)
+- [ ] Add `eslint` linter and `prettier` formatter
+- [ ] Improve documentation (e.g. explain algorithm criteria / format, add GitHub badges)
+- [ ] Add unit tests
 
 ## License
 

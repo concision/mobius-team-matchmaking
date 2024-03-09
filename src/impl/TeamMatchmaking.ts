@@ -62,7 +62,7 @@ const matchmakeTeams: matchmakeTeams = (
 ): IMatchmakingResults => {
     if (0 < teams.length && teams.some(team => team.region !== teams[0].region))
         throw new Error("All teams must be in the same region, encountered unique regions: "
-            + `[${[...new Set(teams.map((team) => team.region))].join(", ")}]; `);
+            + `[${[...new Set(teams.map(team => team.region))].join(", ")}]; `);
 
     const parameters = validateAndCreateParameters(defaultParameters);
 
@@ -120,6 +120,8 @@ function validateAndCreateParameters(parameterOverrides?: IDefaultMatchmakingPar
 
     if (parameters.maximumGamesPerTeam < 1)
         throw new Error("The maximum number of games must be at least 1.");
+    if (parameters.hardEloDifferentialLimit < 1)
+        throw new Error("The hard elo differential limit must be at least 1 (however recommended to be much higher).");
 
     if (parameters.preventDuplicateMatchupsInLastXDays < 0)
         throw new Error("The duplicate matchup day recency must be greater than 0 to be enabled, or 0 to be disabled.");
