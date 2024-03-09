@@ -1,5 +1,73 @@
 [
     {
+        "snowflake": "1181379577273135134",
+        "name": "Archangels",
+        "region": "EU",
+        "elo": 1663,
+        "availability": {
+            "tuesday": [
+                1,
+                1,
+                1
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                1,
+                1,
+                1
+            ],
+            "friday": [
+                1,
+                1,
+                1
+            ],
+            "saturday": [
+                1,
+                1,
+                1
+            ]
+        },
+        "locationPreference": {}
+    },
+    {
+        "snowflake": "1181722140442112111",
+        "name": "Monolith",
+        "region": "EU",
+        "elo": 1537,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        },
+        "locationPreference": {}
+    },
+    {
         "snowflake": "1181363728239841310",
         "name": "Bangalore",
         "region": "NA",
@@ -30,6 +98,11 @@
                 1,
                 1
             ]
+        },
+        "locationPreference": {
+            "first": "Virginia",
+            "second": "Dallas",
+            "third": "California"
         }
     },
     {
@@ -63,7 +136,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181374078255374507",
@@ -96,7 +170,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181375064818581524",
@@ -129,7 +204,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181375544265289758",
@@ -162,6 +238,11 @@
                 0,
                 0
             ]
+        },
+        "locationPreference": {
+            "first": "Virginia",
+            "second": "Dallas",
+            "third": null
         }
     },
     {
@@ -172,8 +253,8 @@
         "availability": {
             "tuesday": [
                 0,
-                0,
-                0
+                1,
+                1
             ],
             "wednesday": [
                 0,
@@ -191,10 +272,15 @@
                 0
             ],
             "saturday": [
-                0,
-                0,
+                1,
+                1,
                 0
             ]
+        },
+        "locationPreference": {
+            "first": "Virginia",
+            "second": "Dallas",
+            "third": null
         }
     },
     {
@@ -206,12 +292,12 @@
             "tuesday": [
                 0,
                 0,
-                0
+                1
             ],
             "wednesday": [
                 0,
                 0,
-                0
+                1
             ],
             "thursday": [
                 0,
@@ -228,7 +314,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181378502017175602",
@@ -261,7 +348,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181379197042700338",
@@ -294,7 +382,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181379406481063996",
@@ -327,40 +416,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1181379577273135134",
-        "name": "Archangels",
-        "region": "EU",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                1,
-                1,
-                1
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                1,
-                1,
-                1
-            ],
-            "friday": [
-                1,
-                1,
-                1
-            ],
-            "saturday": [
-                1,
-                1,
-                1
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181379775160385546",
@@ -376,7 +433,7 @@
             "wednesday": [
                 0,
                 0,
-                0
+                1
             ],
             "thursday": [
                 0,
@@ -386,13 +443,18 @@
             "friday": [
                 0,
                 0,
-                0
+                1
             ],
             "saturday": [
                 0,
                 0,
                 0
             ]
+        },
+        "locationPreference": {
+            "first": "Virginia",
+            "second": "Dallas",
+            "third": "Tokyo"
         }
     },
     {
@@ -426,6 +488,11 @@
                 1,
                 1
             ]
+        },
+        "locationPreference": {
+            "first": "Dallas",
+            "second": "Virginia",
+            "third": "California"
         }
     },
     {
@@ -435,30 +502,35 @@
         "elo": 1500,
         "availability": {
             "tuesday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ],
             "wednesday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ],
             "thursday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ],
             "friday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ],
             "saturday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ]
+        },
+        "locationPreference": {
+            "first": "Stockholm",
+            "second": "Frankfurt",
+            "third": "Ireland"
         }
     },
     {
@@ -492,7 +564,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181394958851244122",
@@ -525,7 +598,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181403752494792795",
@@ -558,7 +632,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181407276876185692",
@@ -591,7 +666,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181408573201317898",
@@ -624,40 +700,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1181409899142459402",
-        "name": "Dirty Little Boys",
-        "region": "NA",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181410997790052372",
@@ -690,7 +734,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181411112554598584",
@@ -723,7 +768,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181411474623713401",
@@ -756,7 +802,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181413924051091467",
@@ -789,7 +836,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181427005707792394",
@@ -822,7 +870,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181427047780843580",
@@ -855,7 +904,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181435779977855058",
@@ -888,7 +938,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181448066163806301",
@@ -921,7 +972,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181593376051703918",
@@ -954,7 +1006,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181603021591949342",
@@ -987,6 +1040,11 @@
                 0,
                 0
             ]
+        },
+        "locationPreference": {
+            "first": "Frankfurt",
+            "second": "Stockholm",
+            "third": "Singapore"
         }
     },
     {
@@ -1020,6 +1078,11 @@
                 0,
                 0
             ]
+        },
+        "locationPreference": {
+            "first": "Ireland",
+            "second": "Frankfurt",
+            "third": "Stockholm"
         }
     },
     {
@@ -1053,7 +1116,8 @@
                 1,
                 1
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181673265668817056",
@@ -1086,7 +1150,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181680478680514621",
@@ -1119,7 +1184,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181681769095897158",
@@ -1152,7 +1218,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181682084834709587",
@@ -1185,7 +1252,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181687531633389648",
@@ -1200,8 +1268,8 @@
             ],
             "wednesday": [
                 0,
-                0,
-                0
+                1,
+                1
             ],
             "thursday": [
                 0,
@@ -1214,11 +1282,12 @@
                 0
             ],
             "saturday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181688456104120332",
@@ -1251,40 +1320,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1181690332954501302",
-        "name": "FIST",
-        "region": "EU",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181693888277250068",
@@ -1317,40 +1354,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1181722140442112111",
-        "name": "Monolith",
-        "region": "EU",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181726471635603489",
@@ -1383,7 +1388,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181730792632766544",
@@ -1393,12 +1399,12 @@
         "availability": {
             "tuesday": [
                 0,
-                0,
+                1,
                 0
             ],
             "wednesday": [
                 0,
-                0,
+                1,
                 0
             ],
             "thursday": [
@@ -1412,11 +1418,12 @@
                 0
             ],
             "saturday": [
-                0,
-                0,
-                0
+                1,
+                1,
+                1
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181740899420618802",
@@ -1449,7 +1456,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181743070862119024",
@@ -1482,7 +1490,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181764700493578332",
@@ -1515,7 +1524,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181768186241224795",
@@ -1548,7 +1558,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181770707466727424",
@@ -1581,40 +1592,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1181791505275437137",
-        "name": "Suspa",
-        "region": "NA",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181810295539253378",
@@ -1647,7 +1626,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181815622246600824",
@@ -1680,40 +1660,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1181821287849541673",
-        "name": "Eternal",
-        "region": "NA",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181832367980158977",
@@ -1746,7 +1694,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181965530488389752",
@@ -1779,7 +1728,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181998669516521574",
@@ -1812,7 +1762,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1181998880368382044",
@@ -1845,7 +1796,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182006202817843230",
@@ -1878,7 +1830,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182009572978872330",
@@ -1911,7 +1864,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182014551022125126",
@@ -1944,7 +1898,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182023622592823437",
@@ -1977,7 +1932,8 @@
                 1,
                 1
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182025746873598002",
@@ -2010,7 +1966,8 @@
                 1,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182025980580204596",
@@ -2043,7 +2000,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182031467610652743",
@@ -2076,7 +2034,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182048259540275304",
@@ -2109,7 +2068,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182054531517906974",
@@ -2142,7 +2102,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182057306972758106",
@@ -2175,7 +2136,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182154565370519562",
@@ -2208,7 +2170,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182350999952826418",
@@ -2241,40 +2204,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1182495034927493120",
-        "name": "Centuria",
-        "region": "NA",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182705429197881364",
@@ -2307,7 +2238,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182755115610943549",
@@ -2340,7 +2272,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1182959424944476181",
@@ -2373,40 +2306,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1183200234948538418",
-        "name": "Comando Vermelho",
-        "region": "SA",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183202227175821405",
@@ -2439,7 +2340,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183286316201418833",
@@ -2472,7 +2374,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183513749982822460",
@@ -2505,7 +2408,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183513814327636192",
@@ -2538,7 +2442,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183538159661895800",
@@ -2571,7 +2476,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183872678336135250",
@@ -2604,7 +2510,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1183965426678517840",
@@ -2637,7 +2544,8 @@
                 1,
                 1
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1184133357953617942",
@@ -2670,7 +2578,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1184155270541217822",
@@ -2703,7 +2612,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1184285180362489907",
@@ -2736,7 +2646,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1184325736824311858",
@@ -2769,7 +2680,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1185066023372726283",
@@ -2802,7 +2714,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1185707739167600650",
@@ -2835,7 +2748,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1186170296554762240",
@@ -2868,7 +2782,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1186436202103054466",
@@ -2901,7 +2816,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1186791609724051537",
@@ -2934,7 +2850,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1186821978246615080",
@@ -2967,7 +2884,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1188924773393252373",
@@ -3000,73 +2918,8 @@
                 0,
                 0
             ]
-        }
-    },
-    {
-        "snowflake": "1189284566352015460",
-        "name": "Swagmode",
-        "region": "EU",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
-    },
-    {
-        "snowflake": "1189375155525386280",
-        "name": "CN",
-        "region": "NA",
-        "elo": 1500,
-        "availability": {
-            "tuesday": [
-                0,
-                0,
-                0
-            ],
-            "wednesday": [
-                0,
-                0,
-                0
-            ],
-            "thursday": [
-                0,
-                0,
-                0
-            ],
-            "friday": [
-                0,
-                0,
-                0
-            ],
-            "saturday": [
-                0,
-                0,
-                0
-            ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1189397645429575771",
@@ -3099,7 +2952,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1189725253824426035",
@@ -3132,7 +2986,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1190008207251353700",
@@ -3165,7 +3020,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1193115904213532772",
@@ -3198,7 +3054,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1194198995493457940",
@@ -3231,7 +3088,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1194324273616130118",
@@ -3264,7 +3122,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1194598038392557731",
@@ -3297,7 +3156,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1194818897665347805",
@@ -3330,7 +3190,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1195627748702568488",
@@ -3363,7 +3224,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1196700010700623902",
@@ -3396,7 +3258,8 @@
                 0,
                 0
             ]
-        }
+        },
+        "locationPreference": {}
     },
     {
         "snowflake": "1197336024431468657",
@@ -3429,6 +3292,151 @@
                 0,
                 0
             ]
+        },
+        "locationPreference": {}
+    },
+    {
+        "snowflake": "1207012423395975279",
+        "name": "Orgs",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        },
+        "locationPreference": {}
+    },
+    {
+        "snowflake": "1213649006945902592",
+        "name": "Deathball Left",
+        "region": "NA",
+        "elo": 1500,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        },
+        "locationPreference": {}
+    },
+    {
+        "snowflake": "1181690332954501302",
+        "name": "FIST",
+        "region": "EU",
+        "elo": 1400,
+        "availability": {
+            "tuesday": [
+                0,
+                0,
+                0
+            ],
+            "wednesday": [
+                0,
+                0,
+                0
+            ],
+            "thursday": [
+                0,
+                0,
+                0
+            ],
+            "friday": [
+                0,
+                0,
+                0
+            ],
+            "saturday": [
+                0,
+                0,
+                0
+            ]
+        },
+        "locationPreference": {
+            "first": "Stockholm",
+            "second": "Frankfurt",
+            "third": "Ireland"
+        }
+    },
+    {
+        "snowflake": "1189284566352015460",
+        "name": "Swagmode",
+        "region": "EU",
+        "elo": 1400,
+        "availability": {
+            "tuesday": [
+                0,
+                1,
+                0
+            ],
+            "wednesday": [
+                0,
+                1,
+                0
+            ],
+            "thursday": [
+                0,
+                1,
+                0
+            ],
+            "friday": [
+                0,
+                1,
+                0
+            ],
+            "saturday": [
+                0,
+                1,
+                0
+            ]
+        },
+        "locationPreference": {
+            "first": "Frankfurt",
+            "second": "Stockholm",
+            "third": "Ireland"
         }
     }
 ]
