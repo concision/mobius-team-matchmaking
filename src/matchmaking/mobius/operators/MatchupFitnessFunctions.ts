@@ -1,29 +1,33 @@
-import {IndividualFitnessFunction} from "../../genetic/api/FitnessFunction";
-import {IMatchupSchedule} from "../api/TeamMatchmaking";
-import {ITeam} from "../api/ITeam";
+import {IndividualFitnessFunction} from "../../../genetic/api/FitnessFunction";
+import {ITeam} from "../../api/ITeam";
+import {IMatchupSchedule} from "../../api/MatchmakingGeneticTypes";
+import {IMobiusTeam} from "../MobiusMatchmakingConfig";
 
-export const countTotalMatchups = new IndividualFitnessFunction<IMatchupSchedule>(
-    "maximizeTotalMatchups",
-    ({matchups}) => matchups.length,
-);
+export function countTotalMatchups<TTeam extends IMobiusTeam = IMobiusTeam>(): IndividualFitnessFunction<IMatchupSchedule<TTeam>> {
+    return new IndividualFitnessFunction<IMatchupSchedule<TTeam>>(
+        "minimizeUnmatchedTeams",
+        ({matchups}) => matchups.length,
+    );
+}
 
-export const eloDifferentialStandardDeviation = new IndividualFitnessFunction<IMatchupSchedule>(
-    "minimizeEloDifferential",
-    ({matchups}) => {
-        const eloDifferentials = matchups.map(matchup => Math.abs(matchup.teams[0].elo - matchup.teams[1].elo));
-        // compute variance of elo differentials
-        const averageEloDifferentials = eloDifferentials.reduce((sum, eloDiff) => sum + eloDiff, 0) / matchups.length;
-        return Math.sqrt(eloDifferentials
-            .map(eloDiff => Math.pow(Math.abs(eloDiff - averageEloDifferentials), 2))
-            .reduce((sum, deviation) => sum + deviation, 0) / eloDifferentials.length);
-    },
-);
+export function eloDifferentialStandardDeviation<TTeam extends IMobiusTeam = IMobiusTeam>(): IndividualFitnessFunction<IMatchupSchedule<TTeam>> {
+    return new IndividualFitnessFunction<IMatchupSchedule<TTeam>>("minimizeEloDifferential",
+        ({matchups}) => {
+            const eloDifferentials = matchups.map(matchup => Math.abs(matchup.teams[0].elo - matchup.teams[1].elo));
+            // compute variance of elo differentials
+            const averageEloDifferentials = eloDifferentials.reduce((sum, eloDiff) => sum + eloDiff, 0) / matchups.length;
+            return Math.sqrt(eloDifferentials
+                .map(eloDiff => Math.pow(Math.abs(eloDiff - averageEloDifferentials), 2))
+                .reduce((sum, deviation) => sum + deviation, 0) / eloDifferentials.length);
+        },
+    );
+}
 
-export function averageGamesPlayedPerTeamVariance(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupSchedule> {
+export function averageGamesPlayedPerTeamVariance<TTeam extends IMobiusTeam = IMobiusTeam>(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupSchedule<TTeam>> {
     const xDaysAgo = new Date(date);
     xDaysAgo.setDate(xDaysAgo.getDate() - recentDays);
 
-    return new IndividualFitnessFunction<IMatchupSchedule>(
+    return new IndividualFitnessFunction<IMatchupSchedule<TTeam>>(
         "maximizeAverageGamesPlayedPerTeam",
         ({matchups, unmatchedTeams}) => {
             const scheduledMatchupsPerTeam: Map<ITeam, number> = Array.from(matchups.values())
@@ -56,11 +60,11 @@ export function averageGamesPlayedPerTeamVariance(date: Date, recentDays: number
     );
 }
 
-export function countRecentDuplicateMatchups(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupSchedule> {
+export function countRecentDuplicateMatchups<TTeam extends IMobiusTeam = IMobiusTeam>(date: Date, recentDays: number): IndividualFitnessFunction<IMatchupSchedule<TTeam>> {
     const xDaysAgo = new Date(date);
     xDaysAgo.setDate(xDaysAgo.getDate() - recentDays);
 
-    return new IndividualFitnessFunction<IMatchupSchedule>(
+    return new IndividualFitnessFunction<IMatchupSchedule<TTeam>>(
         "minimizeRecentDuplicateMatchups",
         ({matchups}) => {
             let duplicateMatchups = 0;

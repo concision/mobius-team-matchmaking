@@ -77,7 +77,8 @@ There are two "entrypoint" API functions that are exported from this module:
 - [`matchmakeTeamsByRegion(options: IMatchmakingOptions): IMatchmakingResult`](src/matchmaking/api/TeamMatchmaking.ts#L151C1-L159C86):
   Partitions teams by region and matchmakes each region separately.
 
-To run the [matchmaking demo](src/matchmaking/demo/MatchmakingDemo.ts) with the existing dataset in `./data/teams.json`,
+To run the [matchmaking demo](src/matchmaking/mobius/demo/MatchmakingDemo.ts) with the existing dataset
+in `./data/teams.json`,
 follow the [build instructions](#build-instructions) and then run the following command:
 
 ```bash
@@ -100,17 +101,19 @@ A non-exhaustive list of tasks (in no particular order) to maybe be completed:
 
 - [ ] Significantly improve repository quality
     - [ ] Comprehensively document all TypeScript types and functions
-    - [ ] Simplify complex data aggregations by using `lodash` and abstracting mathematical operations
+    - [ ] Abstract complex data aggregations and mathematical operations to separate library functions
     - [ ] Improve README documentation
-        - Shorten ['Motivations'](#motivations) section
-        - Explain matchmaking criteria and difficulty
-        - Explain genetic algorithm approach and optimization criteria
-        - Explain the API and its supported options
-        - Add silly GitHub badges and ✨flair✨
+        - [ ] Shorten ['Motivations'](#motivations) section
+        - [ ] Explain matchmaking criteria and difficulty
+        - [ ] Explain genetic algorithm approach and optimization criteria
+        - [ ] Explain the API and its supported options
+        - [ ] Add silly GitHub badges and ✨flair✨
     - [ ] Implement unit tests for all trivial library functions
 
 - [ ] Implement new library features
-    - [ ] Merge the region-partitioned matchmaking API with the non-partitioned API; expose a configuration option
+    - [x] Permit any derived type of `ITeam` to be used in the matchmaking API
+
+    - [x] Merge the region-partitioned matchmaking API with the non-partitioned API; expose a configuration option
       lambda for partitioning (defaulting to team region for Mobius)
 
     - [ ] Rewrite all genetic algorithm types to be more modular, extensible, and serializable
@@ -126,7 +129,7 @@ A non-exhaustive list of tasks (in no particular order) to maybe be completed:
       larger datasets
         - [ ] Implement configuration option for asynchronous and worker pool size
         - [ ] Determine how to pass consumer genetic operators to worker threads (e.g. pure functions and class
-          definitions that are serializable?)
+          definitions that are serializable? scoped closures would not be supported)
         - [ ] Auto-parallelize matchmaking partitions to different workers
 
 - [ ] Improve Node.js project architecture

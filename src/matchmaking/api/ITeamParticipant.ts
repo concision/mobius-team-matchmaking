@@ -49,13 +49,13 @@ export interface ITeamBase {
 /**
  * See {@link ITeamParticipant}.
  */
-export interface ITeamNotYetPlayed extends ITeamBase {
+export interface ITeamNotYetPlayed<TTeam extends ITeam = ITeam> extends ITeamBase {
     /**
      * A reference to the team's data. This is automatically provided by the output matchmaking API and returns the
      * exact {@link ITeam} object that was input. This is useful for consumers to access the team's data without
      * needing to perform a lookup.
      */
-    readonly team: ITeam;
+    readonly team: TTeam;
 
     readonly status: TeamMatchResult.NotYetPlayed;
 }

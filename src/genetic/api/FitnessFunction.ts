@@ -1,4 +1,4 @@
-import {IFitness} from "./GeneticAlgorithm";
+import {IFitness} from "./IGeneticParameters";
 
 export abstract class FitnessFunction<I> {
     public constructor(

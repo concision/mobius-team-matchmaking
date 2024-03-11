@@ -1,146 +1,145 @@
-import {
-    IDefaultMatchmakingParameters,
-    IMatchmakingOptions,
-    IMatchmakingResults,
-    IMatchupSchedule,
-    type matchmakeTeams as matchmakeTeamsApi,
-    type matchmakeTeamsByRegion as matchmakeTeamsByRegionApi,
-    MatchupFailureReason
-} from "./api/TeamMatchmaking";
 import {ITeam} from "./api/ITeam";
 import {IScheduledMatchup} from "./api/ITeamMatchup";
 import {ITeamNotYetPlayed, TeamMatchResult} from "./api/ITeamParticipant";
 import {geneticAlgorithm} from "../genetic/GeneticAlgorithm";
-import {IGeneticOptions} from "../genetic/api/GeneticAlgorithm";
 import {
     filterTimeSlotsThatAlreadyOccurred,
     partitionTeamsByTimeSlots,
     sortScheduledMatchupsByTime,
     translateTimeSlotToDate
 } from "./TimeSlot";
-import {selectBestMatchupSchedule} from "./operators/MatchupPopulationSelectors";
-import {defaultConstraints} from "./GeneticConstraints";
+import {selectBestMatchupSchedule} from "./mobius/operators/MatchupPopulationSelectors";
+import {IMatchmakingResults, IPartitionedMatchmakingResults, MatchupFailureReason} from "./api/IMatchmakingResults";
+import {
+    IConfiguredMatchmakingOptions,
+    IMatchmakingOptions,
+    IPartitionedMatchmakingOptions,
+    IUnpartitionedMatchmakingOptions
+} from "./api/IMatchmakingOptions";
+import {KeysOfType} from "../utilities/TypescriptTypes";
+import {assignDefinedProperties, groupBy} from "../utilities/CollectionUtilities";
+import {IMatchupSchedule} from "./api/MatchmakingGeneticTypes";
+import {ITimeSlot} from "./api/ITimeSlot";
 
-export {matchmakeTeams, matchmakeTeamsByRegion};
+const defaultPartitionKey = {};
 
-const matchmakeTeamsByRegion: typeof matchmakeTeamsByRegionApi = (
-    {teams, defaultParameters, ...options}: IMatchmakingOptions
-): IMatchmakingResults => {
-    const parameters = validateAndCreateParameters(defaultParameters);
+export function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey = string>(
+    teams: readonly TTeam[],
+    options: IUnpartitionedMatchmakingOptions<TTeam, TPartitionKey>,
+): Promise<IMatchmakingResults<TTeam>>;
 
-    const teamsByRegion: ReadonlyMap<string, ITeam[]> = teams.reduce((map, team) => {
-        if (map.has(team.region)) {
-            map.get(team.region)!.push(team);
-        } else {
-            map.set(team.region, [team]);
-        }
-        return map;
-    }, new Map<string, ITeam[]>());
+export function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey = string>(
+    teams: readonly TTeam[],
+    options: IPartitionedMatchmakingOptions<TTeam, TPartitionKey>,
+): Promise<IPartitionedMatchmakingResults<TTeam, TPartitionKey>>;
 
-    let matchups: IScheduledMatchup[] = [];
-    let unmatchedTeams: Map<ITeam, MatchupFailureReason> = new Map<ITeam, MatchupFailureReason>();
-    for (const regionTeams of teamsByRegion.values()) {
-        const regionalMatchups = matchmakeTeams({
-            ...options,
-            teams: regionTeams,
-            defaultParameters: parameters,
-        });
+// TODO: update documentation
+/**
+ * Performs the matchmaking algorithm on a set of teams, automatically partitioning them by region. This is a
+ * convenience method computing matchups for all regions in the league at once. If a specific region needs to be
+ * recomputed due to changes, use {@link matchmakeTeams} directly or invoke this with a subset of the teams.
+ *
+ * @param teams An array of teams that are competing in the season's league. These teams will attempt to be paired up by the
+ * matchmaking algorithm, referred to as a "matchup".
+ * @param options The input options for the matchmaking algorithm. See {@link IMatchmakingOptions}.
+ * @template TTeam
+ * @template TPartitionKey
+ * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
+ */
+export async function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey = string>(
+    teams: readonly TTeam[],
+    options: IMatchmakingOptions<TTeam, TPartitionKey>,
+): Promise<IMatchmakingResults<TTeam> | IPartitionedMatchmakingResults<TTeam, TPartitionKey>> {
+    const parameters: IConfiguredMatchmakingOptions<TTeam, TPartitionKey> = addDefaultsAndValidateParameters(options);
 
-        matchups = matchups.concat(regionalMatchups.scheduledMatchups);
-        for (const [team, reason] of regionalMatchups.unmatchedTeams.entries())
+    const partitioningFunction = parameters.partitionBy === undefined ? (() => <TPartitionKey>defaultPartitionKey)
+        : typeof parameters.partitionBy === 'function' ? parameters.partitionBy
+            : ((team: TTeam) => team[<keyof KeysOfType<ITeam, TPartitionKey>>parameters.partitionBy]);
+    const partitionedTeams: ReadonlyMap<TPartitionKey, readonly TTeam[]> = groupBy<TPartitionKey, TTeam>(teams, partitioningFunction);
+
+    type PartitionResult = { partitionKey: TPartitionKey; result: IMatchmakingResults<TTeam>; }
+    const promises: Promise<PartitionResult>[] = [];
+    for (const [partitionKey, partitionTeams] of partitionedTeams.entries()) {
+        promises.push((async () => ({
+            partitionKey,
+            result: await matchmakeTeamPartition<TTeam, TPartitionKey>(partitionTeams, partitionKey, parameters),
+        }))());
+    }
+    const partitionedResults = groupBy(await Promise.all(promises), result => result.partitionKey);
+
+    const unmatchedTeams = new Map<ITeam, MatchupFailureReason>();
+    const results = new Map<TPartitionKey, IMatchmakingResults<TTeam>>();
+    for (const [partitionKey, [{result}]] of partitionedResults.entries()) {
+        results.set(partitionKey, result);
+        for (const [team, reason] of result.unmatchedTeams.entries())
             unmatchedTeams.set(team, reason);
     }
-    return {
-        scheduledMatchups: matchups.sort(sortScheduledMatchupsByTime),
-        unmatchedTeams,
-    };
+    return {results: results, unmatchedTeams};
 }
 
-
-const matchmakeTeams: typeof matchmakeTeamsApi = (
-    {teams, defaultParameters, ...options}: IMatchmakingOptions
-): IMatchmakingResults => {
-    if (0 < teams.length && teams.some(team => team.region !== teams[0].region))
-        throw new Error("All teams must be in the same region, encountered unique regions: "
-            + `[${[...new Set(teams.map(team => team.region))].join(", ")}]; `);
-
-    const parameters = validateAndCreateParameters(defaultParameters);
-
+// TODO: implement worker multithreading; current async signature is a placeholder
+async function matchmakeTeamPartition<TTeam extends ITeam = ITeam, TPartitionKey = string>(
+    teams: readonly TTeam[],
+    partitionKey: TPartitionKey,
+    options: IConfiguredMatchmakingOptions<TTeam, TPartitionKey>,
+): Promise<IMatchmakingResults<TTeam>> {
     // partition teams by availability
     let teamsPartitionedByTimeSlot = partitionTeamsByTimeSlots(
-        parameters.scheduledDate, parameters.timeSlotToDateTranslator,
+        options.scheduledDate, options.timeSlotToDateTranslator,
         teams
     );
-    if (parameters.excludeTimeSlotsThatAlreadyOccurred)
+    if (options.excludeTimeSlotsThatAlreadyOccurred)
         teamsPartitionedByTimeSlot = filterTimeSlotsThatAlreadyOccurred(teamsPartitionedByTimeSlot);
     const {teamsByTimeSlot, unavailableTeams} = teamsPartitionedByTimeSlot;
 
     // if all teams are unavailable, no matchups can be scheduled
     if (unavailableTeams.size === teams.length)
-        return {scheduledMatchups: [], unmatchedTeams: unavailableTeams};
+        return Promise.resolve<IMatchmakingResults<TTeam>>({
+            teams,
+            scheduledMatchups: [],
+            unmatchedTeams: unavailableTeams,
+            teamAvailability: teamsByTimeSlot,
+        });
 
     // prepare genetic algorithm constraints
-    let constraints: IGeneticOptions<IMatchupSchedule> = defaultConstraints(parameters, teamsByTimeSlot);
-    if (typeof options.configure === 'function')
-        constraints = options.configure(constraints) ?? constraints;
+    const geneticParameters = options.configure.configure({options, partitionKey, teamsByTimeSlot});
 
     // run the genetic algorithm to compute matchmaking results
-    const solutions = geneticAlgorithm<IMatchupSchedule>(constraints, parameters.hallOfFame);
-    const solution = selectBestMatchupSchedule(solutions.map(({solution}) => solution));
+    const solutions = geneticAlgorithm<IMatchupSchedule<TTeam>>(geneticParameters);
+    const solution = selectBestMatchupSchedule<TTeam>(solutions.map(({solution}) => solution));
 
     // translate matchups into a format that is more useful for the consumer
-    return convertToMatchmakingResults(teams, unavailableTeams, solution);
+    return convertToMatchmakingResults<TTeam>(teams, teamsByTimeSlot, unavailableTeams, solution);
 }
 
 
-function validateAndCreateParameters(parameterOverrides?: IDefaultMatchmakingParameters): Required<IDefaultMatchmakingParameters> {
-    const defaultParameters: Required<IDefaultMatchmakingParameters> = {
+function addDefaultsAndValidateParameters<TTeam extends ITeam = ITeam, TPartitionKey = string>(
+    optionOverrides: IMatchmakingOptions<TTeam, TPartitionKey>,
+): IConfiguredMatchmakingOptions<TTeam, TPartitionKey> {
+    const parameters = assignDefinedProperties<IMatchmakingOptions<TTeam, TPartitionKey>>({
+        configure: undefined!, // validated later
         scheduledDate: new Date(),
         timeSlotToDateTranslator: translateTimeSlotToDate,
         excludeTimeSlotsThatAlreadyOccurred: true,
+    }, optionOverrides);
 
-        hallOfFame: 32,
+    if (parameters.configure === undefined)
+        throw new Error("Matchmaking options must have a 'configure' property for the genetic algorithm.");
 
-        maximumGamesPerTeam: 3,
-        hardEloDifferentialLimit: 300,
-
-        preventDuplicateMatchupsInLastXDays: 14,
-        countGamesPlayedInLastXDays: 21,
-    };
-    const defineParameterOverrides: Partial<IDefaultMatchmakingParameters> = Object.fromEntries(
-        Object.entries(parameterOverrides ?? {})
-            .filter(([, value]) => value !== undefined)
-    );
-    const parameters: typeof defaultParameters = Object.assign(defaultParameters, defineParameterOverrides);
-
-    if (parameters.scheduledDate === undefined)
-        throw new Error("The scheduling date must be defined.");
-    if (typeof parameters.timeSlotToDateTranslator !== "function")
-        throw new Error("The time slot to date translator must be a function.");
-
-    if (parameters.maximumGamesPerTeam < 1)
-        throw new Error("The maximum number of games must be at least 1.");
-    if (parameters.hardEloDifferentialLimit < 1)
-        throw new Error("The hard elo differential limit must be at least 1 (however recommended to be much higher).");
-
-    if (parameters.preventDuplicateMatchupsInLastXDays < 0)
-        throw new Error("The duplicate matchup day recency must be greater than 0 to be enabled, or 0 to be disabled.");
-    if (parameters.countGamesPlayedInLastXDays < 0)
-        throw new Error("The games played day recency must be greater than 0 to be enabled, or 0 to be disabled.");
-
-    return parameters;
+    return <IConfiguredMatchmakingOptions<TTeam, TPartitionKey>>parameters;
 }
 
 
-function convertToMatchmakingResults(
-    teams: readonly ITeam[],
-    unavailableTeams: ReadonlyMap<ITeam, MatchupFailureReason>,
-    solution: IMatchupSchedule,
-): IMatchmakingResults {
+function convertToMatchmakingResults<TTeam extends ITeam>(
+    teams: readonly TTeam[],
+    teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>,
+    unavailableTeams: ReadonlyMap<TTeam, MatchupFailureReason>,
+    solution: IMatchupSchedule<TTeam>,
+): IMatchmakingResults<TTeam> {
     const scheduledMatchups = solution.matchups
-        .map(({timeSlot, teams}) => <IScheduledMatchup>({
+        .map(({timeSlot, teams}) => <IScheduledMatchup<TTeam>>({
             time: timeSlot,
-            teams: <[ITeamNotYetPlayed, ITeamNotYetPlayed]>teams.map(team => ({
+            teams: <[ITeamNotYetPlayed<TTeam>, ITeamNotYetPlayed<TTeam>]>teams.map(team => ({
                 team: team,
                 snowflake: team.snowflake,
                 status: TeamMatchResult.NotYetPlayed,
@@ -149,16 +148,21 @@ function convertToMatchmakingResults(
         }))
         .toSorted(sortScheduledMatchupsByTime);
 
-    const unmatchedTeamReasons = new Map<ITeam, MatchupFailureReason>(unavailableTeams);
-    const matchedTeams = new Set<ITeam>(solution.matchups.flatMap(matchup => matchup.teams));
+    const unmatchedTeamReasons = new Map<TTeam, MatchupFailureReason>(unavailableTeams);
+    const matchedTeams = new Set<TTeam>(solution.matchups.flatMap(matchup => matchup.teams));
     const unmatchedTeams = Array.from(teams
         .flatMap(teams => teams)
         .filter(team => !matchedTeams.has(team) && !unmatchedTeamReasons.has(team))
-        .reduce((uniqueTeams, team) => !uniqueTeams.has(team.snowflake) ? uniqueTeams.set(team.snowflake, team) : uniqueTeams, new Map<string, ITeam>())
+        .reduce((uniqueTeams, team) => !uniqueTeams.has(team.snowflake) ? uniqueTeams.set(team.snowflake, team) : uniqueTeams, new Map<string, TTeam>())
         .values()
     );
     for (const unmatchedTeam of unmatchedTeams)
         unmatchedTeamReasons.set(unmatchedTeam, MatchupFailureReason.NO_IDEAL_MATCHUPS);
 
-    return {scheduledMatchups, unmatchedTeams: unmatchedTeamReasons};
+    return {
+        teams,
+        scheduledMatchups,
+        unmatchedTeams: unmatchedTeamReasons,
+        teamAvailability: teamsByTimeSlot,
+    };
 }

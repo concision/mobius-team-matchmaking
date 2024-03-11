@@ -1,10 +1,13 @@
-import {IFitness, IGeneration, IGeneticOptions} from "./api/GeneticAlgorithm";
-import {randomIndex} from "./library/Random";
+import {IFitness, IGeneration, IGeneticParameters} from "./api/IGeneticParameters";
+import {randomIndex} from "../utilities/Random";
 
-export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGeneticOptions<I>, individuals: number): readonly IFitness<I>[] {
+
+export function geneticAlgorithm<I>(parameters: I extends any[] ? never : IGeneticParameters<I>): readonly IFitness<I>[] {
+    const individuals = 32; // TODO: move this logic to genetic parameters as a 'hallOfFame' statistic collector
+
     let fittest: IFitness<I>[] = [];
-    for (const {generation, population} of geneticAlgorithmGenerator(constraints)) {
-        if (constraints.debugLogging) {
+    for (const {generation, population} of geneticAlgorithmGenerator(parameters)) {
+        if (parameters.debugLogging) {
             const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
             console.log(`Generation ${generation}: ${population.length} individuals; maximum fitness: ${fittestIndividual?.fitness}`);
         }
@@ -13,7 +16,7 @@ export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGene
         const seen = new Map<string, IFitness<I>>();
         for (const individual of fittest.concat(population)) {
             // all individual with the same key should be identical
-            const key = constraints.individualIdentity(individual.solution);
+            const key = parameters.individualIdentity(individual.solution);
             if (!seen.has(key))
                 seen.set(key, individual);
         }
@@ -25,7 +28,7 @@ export function geneticAlgorithm<I>(constraints: I extends any[] ? never : IGene
     return fittest;
 }
 
-export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? never : IGeneticOptions<I>): Generator<IGeneration<I>> {
+export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? never : IGeneticParameters<I>): Generator<IGeneration<I>> {
     const {
         maximumGenerations,
         maximumPopulationSize,

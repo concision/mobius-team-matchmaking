@@ -1,7 +1,7 @@
-import {ReplaceReturnType} from "../../types/TypescriptTypes";
-import {IFitness, IGeneration} from "./GeneticAlgorithm";
-import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../library/Random";
+import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
 import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
+import {IFitness, IGeneration} from "./IGeneticParameters";
+import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../../utilities/Random";
 
 export abstract class PopulationSelector<I> {
     public constructor(

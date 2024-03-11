@@ -1,20 +1,21 @@
-import {IMatchupSchedule} from "../api/TeamMatchmaking";
-import {KillPredicate} from "../../genetic/api/PopulationSelector";
-import {ITeam} from "../api/ITeam";
-import {ITimeSlot} from "../api/ITimeSlot";
-import {IndividualIdentityFunction} from "../../genetic/api/IndividualIdentityFunction";
-import {IFitness} from "../../genetic/api/GeneticAlgorithm";
+import {IMatchupSchedule} from "../../api/MatchmakingGeneticTypes";
+import {KillPredicate} from "../../../genetic/api/PopulationSelector";
+import {ITeam} from "../../api/ITeam";
+import {ITimeSlot} from "../../api/ITimeSlot";
+import {IndividualIdentityFunction} from "../../../genetic/api/IndividualIdentityFunction";
+import {IFitness} from "../../../genetic/api/IGeneticParameters";
 
-export const uniqueTeamMatchupIdentity: IndividualIdentityFunction<IMatchupSchedule> =
-    (individual: IMatchupSchedule): string => {
+export function uniqueTeamMatchupIdentity<TTeam extends ITeam>(): IndividualIdentityFunction<IMatchupSchedule<TTeam>> {
+    return (individual: IMatchupSchedule<TTeam>): string => {
         return JSON.stringify(individual.matchups
             .map(matchup => matchup.teams.map(team => team.snowflake).sort().join(","))
             .sort())
     };
+}
 
-export function backToBackMatchupKillPredicate(ordinalRecency: number = 1): KillPredicate<IMatchupSchedule> {
-    return ({solution}: IFitness<IMatchupSchedule>): boolean => {
-        const teamTimeSlots = new Map<ITeam, ITimeSlot[]>();
+export function backToBackMatchupKillPredicate<TTeam extends ITeam>(ordinalRecency: number = 1): KillPredicate<IMatchupSchedule<TTeam>> {
+    return ({solution}: IFitness<IMatchupSchedule<TTeam>>): boolean => {
+        const teamTimeSlots = new Map<TTeam, ITimeSlot[]>();
         for (const matchup of solution.matchups) {
             for (const team of matchup.teams) {
                 const timeSlots = teamTimeSlots.get(team) ?? [];
@@ -40,11 +41,11 @@ export function backToBackMatchupKillPredicate(ordinalRecency: number = 1): Kill
     };
 }
 
-export function maximumGamesPerTeamKillPredicate(maximumGames: number): KillPredicate<IMatchupSchedule> {
-    return ({solution}: IFitness<IMatchupSchedule>): boolean => {
-        const scheduledMatchupsPerTeam: Map<ITeam, number> = solution.matchups
+export function maximumGamesPerTeamKillPredicate<TTeam extends ITeam>(maximumGames: number): KillPredicate<IMatchupSchedule<TTeam>> {
+    return ({solution}: IFitness<IMatchupSchedule<TTeam>>): boolean => {
+        const scheduledMatchupsPerTeam: Map<TTeam, number> = solution.matchups
             .flatMap(matchup => matchup.teams)
-            .reduce((map, team) => map.set(team, (map.get(team) ?? 0) + 1), new Map<ITeam, number>());
+            .reduce((map, team) => map.set(team, (map.get(team) ?? 0) + 1), new Map<TTeam, number>());
 
         for (const scheduledMatchups of scheduledMatchupsPerTeam.values())
             if (maximumGames < scheduledMatchups)
@@ -54,8 +55,8 @@ export function maximumGamesPerTeamKillPredicate(maximumGames: number): KillPred
     };
 }
 
-export function hardEloDifferentialLimitKillPredicate(hardEloDifferentialLimit: number): KillPredicate<IMatchupSchedule> {
-    return ({solution: {matchups}}: IFitness<IMatchupSchedule>): boolean => {
+export function hardEloDifferentialLimitKillPredicate<TTeam extends ITeam>(hardEloDifferentialLimit: number): KillPredicate<IMatchupSchedule<TTeam>> {
+    return ({solution: {matchups}}: IFitness<IMatchupSchedule<TTeam>>): boolean => {
         for (const matchup of matchups) {
             if (hardEloDifferentialLimit < Math.abs(matchup.teams[0].elo - matchup.teams[1].elo))
                 return true;
@@ -65,7 +66,7 @@ export function hardEloDifferentialLimitKillPredicate(hardEloDifferentialLimit: 
 }
 
 
-export function selectBestMatchupSchedule(solutions: readonly IMatchupSchedule[]): IMatchupSchedule {
+export function selectBestMatchupSchedule<TTeam extends ITeam>(solutions: readonly IMatchupSchedule<TTeam>[]): IMatchupSchedule<TTeam> {
     const solutionsRankedByMinimalUnmatchedTeams = solutions
         .map(solution => {
             const matchmadeTeams = new Set(solution.matchups.flatMap(matchup => matchup.teams));

@@ -4,30 +4,33 @@ import {FitnessFunction} from "./FitnessFunction";
 import {PopulationSelector} from "./PopulationSelector";
 import {EarlyStoppingEvaluator} from "./EarlyStoppingEvaluator";
 import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
+import {Writeable} from "../../utilities/TypescriptTypes";
 
-export declare function geneticAlgorithm<I>(options: IGeneticOptions<I>, individuals: number): readonly IFitness<I>[];
-
-export declare function geneticAlgorithmGenerator<I>(constraints: I extends any[] ? never : IGeneticOptions<I>): Generator<IGeneration<I>>;
-
-export type IGeneticOptions<I> = { // TODO: make everything a genetic operator
+export type IGeneticParameters<I> = { // TODO: make everything a genetic operator
     readonly debugLogging?: boolean;
 
     readonly maximumGenerations?: number;
     readonly maximumPopulationSize: number;
-
-    readonly individualIdentity: IndividualIdentityFunction<I>;
-
-    readonly individualMutator: IndividualMutator<I>;
-    readonly fitnessFunction: FitnessFunction<I>;
-    readonly populationSelector: PopulationSelector<I>;
-    readonly earlyStopping?: EarlyStoppingEvaluator<I>;
 } & ({
     readonly firstGeneration: readonly I[];
     readonly individualGenerator?: undefined;
 } | {
     readonly firstGeneration?: undefined;
     readonly individualGenerator: IndividualGenerator<I>;
-});
+}) & {
+    readonly individualIdentity: IndividualIdentityFunction<I>;
+
+    readonly individualMutator: IndividualMutator<I>;
+    readonly fitnessFunction: FitnessFunction<I>;
+    readonly populationSelector: PopulationSelector<I>;
+    readonly earlyStopping?: EarlyStoppingEvaluator<I>;
+
+    readonly statistics?: readonly Statistic<I>[];
+};
+
+export type IMutableGeneticParameters<I> = Writeable<IGeneticParameters<I>>;
+
+export type Statistic<I> = (generation: IGeneration<I>) => void;
 
 export interface IGeneration<I> {
     readonly generation: number;

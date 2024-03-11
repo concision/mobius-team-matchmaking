@@ -1,3 +1,16 @@
+export class SeededRandom {
+    private seed: number;
+
+    public constructor(seed: number = 0) {
+        this.seed = seed;
+    }
+
+    public next(min: number = 0, max: number = 1) {
+        const randomProportion = Math.abs((Math.sin(this.seed++) * 10000) % 1);
+        return min + randomProportion * (max - min);
+    }
+}
+
 export function randomIndex<T>(length: number | readonly T[]): number {
     return Math.floor(Math.random() * (Array.isArray(length) ? length.length : <number>length));
 }

@@ -68,12 +68,4 @@ export interface ITeam {
      * This is an optional property, and may be omitted if the history is not available or not needed.
      */
     readonly history?: IPlayedMatchup[];
-
-    readonly matchmakingParameters?: ITeamMatchmakingParameters;
-}
-
-export interface ITeamMatchmakingParameters {
-    readonly maximumGamesPerWeek?: number; // 5
-    readonly maximumGamesPerDay?: number; // 2
-    readonly permittedBackToBackRecency?: boolean; // 1
 }
