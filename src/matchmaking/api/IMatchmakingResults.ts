@@ -1,5 +1,5 @@
-import {IScheduledMatchup} from "./ITeamMatchup";
 import {ITeam} from "./ITeam";
+import {IScheduledMatchup} from "./ITeamMatchup";
 import {ITimeSlot} from "./ITimeSlot";
 
 export interface IPartitionedMatchmakingResults<TTeam extends ITeam = ITeam, TPartitionKey = string>

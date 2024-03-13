@@ -1,9 +1,9 @@
+import {GeneticParameters} from "../../genetic/api/GeneticParameters";
+import {KeysOfType, UndefinedValues} from "../../utilities/TypescriptTypes";
 import {ITeam} from './ITeam';
 import {IScheduledMatchup} from './ITeamMatchup';
 import {ITimeSlot} from "./ITimeSlot";
 import {IMatchupSchedule} from "./MatchmakingGeneticTypes";
-import {KeysOfType, UndefinedValues} from "../../utilities/TypescriptTypes";
-import {IMutableGeneticParameters} from "../../genetic/api/IGeneticParameters";
 
 /**
  * Configurable options for the matchmaking algorithm for {@link matchmakeTeams}.
@@ -77,12 +77,12 @@ export type TimeSlotToDateTranslator = (timeSlot: Omit<ITimeSlot, 'date'>, week:
 
 
 export interface IMatchmakingParameters<TTeam extends ITeam = ITeam, TPartitionKey = string> {
-    options: IConfiguredMatchmakingOptions<TTeam, TPartitionKey>;
-    partitionKey: TPartitionKey | undefined;
+    readonly options: IConfiguredMatchmakingOptions<TTeam, TPartitionKey>;
+    readonly partitionKey: TPartitionKey | undefined;
 
-    teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>;
+    readonly teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>;
 }
 
 export abstract class MatchmakingConfig<TTeam extends ITeam = ITeam, TPartitionKey = string> {
-    public abstract configure(parameters: IMatchmakingParameters<TTeam, TPartitionKey>): IMutableGeneticParameters<IMatchupSchedule<TTeam>>;
+    public abstract configure(parameters: IMatchmakingParameters<TTeam, TPartitionKey>): GeneticParameters<IMatchupSchedule<TTeam>>;
 }

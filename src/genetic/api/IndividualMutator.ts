@@ -1,12 +1,8 @@
-import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
 import {selectRandomWeightedElement} from "../../utilities/Random";
+import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
+import {GeneticOperator, IGeneticOperatorChild} from "./GeneticOperator";
 
-export abstract class IndividualMutator<I> {
-    public constructor(
-        public readonly name: string,
-    ) {
-    }
-
+export abstract class IndividualMutator<I, TChildType = undefined> extends GeneticOperator<I, TChildType> {
     public abstract mutate(parent: I, population: readonly I[]): I | undefined;
 }
 
@@ -17,20 +13,38 @@ export interface IWeightedIndividualMutator<I> {
     mutator: IndividualMutator<I>;
 }
 
-export class WeightedRandomIndividualMutator<I> extends IndividualMutator<I> {
-    public readonly mutators: IWeightedIndividualMutator<I>[];
+export class WeightedRandomIndividualMutator<I> extends IndividualMutator<I, IWeightedIndividualMutator<I>> {
+    private _mutationProbability: number;
+    private readonly mutators: IWeightedIndividualMutator<I>[];
 
-    constructor(
+    public constructor(
         name: string,
-        public readonly mutationProbability: number,
-        mutators: readonly IWeightedIndividualMutator<I>[]
+        mutationProbability: number,
+        mutators: readonly IWeightedIndividualMutator<I>[],
     ) {
         super(name);
-        this.mutators = [...mutators];
+        this._mutationProbability = mutationProbability;
+        this.mutators = Array.isArray(mutators) ? [...mutators] : mutators;
+
+        this.validateIfConsumerInstantiation(WeightedRandomIndividualMutator, arguments);
+    }
+
+    public get mutationProbability(): number {
+        return this._mutationProbability;
+    }
+
+    public set mutationProbability(value: number) {
+        if (!(0 <= value && value <= 1))
+            throw new Error(`${WeightedRandomIndividualMutator.name}.mutationProbability must be a number between 0 and 1`);
+        this._mutationProbability = value;
+    }
+
+    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, IWeightedIndividualMutator<I>>[] {
+        return Object.freeze(this.mutators.map(child => ({child, operator: child.mutator})));
     }
 
     public override mutate(individual: I, population: readonly I[]): I {
-        if (this.mutationProbability <= Math.random()) {
+        if (this._mutationProbability <= Math.random()) {
             const enabledMutators = this.mutators.filter(({predicate}) => predicate?.(individual, population) ?? true);
             const chosenMutator = selectRandomWeightedElement(enabledMutators, ({weight}) => weight);
             if (chosenMutator)

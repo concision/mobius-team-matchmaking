@@ -1,34 +1,37 @@
-import {IFitness, IGeneration, IGeneticParameters} from "./api/IGeneticParameters";
+import {Exception} from "../utilities/Exception";
 import {randomIndex} from "../utilities/Random";
+import {EarlyStoppingEvaluator} from "./api/EarlyStoppingEvaluator";
+import {IFitness} from "./api/FitnessFunction";
+import {GeneticParameters} from "./api/GeneticParameters";
+import {IndividualGenerator} from "./api/IndividualGenerator";
+import {MetricCollector} from "./api/MetricCollector";
+import {IGeneration, PopulationSelector} from "./api/PopulationSelector";
 
+export function geneticAlgorithm<I>(parameters: I extends any[] ? never : GeneticParameters<I>): readonly IFitness<I>[] {
+    try {
+        for (const operator of parameters.walk(true))
+            Object.defineProperty(operator, "_parameters", {value: parameters});
+        parameters.validate();
 
-export function geneticAlgorithm<I>(parameters: I extends any[] ? never : IGeneticParameters<I>): readonly IFitness<I>[] {
-    const individuals = 32; // TODO: move this logic to genetic parameters as a 'hallOfFame' statistic collector
+        let lastGeneration: readonly IFitness<I>[] | undefined;
+        for (const {generation, population} of geneticAlgorithmGenerator(parameters)) {
+            if (parameters.debugLogging) {
+                const fittestIndividual = population
+                    .filter(({fitness}) => Number.isFinite(fitness) && !Number.isNaN(fitness))
+                    .reduce((max, individual) => max.fitness < individual.fitness ? individual : max, population[0]);
+                console.log(`Generation ${generation}: ${population.length} individuals; maximum fitness: ${fittestIndividual?.fitness}`);
+            }
 
-    let fittest: IFitness<I>[] = [];
-    for (const {generation, population} of geneticAlgorithmGenerator(parameters)) {
-        if (parameters.debugLogging) {
-            const fittestIndividual = population.reduce((max, individual) => individual.fitness > max.fitness ? individual : max, population[0]);
-            console.log(`Generation ${generation}: ${population.length} individuals; maximum fitness: ${fittestIndividual?.fitness}`);
+            lastGeneration = population;
         }
-
-        // keep track of the fittest individuals across all generations
-        const seen = new Map<string, IFitness<I>>();
-        for (const individual of fittest.concat(population)) {
-            // all individual with the same key should be identical
-            const key = parameters.individualIdentity(individual.solution);
-            if (!seen.has(key))
-                seen.set(key, individual);
-        }
-        fittest = Array.from(seen.values())
-            .toSorted((a, b) => b.fitness - a.fitness)
-            .slice(0, individuals);
+        return lastGeneration ?? [];
+    } finally {
+        for (const operator of parameters.walk(true))
+            Object.defineProperty(operator, "_parameters", {value: undefined});
     }
-
-    return fittest;
 }
 
-export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? never : IGeneticParameters<I>): Generator<IGeneration<I>> {
+export function* geneticAlgorithmGenerator<I>(parameters: I extends any[] ? never : GeneticParameters<I>): Generator<IGeneration<I>> {
     const {
         maximumGenerations,
         maximumPopulationSize,
@@ -38,50 +41,61 @@ export function* geneticAlgorithmGenerator<I>(constraints: I extends any[] ? nev
         fitnessFunction,
         populationSelector,
         earlyStopping,
-    } = constraints;
+        metricCollector,
+    } = parameters;
 
-    let generation: IGeneration<I> = {
-        generation: 0,
-        // generate initial population
-        population: fitnessFunction.evaluate(
-            firstGeneration
-            || (typeof individualGenerator === 'function' ? Array.from({length: maximumPopulationSize}, constraints.individualGenerator!) : [])
-        ),
-    };
+    // generate initial population and compute fitness
+    let population: readonly IFitness<I>[] = fitnessFunction.evaluate(
+        firstGeneration
+        || (individualGenerator instanceof IndividualGenerator ?
+            Array.from({length: maximumPopulationSize}, individualGenerator.generate.bind(individualGenerator))
+            : [])
+    );
     // iterate generations
     for (let generationIndex = 1; maximumGenerations ? generationIndex <= maximumGenerations : true; generationIndex++) {
         // modify selected population via mutations (individual state transitions)
-        const currentIndividuals: I[] = generation.population.map(individual => individual.solution);
-        const nextGeneration: I[] = generation.population.map(individual =>
+        const currentIndividuals: readonly I[] = Object.freeze(population.map(individual => individual.solution));
+        const nextGeneration: readonly I[] = Object.freeze(population.map(individual =>
             // attempt to mutate individual; if mutation fails, use original individual
             individualMutator.mutate(individual.solution, currentIndividuals) ?? individual.solution
-        );
+        ));
         if (nextGeneration.length === 0)
             throw new Error(`No individuals spawned in next generation ${generationIndex}`);
 
         // compute fitness of the next generation
-        const populationFitness = fitnessFunction.evaluate(nextGeneration);
+        const populationFitness = Object.freeze(fitnessFunction.evaluate(nextGeneration));
+        for (const individual of populationFitness)
+            Object.freeze(individual);
 
         // perform selection of individuals for the next generation
-        let selectedPopulation: readonly IFitness<I>[] = populationSelector.select(
-            {generation: generationIndex, population: populationFitness},
+        population = populationSelector.select(
+            Object.freeze({generation: generationIndex, population: populationFitness}),
             maximumPopulationSize
         );
-        if (selectedPopulation.length === 0)
-            throw new Error(`PopulationSelector provided no individuals for next generation ${generationIndex + 1}`);
+        if (population.length === 0)
+            throw new Error(`${PopulationSelector.name} provided no individuals for next generation ${generationIndex + 1}`);
         // limit population size to maximumPopulationSize
-        if (maximumPopulationSize < selectedPopulation.length) {
-            const culledPopulation = [...selectedPopulation];
-            while (maximumPopulationSize < selectedPopulation.length)
-                culledPopulation.splice(randomIndex(selectedPopulation), 1);
-            selectedPopulation = culledPopulation;
+        if (maximumPopulationSize < population.length) {
+            const culledPopulation = [...population];
+            while (maximumPopulationSize < population.length)
+                culledPopulation.splice(randomIndex(population), 1);
+            population = culledPopulation;
         }
+        population = Object.freeze(population);
 
         // compute updates
-        generation = {generation: generationIndex, population: selectedPopulation};
+        const generation = Object.freeze({generation: generationIndex, population: population});
+        if (metricCollector instanceof MetricCollector) {
+            try {
+                metricCollector.update(generation);
+            } catch (error) {
+                throw new Exception(`An error occurred invoking ${MetricCollector.name} `
+                    + `'${metricCollector.name}' (${Object.getPrototypeOf(metricCollector).name})`, error);
+            }
+        }
         yield generation;
 
-        if (typeof earlyStopping === 'function' && earlyStopping(generation))
+        if (earlyStopping instanceof EarlyStoppingEvaluator && earlyStopping.shouldStopEarly(generation))
             break;
     }
 }

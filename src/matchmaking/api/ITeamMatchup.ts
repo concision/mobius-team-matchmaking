@@ -1,6 +1,6 @@
+import {ITeam} from "./ITeam";
 import {ITeamNotYetPlayed, ITeamParticipant, ITeamPlayed} from "./ITeamParticipant";
 import {ITimeSlot} from "./ITimeSlot";
-import {ITeam} from "./ITeam";
 
 /**
  * See {@link ITeamMatchup}.

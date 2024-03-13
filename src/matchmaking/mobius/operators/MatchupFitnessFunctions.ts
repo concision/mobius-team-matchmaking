@@ -13,12 +13,14 @@ export function countTotalMatchups<TTeam extends IMobiusTeam = IMobiusTeam>(): I
 export function eloDifferentialStandardDeviation<TTeam extends IMobiusTeam = IMobiusTeam>(): IndividualFitnessFunction<IMatchupSchedule<TTeam>> {
     return new IndividualFitnessFunction<IMatchupSchedule<TTeam>>("minimizeEloDifferential",
         ({matchups}) => {
-            const eloDifferentials = matchups.map(matchup => Math.abs(matchup.teams[0].elo - matchup.teams[1].elo));
-            // compute variance of elo differentials
+            const eloDifferentials = matchups.map(({teams: [a, b]}) => Math.abs(a.elo - b.elo));
             const averageEloDifferentials = eloDifferentials.reduce((sum, eloDiff) => sum + eloDiff, 0) / matchups.length;
-            return Math.sqrt(eloDifferentials
-                .map(eloDiff => Math.pow(Math.abs(eloDiff - averageEloDifferentials), 2))
-                .reduce((sum, deviation) => sum + deviation, 0) / eloDifferentials.length);
+            return Math.sqrt(
+                eloDifferentials
+                    .map(eloDiff => Math.pow(Math.abs(eloDiff - averageEloDifferentials), 2))
+                    .reduce((sum, deviation) => sum + deviation, 0)
+                / Math.max(1, eloDifferentials.length)
+            );
         },
     );
 }
@@ -52,10 +54,11 @@ export function averageGamesPlayedPerTeamVariance<TTeam extends IMobiusTeam = IM
                 }));
 
             // compute variance of the number of matchups played by each team
-            const averageMatchupsCount = metrics.reduce((sum, metric) => sum + metric.matchesPlayed, 0) / metrics.length;
+            const averageMatchupsCount = metrics.reduce((sum, metric) => sum + metric.matchesPlayed, 0)
+                / Math.max(1, metrics.length);
             return metrics
                 .map(metric => Math.pow(Math.abs(metric.matchesPlayed - averageMatchupsCount), 2))
-                .reduce((sum, deviation) => sum + deviation, 0) / metrics.length;
+                .reduce((sum, deviation) => sum + deviation, 0) / Math.max(1, metrics.length);
         },
     );
 }

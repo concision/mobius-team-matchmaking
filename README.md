@@ -116,13 +116,13 @@ A non-exhaustive list of tasks (in no particular order) to maybe be completed:
     - [x] Merge the region-partitioned matchmaking API with the non-partitioned API; expose a configuration option
       lambda for partitioning (defaulting to team region for Mobius)
 
-    - [ ] Rewrite all genetic algorithm types to be more modular, extensible, and serializable
-        - [ ] Abstract all genetic algorithm types to a tree-traversable `GeneticOperator` class (including
+    - [x] Rewrite all genetic algorithm types to be more modular, extensible, and serializable
+        - [x] Abstract all genetic algorithm types to a tree-traversable `GeneticOperator` class (including
           root `IGeneticOptions`)
-        - [ ] Implement various helpful functions for tweaking `GeneticOperator` properties/weights without needing to
+        - [x] Implement various helpful functions for tweaking `GeneticOperator` properties/weights without needing to
           rewrite an entire genetic operator configuration
+        - [x] Implement immutable types
         - [ ] Improve debuggability of genetic algorithm types (e.g. weighted fitness functions are difficult to debug)
-        - [ ] Maybe abstract to a separate NPM module?
 
     - [ ] Implement configurable asynchronous multithreading pool using Node.js workers
       > The current implementation blocks the main thread for a non-negligible amount of time, e.g. up to 10 seconds for

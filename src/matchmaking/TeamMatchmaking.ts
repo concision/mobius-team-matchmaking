@@ -1,25 +1,25 @@
-import {ITeam} from "./api/ITeam";
-import {IScheduledMatchup} from "./api/ITeamMatchup";
-import {ITeamNotYetPlayed, TeamMatchResult} from "./api/ITeamParticipant";
 import {geneticAlgorithm} from "../genetic/GeneticAlgorithm";
-import {
-    filterTimeSlotsThatAlreadyOccurred,
-    partitionTeamsByTimeSlots,
-    sortScheduledMatchupsByTime,
-    translateTimeSlotToDate
-} from "./TimeSlot";
-import {selectBestMatchupSchedule} from "./mobius/operators/MatchupPopulationSelectors";
-import {IMatchmakingResults, IPartitionedMatchmakingResults, MatchupFailureReason} from "./api/IMatchmakingResults";
+import {assignDefinedProperties, groupBy} from "../utilities/CollectionUtilities";
+import {KeysOfType} from "../utilities/TypescriptTypes";
 import {
     IConfiguredMatchmakingOptions,
     IMatchmakingOptions,
     IPartitionedMatchmakingOptions,
     IUnpartitionedMatchmakingOptions
 } from "./api/IMatchmakingOptions";
-import {KeysOfType} from "../utilities/TypescriptTypes";
-import {assignDefinedProperties, groupBy} from "../utilities/CollectionUtilities";
-import {IMatchupSchedule} from "./api/MatchmakingGeneticTypes";
+import {IMatchmakingResults, IPartitionedMatchmakingResults, MatchupFailureReason} from "./api/IMatchmakingResults";
+import {ITeam} from "./api/ITeam";
+import {IScheduledMatchup} from "./api/ITeamMatchup";
+import {ITeamNotYetPlayed, TeamMatchResult} from "./api/ITeamParticipant";
 import {ITimeSlot} from "./api/ITimeSlot";
+import {IMatchupSchedule} from "./api/MatchmakingGeneticTypes";
+import {selectBestMatchupSchedule} from "./mobius/operators/MatchupPopulationSelectors";
+import {
+    filterTimeSlotsThatAlreadyOccurred,
+    partitionTeamsByTimeSlots,
+    sortScheduledMatchupsByTime,
+    translateTimeSlotToDate
+} from "./TimeSlot";
 
 const defaultPartitionKey = {};
 

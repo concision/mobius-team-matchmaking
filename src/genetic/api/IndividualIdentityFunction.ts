@@ -1,1 +1,1 @@
-export type IndividualIdentityFunction<I> = (individual: I) => string;
+export type IndividualIdentityFunction<I> = (individual: I) => any;

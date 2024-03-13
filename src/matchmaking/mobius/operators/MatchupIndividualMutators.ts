@@ -1,6 +1,6 @@
 import {IndividualMutator} from "../../../genetic/api/IndividualMutator";
-import {ITimeSlot} from "../../api/ITimeSlot";
 import {randomIndex, selectRandomWeightedElement, selectUniqueRandomElements} from "../../../utilities/Random";
+import {ITimeSlot} from "../../api/ITimeSlot";
 import {IMatchupSchedule, ITeamMatchupGene} from "../../api/MatchmakingGeneticTypes";
 import {IMobiusTeam} from "../MobiusMatchmakingConfig";
 
@@ -23,13 +23,13 @@ export class MutationAddNewMatchup<TTeam extends IMobiusTeam = IMobiusTeam> exte
         const [timeSlot, possibleTeams] = chosen;
         const [firstTeam, secondTeam] = selectUniqueRandomElements(possibleTeams, 2);
 
-        return {
+        return Object.freeze({
             // remove the teams from the unmatched list
             unmatchedTeams: new Map(parent.unmatchedTeams)
                 .set(timeSlot, possibleTeams.filter(team => team !== firstTeam && team !== secondTeam)),
             // add new matchup
             matchups: [...parent.matchups, {timeSlot, teams: [firstTeam, secondTeam]}],
-        };
+        });
     }
 }
 
@@ -47,8 +47,11 @@ export class MutationRemoveMatchup<TTeam extends IMobiusTeam = IMobiusTeam> exte
             const removedMatchup = matchups.splice(randomIndex(matchups), 1)[0];
 
             const unmatchedTeams = new Map<ITimeSlot, readonly TTeam[]>(parent.unmatchedTeams);
-            unmatchedTeams.set(removedMatchup.timeSlot, [...parent.unmatchedTeams.get(removedMatchup.timeSlot)!, ...removedMatchup.teams]);
-            return {unmatchedTeams, matchups};
+            unmatchedTeams.set(
+                removedMatchup.timeSlot,
+                [...parent.unmatchedTeams.get(removedMatchup.timeSlot)!, ...removedMatchup.teams]
+            );
+            return Object.freeze({unmatchedTeams, matchups});
         }
     }
 }
@@ -79,7 +82,7 @@ export class MutationSwapMatchupInTimeSlot<TTeam extends IMobiusTeam = IMobiusTe
             return;
         const [timeSlot, matchups] = chosen;
         const [firstTeam, secondTeam] = selectUniqueRandomElements(matchups, 2);
-        return {
+        return Object.freeze({
             unmatchedTeams: parent.unmatchedTeams,
             // swap teams in the time slot
             matchups: parent.matchups
@@ -88,6 +91,6 @@ export class MutationSwapMatchupInTimeSlot<TTeam extends IMobiusTeam = IMobiusTe
                     {timeSlot, teams: [firstTeam.teams[0], secondTeam.teams[0]]},
                     {timeSlot, teams: [firstTeam.teams[1], secondTeam.teams[1]]}
                 ]),
-        };
+        });
     }
 }

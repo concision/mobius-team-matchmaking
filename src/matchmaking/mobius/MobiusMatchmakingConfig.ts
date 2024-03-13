@@ -1,39 +1,40 @@
-import {ensureGrowthEarlyStopEvaluator} from "./operators/MatchupEarlyStoppingEvaluator";
+import {EnsureGrowthEarlyStoppingEvaluator} from "../../genetic/api/EarlyStoppingEvaluator";
 import {
-    backToBackMatchupKillPredicate,
-    hardEloDifferentialLimitKillPredicate,
-    maximumGamesPerTeamKillPredicate,
-    uniqueTeamMatchupIdentity
-} from "./operators/MatchupPopulationSelectors";
-import {WeightedRandomIndividualMutator} from "../../genetic/api/IndividualMutator";
-import {MutationAddNewMatchup, MutationRemoveMatchup, MutationSwapMatchupInTimeSlot} from "./operators/MatchupIndividualMutators";
-import {
+    FitnessNormalizer,
     IWeightedFitnessFunction,
     LinearWeightedFitnessReducer,
-    MultivariateFitnessFunction,
-    Normalizer
+    MultivariateFitnessFunction
 } from "../../genetic/api/FitnessFunction";
-import {
-    averageGamesPlayedPerTeamVariance,
-    countRecentDuplicateMatchups,
-    countTotalMatchups,
-    eloDifferentialStandardDeviation
-} from "./operators/MatchupFitnessFunctions";
+import {GeneticParameters} from "../../genetic/api/GeneticParameters";
+import {LambdaIndividualGenerator} from "../../genetic/api/IndividualGenerator";
+import {WeightedRandomIndividualMutator} from "../../genetic/api/IndividualMutator";
 import {
     ChainedPopulationSelector,
     DeduplicatePopulationSelector,
-    ElitistPopulationSelector,
+    ElitismPopulationSelector,
     KillInvalidPopulationSelector,
     ProportionalPopulationSelector,
     RepopulatePopulationSelector,
     RouletteWheelPopulationSelector,
     TournamentPopulationSelector
 } from "../../genetic/api/PopulationSelector";
-import {ITeam} from "../api/ITeam";
-import {IMatchupSchedule} from "../api/MatchmakingGeneticTypes";
 import {assignDefinedProperties} from "../../utilities/CollectionUtilities";
 import {IMatchmakingParameters, MatchmakingConfig} from "../api/IMatchmakingOptions";
-import {IMutableGeneticParameters} from "../../genetic/api/IGeneticParameters";
+import {ITeam} from "../api/ITeam";
+import {IMatchupSchedule} from "../api/MatchmakingGeneticTypes";
+import {
+    averageGamesPlayedPerTeamVariance,
+    countRecentDuplicateMatchups,
+    countTotalMatchups,
+    eloDifferentialStandardDeviation
+} from "./operators/MatchupFitnessFunctions";
+import {MutationAddNewMatchup, MutationRemoveMatchup, MutationSwapMatchupInTimeSlot} from "./operators/MatchupIndividualMutators";
+import {
+    backToBackMatchupKillPredicate,
+    hardEloDifferentialLimitKillPredicate,
+    maximumGamesPerTeamKillPredicate,
+    uniqueTeamMatchupIdentity
+} from "./operators/MatchupPopulationSelectors";
 
 export interface IMobiusTeam extends ITeam {
     // TODO: implement team-specific parameter overrides
@@ -91,10 +92,11 @@ export interface IMobiusTeamMatchmakingParameters {
     readonly permittedBackToBackRecency?: number;
 }
 
-export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TPartitionKey = string> extends MatchmakingConfig<TTeam, TPartitionKey> {
+export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TPartitionKey = string>
+    extends MatchmakingConfig<TTeam, TPartitionKey> {
     private readonly options: Required<IMobiusMatchmakingOptions>;
 
-    public constructor(parameters: IMobiusMatchmakingOptions) {
+    public constructor(parameters?: IMobiusMatchmakingOptions) {
         super();
         this.options = assignDefinedProperties({
             hallOfFame: 32,
@@ -105,23 +107,20 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
             preventDuplicateMatchupsInLastXDays: 14,
             countGamesPlayedInLastXDays: 21,
             permittedBackToBackRecency: 1,
-        }, parameters);
+        }, parameters ?? {});
         this.validateOptions(this.options);
     }
 
     public override configure(
         {teamsByTimeSlot, options}: IMatchmakingParameters<TTeam, TPartitionKey>,
-    ): IMutableGeneticParameters<IMatchupSchedule<TTeam>> {
-        const earlyStoppingEvaluator = ensureGrowthEarlyStopEvaluator(16);
-        return {
+    ): GeneticParameters<IMatchupSchedule<TTeam>> {
+        return new GeneticParameters({
             // an upper bound estimate of the number of generations needed to find a decent solution
             maximumGenerations: 2 * [...teamsByTimeSlot.values()]
                 .reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
             maximumPopulationSize: 2500,
 
-            individualIdentity: uniqueTeamMatchupIdentity(),
-
-            individualGenerator: () => ({unmatchedTeams: teamsByTimeSlot, matchups: []}),
+            individualGenerator: new LambdaIndividualGenerator(() => ({unmatchedTeams: teamsByTimeSlot, matchups: []})),
             individualMutator: new WeightedRandomIndividualMutator("mutator", 0.75, [
                 // add new valid team matchup
                 {weight: 2, mutator: new MutationAddNewMatchup()},
@@ -132,24 +131,24 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
             ]),
             fitnessFunction: new MultivariateFitnessFunction<IMatchupSchedule<TTeam>>("fitness", new LinearWeightedFitnessReducer(), [
                 // maximize total matchups
-                {weighting: 1, normalizer: Normalizer.NONE, fitnessFunction: countTotalMatchups()},
+                {weight: 2, normalizer: FitnessNormalizer.NONE, fitnessFunction: countTotalMatchups()},
                 // minimize ELO differential in team matchups
                 // elo standard deviation is likely proportional to parameters.hardEloDifferentialLimit
                 {
-                    weighting: Math.pow(this.options.hardEloDifferentialLimit, -.4),
-                    normalizer: Normalizer.NONE,
+                    weight: Math.pow(this.options.hardEloDifferentialLimit, -.4),
+                    normalizer: FitnessNormalizer.NONE,
                     fitnessFunction: eloDifferentialStandardDeviation(),
                 },
                 // favor scheduling games to teams who have played fewer games in the last options.countGamesPlayedInLastXDays days
                 {
-                    weighting: -1,
-                    normalizer: Normalizer.NONE,
+                    weight: -1,
+                    normalizer: FitnessNormalizer.NONE,
                     fitnessFunction: averageGamesPlayedPerTeamVariance(options.scheduledDate, this.options.countGamesPlayedInLastXDays),
                 },
                 // strong penalty for matchups that have occurred in the last options.preventDuplicateMatchupsInLastXWeeks weeks
                 ...(0 < this.options.preventDuplicateMatchupsInLastXDays ? [<IWeightedFitnessFunction<IMatchupSchedule<TTeam>>>{
-                    weighting: -100,
-                    normalizer: Normalizer.NONE,
+                    weight: -100,
+                    normalizer: FitnessNormalizer.NONE,
                     fitnessFunction: countRecentDuplicateMatchups(options.scheduledDate, this.options.preventDuplicateMatchupsInLastXDays),
                 }] : []),
             ]),
@@ -170,7 +169,7 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
                     // randomly select the best matchups
                     {weight: .50, selector: new TournamentPopulationSelector("tournament", 10)},
                     // preserve some of the best matchups without selective pressure
-                    {weight: .10, selector: new ElitistPopulationSelector("elitism", 1)},
+                    {weight: .10, selector: new ElitismPopulationSelector("elitism", 1)},
                     // preserve individuals to maintain diversity (proportional by fitness)
                     {weight: .20, selector: new RouletteWheelPopulationSelector("roulette")},
                     // preserve random-selected individuals to maintain diversity
@@ -180,8 +179,8 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
                 new RepopulatePopulationSelector("repopulate"),
             ]),
             // stop early if the fitness is not improving within XYZ generations
-            earlyStopping: earlyStoppingEvaluator,
-        };
+            earlyStopping: new EnsureGrowthEarlyStoppingEvaluator(16),
+        });
     }
 
     public validateOptions(options: Required<IMobiusMatchmakingOptions>): void {

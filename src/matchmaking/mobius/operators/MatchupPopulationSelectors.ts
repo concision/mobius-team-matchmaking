@@ -1,9 +1,9 @@
-import {IMatchupSchedule} from "../../api/MatchmakingGeneticTypes";
+import {IFitness} from "../../../genetic/api/FitnessFunction";
+import {IndividualIdentityFunction} from "../../../genetic/api/IndividualIdentityFunction";
 import {KillPredicate} from "../../../genetic/api/PopulationSelector";
 import {ITeam} from "../../api/ITeam";
 import {ITimeSlot} from "../../api/ITimeSlot";
-import {IndividualIdentityFunction} from "../../../genetic/api/IndividualIdentityFunction";
-import {IFitness} from "../../../genetic/api/IGeneticParameters";
+import {IMatchupSchedule} from "../../api/MatchmakingGeneticTypes";
 
 export function uniqueTeamMatchupIdentity<TTeam extends ITeam>(): IndividualIdentityFunction<IMatchupSchedule<TTeam>> {
     return (individual: IMatchupSchedule<TTeam>): string => {

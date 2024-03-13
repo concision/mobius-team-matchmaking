@@ -1,31 +1,50 @@
-import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
-import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
-import {IFitness, IGeneration} from "./IGeneticParameters";
+import {groupBy, GroupingBehavior} from "../../utilities/CollectionUtilities";
+import {Exception} from "../../utilities/Exception";
 import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../../utilities/Random";
+import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
+import {IFitness} from "./FitnessFunction";
+import {GeneticOperator, IGeneticOperatorChild} from "./GeneticOperator";
+import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 
-export abstract class PopulationSelector<I> {
-    public constructor(
-        public readonly name: string,
-    ) {
-    }
-
-    public abstract select(population: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[];
+export interface IGeneration<I> {
+    readonly generation: number;
+    readonly population: readonly IFitness<I>[];
 }
 
-export class ChainedPopulationSelector<I> extends PopulationSelector<I> {
-    public readonly selectors: PopulationSelector<I>[];
 
-    public constructor(name: string, selectors: readonly PopulationSelector<I>[]) {
+export abstract class PopulationSelector<TIndividual, TChildrenType = undefined>
+    extends GeneticOperator<TIndividual, TChildrenType> {
+    public abstract select(population: IGeneration<TIndividual>, maximumPopulation: number): readonly IFitness<TIndividual>[];
+}
+
+
+export class ChainedPopulationSelector<I> extends PopulationSelector<I, PopulationSelector<I, unknown>> {
+    private readonly selectors: PopulationSelector<I, unknown>[];
+
+    public constructor(name: string, selectors: readonly PopulationSelector<I, unknown>[]) {
         super(name);
-        this.selectors = [...selectors];
+        this.selectors = Array.isArray(selectors) ? [...selectors] : selectors;
+
+        this.validateIfConsumerInstantiation(ChainedPopulationSelector, arguments);
+    }
+
+    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, PopulationSelector<I, unknown>>[] {
+        return Object.freeze(this.selectors.map(child => ({child, operator: child})));
     }
 
     public override select({generation, population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
-        for (const selector of this.selectors)
-            population = selector.select({generation, population}, maximumPopulation);
+        for (const selector of this.selectors) {
+            try {
+                population = selector.select({generation, population}, maximumPopulation);
+            } catch (error) {
+                throw new Exception(`An error occurred invoking ${PopulationSelector.name}`
+                    + `'${selector.name}' (${Object.getPrototypeOf(selector).name})`, error);
+            }
+        }
         return population;
     }
 }
+
 
 export interface IWeightedPopulationSelector<I> {
     readonly weight: number;
@@ -33,12 +52,18 @@ export interface IWeightedPopulationSelector<I> {
     readonly selector: PopulationSelector<I>;
 }
 
-export class ProportionalPopulationSelector<I> extends PopulationSelector<I> {
-    public readonly selectors: IWeightedPopulationSelector<I>[];
+export class ProportionalPopulationSelector<I> extends PopulationSelector<I, IWeightedPopulationSelector<I>> {
+    private readonly selectors: IWeightedPopulationSelector<I>[];
 
     public constructor(name: string, selectors: readonly IWeightedPopulationSelector<I>[]) {
         super(name);
-        this.selectors = [...selectors];
+        this.selectors = Array.isArray(selectors) ? [...selectors] : selectors;
+
+        this.validateIfConsumerInstantiation(ProportionalPopulationSelector, arguments);
+    }
+
+    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, IWeightedPopulationSelector<I>>[] {
+        return Object.freeze(this.selectors.map(child => ({child, operator: child.selector})));
     }
 
     public override select(population: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
@@ -59,9 +84,10 @@ export class ProportionalPopulationSelector<I> extends PopulationSelector<I> {
         while (maximumPopulation < nextPopulation.length)
             nextPopulation.splice(randomIndex(nextPopulation), 1);
 
-        return nextPopulation;
+        return Object.freeze(nextPopulation);
     }
 }
+
 
 export class RepopulatePopulationSelector<I> extends PopulationSelector<I> {
     public constructor(name: string) {
@@ -72,37 +98,69 @@ export class RepopulatePopulationSelector<I> extends PopulationSelector<I> {
         const selectedPopulation: IFitness<I>[] = [...population];
         while (selectedPopulation.length < maximumPopulation)
             selectedPopulation.push(selectRandomElement(population)!);
-        return population;
+        return Object.freeze(population);
     }
 }
 
-export class ElitistPopulationSelector<I> extends PopulationSelector<I> {
-    public constructor(
-        name: string,
-        public readonly elitismProportion: number,
-    ) {
+export class ElitismPopulationSelector<I> extends PopulationSelector<I> {
+    private _proportion: number;
+
+    public constructor(name: string, proportion: number) {
         super(name);
+        this._proportion = proportion;
+
+        this.validateIfConsumerInstantiation(ElitismPopulationSelector, arguments);
+    }
+
+    public get proportion(): number {
+        return this._proportion;
+    }
+
+    public set proportion(value: number) {
+        if (typeof value !== 'number' || !(0 <= value && value <= 1))
+            throw new Error(`${ElitismPopulationSelector.name}.proportion must be a number between 0 and 1`);
+        this._proportion = value;
     }
 
     public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
-        return population.toSorted((a, b) => b.fitness - a.fitness)
-            .slice(0, Math.max(1, Math.ceil(maximumPopulation * this.elitismProportion)));
+        return Object.freeze(
+            population
+                .toSorted((a, b) => b.fitness - a.fitness)
+                .slice(0, Math.max(1, Math.ceil(maximumPopulation * this._proportion)))
+        );
     }
 }
 
 export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
+    private _proportional: boolean;
+
     public constructor(
         name: string,
-        public readonly proportional: boolean = true,
+        proportional: boolean = true,
     ) {
         super(name);
+        this._proportional = proportional;
+
+        this.validateIfConsumerInstantiation(RouletteWheelPopulationSelector, arguments);
+    }
+
+    public get proportional(): boolean {
+        return this._proportional;
+    }
+
+    public set proportional(value: boolean) {
+        if (typeof value !== "boolean")
+            throw new Error(`${RouletteWheelPopulationSelector.name}.proportional must be a boolean`);
+        this._proportional = value;
     }
 
     public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         const selectedPopulation: IFitness<I>[] = [];
 
-        if (this.proportional) {
-            const minFitness: number = population.reduce((min, individual) => Math.min(min, individual.fitness), 0);
+        if (this._proportional) {
+            const minFitness: number = population
+                .filter(({fitness}) => Number.isFinite(fitness) && !Number.isNaN(fitness))
+                .reduce((min, {fitness}) => Math.min(min, fitness), 0);
             const cumulativeFitness: number[] = [];
             for (let i = 0; i < selectedPopulation.length; i++)
                 cumulativeFitness[i] = (cumulativeFitness[i - 1] ?? 0) + (selectedPopulation[i].fitness - minFitness);
@@ -145,15 +203,30 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
 }
 
 export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
+    private _tournamentSize: number;
+
     public constructor(
         name: string,
-        public readonly tournamentSize: number,
+        tournamentSize: number,
     ) {
         super(name);
+        this._tournamentSize = tournamentSize;
+
+        this.validateIfConsumerInstantiation(TournamentPopulationSelector, arguments);
+    }
+
+    public get tournamentSize(): number {
+        return this._tournamentSize;
+    }
+
+    public set tournamentSize(value: number) {
+        if (!Number.isInteger(value) || value <= 0)
+            throw new Error(`${TournamentPopulationSelector.name}.tournamentSize must be a positive integer`);
+        this._tournamentSize = value;
     }
 
     public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
-        const tournamentSize = Math.max(2, this.tournamentSize < 1 ? Math.ceil(Math.random() * population.length) : this.tournamentSize);
+        const tournamentSize = Math.max(2, this._tournamentSize < 1 ? Math.ceil(Math.random() * population.length) : this._tournamentSize);
 
         const selectedPopulation: IFitness<I>[] = [];
         for (let i = 0; i < maximumPopulation; i++) {
@@ -167,43 +240,77 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
 
 
 export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
+    private _identityFunction: IndividualIdentityFunction<I>;
+
     public constructor(
         name: string,
-        public readonly identity: IndividualIdentityFunction<I>,
+        identityFunction: IndividualIdentityFunction<I>,
     ) {
         super(name);
+        this._identityFunction = identityFunction;
+
+        this.validateIfConsumerInstantiation(DeduplicatePopulationSelector, arguments);
+    }
+
+    public get identityFunction(): IndividualIdentityFunction<I> {
+        return this._identityFunction;
+    }
+
+    public set identityFunction(value: IndividualIdentityFunction<I>) {
+        if (typeof value !== "function")
+            throw new Error(`${DeduplicatePopulationSelector.name}.identityFunction must be a serializable pure function without any closures`);
+        this._identityFunction = value;
     }
 
     public override select({population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
-        const seen = new Map<string, IFitness<I>>();
-        for (const individual of population) {
-            // all individual with the same key should be identical
-            const key = this.identity(individual.solution);
-            if (!seen.has(key))
-                seen.set(key, individual);
-        }
-        return <const>[...seen.values()];
+        return Object.freeze(Array.from(groupBy(
+            population,
+            individual => this._identityFunction(individual.solution),
+            GroupingBehavior.SINGLE_KEY_SINGLE_VALUE
+        ).values()));
     }
 }
 
 export type KillPredicate<I> = (individual: IFitness<I>) => boolean;
 
-export class KillInvalidPopulationSelector<I> extends PopulationSelector<I> {
-    public readonly killPredicates: KillPredicate<I>[];
+export class KillInvalidPopulationSelector<I> extends PopulationSelector<I, KillPredicate<I>> {
+    private readonly killPredicates: KillPredicate<I>[];
+    private _probability: number | ((generation: number) => number) = 1;
 
     public constructor(
         name: string,
         killPredicate: KillPredicate<I> | readonly KillPredicate<I>[],
-        public readonly killProbability: number | ((generation: number) => number) = 1,
+        probability: number | ((generation: number) => number) = 1,
     ) {
         super(name);
+        this._probability = probability;
         this.killPredicates = Array.isArray(killPredicate) ? killPredicate : [killPredicate];
+
+        this.validateIfConsumerInstantiation(KillInvalidPopulationSelector, arguments);
+    }
+
+    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, KillPredicate<I>>[] {
+        return Object.freeze(this.killPredicates.map(child => ({child})));
+    }
+
+    public get children(): readonly KillPredicate<I>[] {
+        return this.killPredicates;
+    }
+
+    public get probability(): number | ((generation: number) => number) {
+        return this._probability;
+    }
+
+    public set probability(value: number | ((generation: number) => number)) {
+        if (typeof value !== "number" && typeof value !== "function")
+            throw new Error(`${KillInvalidPopulationSelector.name}.probability must be a number or a function`);
+        this._probability = value;
     }
 
     public override select({population, generation}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         return population.filter(individual =>
             this.killPredicates.filter(predicate => predicate(individual)).length === 0
-            || (typeof this.killProbability === "function" ? this.killProbability(generation) : this.killProbability) <= Math.random()
+            || (typeof this._probability === "function" ? this._probability(generation) : this._probability) <= Math.random()
         );
     }
 }
