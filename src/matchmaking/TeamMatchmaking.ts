@@ -13,7 +13,6 @@ import {IScheduledMatchup} from "./api/ITeamMatchup";
 import {ITeamNotYetPlayed, TeamMatchResult} from "./api/ITeamParticipant";
 import {ITimeSlot} from "./api/ITimeSlot";
 import {IMatchupSchedule} from "./api/MatchmakingGeneticTypes";
-import {selectBestMatchupSchedule} from "./mobius/operators/MatchupPopulationSelectors";
 import {
     filterTimeSlotsThatAlreadyOccurred,
     partitionTeamsByTimeSlots,
@@ -102,11 +101,12 @@ async function matchmakeTeamPartition<TTeam extends ITeam = ITeam, TPartitionKey
         });
 
     // prepare genetic algorithm constraints
-    const geneticParameters = options.configure.configure({options, partitionKey, teamsByTimeSlot});
+    const geneticParameters = options.config.configure({options, partitionKey, teamsByTimeSlot});
 
     // run the genetic algorithm to compute matchmaking results
-    const solutions = geneticAlgorithm<IMatchupSchedule<TTeam>>(geneticParameters);
-    const solution = selectBestMatchupSchedule<TTeam>(solutions.map(({solution}) => solution));
+    const results = geneticAlgorithm(geneticParameters);
+
+    const solution = options.config.selectSolution(results);
 
     // translate matchups into a format that is more useful for the consumer
     return convertToMatchmakingResults<TTeam>(teams, teamsByTimeSlot, unavailableTeams, solution);
@@ -117,13 +117,13 @@ function addDefaultsAndValidateParameters<TTeam extends ITeam = ITeam, TPartitio
     optionOverrides: IMatchmakingOptions<TTeam, TPartitionKey>,
 ): IConfiguredMatchmakingOptions<TTeam, TPartitionKey> {
     const parameters = assignDefinedProperties<IMatchmakingOptions<TTeam, TPartitionKey>>({
-        configure: undefined!, // validated later
+        config: undefined!, // validated later
         scheduledDate: new Date(),
         timeSlotToDateTranslator: translateTimeSlotToDate,
         excludeTimeSlotsThatAlreadyOccurred: true,
     }, optionOverrides);
 
-    if (parameters.configure === undefined)
+    if (parameters.config === undefined)
         throw new Error("Matchmaking options must have a 'configure' property for the genetic algorithm.");
 
     return <IConfiguredMatchmakingOptions<TTeam, TPartitionKey>>parameters;

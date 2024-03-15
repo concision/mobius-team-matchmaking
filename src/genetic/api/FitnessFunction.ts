@@ -1,4 +1,4 @@
-import {GeneticOperator, IGeneticOperatorChild} from "./GeneticOperator";
+import {GeneticOperator, IGeneticOperatorChildren} from "./GeneticOperator";
 
 export interface IFitness<I> {
     readonly solution: I;
@@ -11,33 +11,15 @@ export abstract class FitnessFunction<I, TChildrenType = undefined>
     public abstract evaluate(population: readonly I[]): readonly IFitness<I>[];
 }
 
-
-export class IndividualFitnessFunction<I> extends FitnessFunction<I> {
-    private _fitnessFunction: (individual: I) => number;
-
-    public constructor(name: string, fitnessFunction: (individual: I) => number) {
-        super(name);
-        this._fitnessFunction = fitnessFunction;
-
-        this.validateIfConsumerInstantiation(IndividualFitnessFunction, arguments);
-    }
-
-    public get fitnessFunction(): (individual: I) => number {
-        return this._fitnessFunction;
-    }
-
-    public set fitnessFunction(value: (individual: I) => number) {
-        if (typeof value !== "function")
-            throw new Error(`${IndividualFitnessFunction.name}.fitnessFunction must be a serializable pure function without any closures`);
-        this._fitnessFunction = value;
-    }
-
+export abstract class IndividualFitnessFunction<I> extends FitnessFunction<I> {
     public override evaluate(population: readonly I[]): readonly IFitness<I>[] {
-        return Object.freeze(population.map(individual => Object.freeze({
-            solution: individual,
-            fitness: this._fitnessFunction(individual),
+        return Object.freeze(population.map(solution => Object.freeze({
+            solution,
+            fitness: this.evaluateIndividual(solution),
         })));
     }
+
+    public abstract evaluateIndividual(individual: I): number;
 }
 
 export class MultivariateFitnessFunction<I> extends FitnessFunction<I, IWeightedFitnessFunction<I>> {
@@ -56,10 +38,6 @@ export class MultivariateFitnessFunction<I> extends FitnessFunction<I, IWeighted
         this.validateIfConsumerInstantiation(MultivariateFitnessFunction, arguments);
     }
 
-    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, IWeightedFitnessFunction<I>>[] {
-        return Object.freeze(this.fitnessFunctions.map(child => ({child, operator: child.fitnessFunction})));
-    }
-
     public get reducer(): WeightedFitnessReducer {
         return this._reducer;
     }
@@ -68,6 +46,23 @@ export class MultivariateFitnessFunction<I> extends FitnessFunction<I, IWeighted
         if (!(value instanceof WeightedFitnessReducer))
             throw new Error(`${MultivariateFitnessFunction.name}.reducer must be an instance of ${WeightedFitnessReducer.name}`);
         this._reducer = value;
+    }
+
+
+    public get provideChildren(): IGeneticOperatorChildren<I, IWeightedFitnessFunction<I>> {
+        return {
+            children: this.fitnessFunctions,
+            operatorExtractor: ({fitnessFunction}) => fitnessFunction,
+        };
+    }
+
+    protected validateChild(child: IWeightedFitnessFunction<I>, index?: number) {
+        if (typeof child.weight !== "number" || !Number.isFinite(child.weight) || Number.isNaN(child.weight))
+            throw new Error(`${MultivariateFitnessFunction.name}.fitnessFunctions[${index ?? "i"}].weight must be a finite number`);
+        if (child.normalizer !== undefined && !normalizers.has(child.normalizer))
+            throw new Error(`${MultivariateFitnessFunction.name}.fitnessFunctions[${index ?? "i"}].normalizer must be a valid FitnessNormalizer (if defined)`);
+        if (!(child.fitnessFunction instanceof FitnessFunction))
+            throw new Error(`${MultivariateFitnessFunction.name}.fitnessFunctions[${index ?? "i"}].fitnessFunction must be an instance of ${FitnessFunction.name}`);
     }
 
     public override evaluate(population: readonly I[]): readonly IFitness<I>[] {
@@ -103,7 +98,7 @@ export class MultivariateFitnessFunction<I> extends FitnessFunction<I, IWeighted
 export interface IWeightedFitnessFunction<I> {
     weight: number;
     normalizer?: FitnessNormalizer;
-    fitnessFunction: FitnessFunction<I>;
+    fitnessFunction: FitnessFunction<I, any>;
 }
 
 export enum FitnessNormalizer {

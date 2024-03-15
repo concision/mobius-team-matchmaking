@@ -7,31 +7,45 @@ import {IndividualGenerator} from "./api/IndividualGenerator";
 import {MetricCollector} from "./api/MetricCollector";
 import {IGeneration, PopulationSelector} from "./api/PopulationSelector";
 
-export function geneticAlgorithm<I>(parameters: I extends any[] ? never : GeneticParameters<I>): readonly IFitness<I>[] {
+export interface IGeneticAlgorithmResults<I, TMetricCollector> extends IGeneration<I> {
+    readonly metrics?: TMetricCollector;
+}
+
+export function geneticAlgorithm<I, TMetricCollector>(
+    parameters: I extends any[] ? never : GeneticParameters<I, TMetricCollector>
+): IGeneticAlgorithmResults<I, TMetricCollector> {
     try {
         for (const operator of parameters.walk(true))
             Object.defineProperty(operator, "_parameters", {value: parameters});
         parameters.validate();
 
-        let lastGeneration: readonly IFitness<I>[] | undefined;
-        for (const {generation, population} of geneticAlgorithmGenerator(parameters)) {
+        let lastGeneration: IGeneration<I> | undefined;
+        for (const nextGeneration of geneticAlgorithmGenerator(parameters)) {
             if (parameters.debugLogging) {
+                const {generation, population} = nextGeneration;
                 const fittestIndividual = population
                     .filter(({fitness}) => Number.isFinite(fitness) && !Number.isNaN(fitness))
                     .reduce((max, individual) => max.fitness < individual.fitness ? individual : max, population[0]);
                 console.log(`Generation ${generation}: ${population.length} individuals; maximum fitness: ${fittestIndividual?.fitness}`);
             }
 
-            lastGeneration = population;
+            lastGeneration = nextGeneration;
         }
-        return lastGeneration ?? [];
+
+        return {
+            generation: lastGeneration?.generation ?? 0,
+            population: lastGeneration?.population ?? [],
+            metrics: parameters.metricCollector?.finalize(),
+        };
     } finally {
         for (const operator of parameters.walk(true))
             Object.defineProperty(operator, "_parameters", {value: undefined});
     }
 }
 
-export function* geneticAlgorithmGenerator<I>(parameters: I extends any[] ? never : GeneticParameters<I>): Generator<IGeneration<I>> {
+export function* geneticAlgorithmGenerator<I, TMetricCollector>(
+    parameters: I extends any[] ? never : GeneticParameters<I, TMetricCollector>
+): Generator<IGeneration<I>> {
     const {
         maximumGenerations,
         maximumPopulationSize,

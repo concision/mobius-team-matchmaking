@@ -3,7 +3,7 @@ import {Exception} from "../../utilities/Exception";
 import {randomIndex, selectRandomElement, selectUniqueRandomElements} from "../../utilities/Random";
 import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
 import {IFitness} from "./FitnessFunction";
-import {GeneticOperator, IGeneticOperatorChild} from "./GeneticOperator";
+import {GeneticOperator, IGeneticOperatorChildren} from "./GeneticOperator";
 import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 
 export interface IGeneration<I> {
@@ -18,19 +18,26 @@ export abstract class PopulationSelector<TIndividual, TChildrenType = undefined>
 }
 
 
-export class ChainedPopulationSelector<I> extends PopulationSelector<I, PopulationSelector<I, unknown>> {
-    private readonly selectors: PopulationSelector<I, unknown>[];
+export class ChainedPopulationSelector<I> extends PopulationSelector<I, PopulationSelector<I, any>> {
+    private readonly selectors: PopulationSelector<I, any>[];
 
-    public constructor(name: string, selectors: readonly PopulationSelector<I, unknown>[]) {
+    public constructor(name: string, selectors: readonly PopulationSelector<I, any>[]) {
         super(name);
         this.selectors = Array.isArray(selectors) ? [...selectors] : selectors;
 
         this.validateIfConsumerInstantiation(ChainedPopulationSelector, arguments);
     }
 
-    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, PopulationSelector<I, unknown>>[] {
-        return Object.freeze(this.selectors.map(child => ({child, operator: child})));
+
+    protected get provideChildren(): IGeneticOperatorChildren<I, PopulationSelector<I, any>> {
+        return Object.freeze({children: this.selectors});
     }
+
+    protected validateChild(child: PopulationSelector<I, any>, index?: number) {
+        if (!(child instanceof PopulationSelector))
+            throw new Error(`${ChainedPopulationSelector.name}.children[${index ?? "i"}] must be an instance of ${PopulationSelector.name}`);
+    }
+
 
     public override select({generation, population}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         for (const selector of this.selectors) {
@@ -49,7 +56,7 @@ export class ChainedPopulationSelector<I> extends PopulationSelector<I, Populati
 export interface IWeightedPopulationSelector<I> {
     readonly weight: number;
     readonly predicate?: ReplaceReturnType<PopulationSelector<I>["select"], boolean>;
-    readonly selector: PopulationSelector<I>;
+    readonly selector: PopulationSelector<I, any>;
 }
 
 export class ProportionalPopulationSelector<I> extends PopulationSelector<I, IWeightedPopulationSelector<I>> {
@@ -62,9 +69,23 @@ export class ProportionalPopulationSelector<I> extends PopulationSelector<I, IWe
         this.validateIfConsumerInstantiation(ProportionalPopulationSelector, arguments);
     }
 
-    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, IWeightedPopulationSelector<I>>[] {
-        return Object.freeze(this.selectors.map(child => ({child, operator: child.selector})));
+
+    protected get provideChildren(): IGeneticOperatorChildren<I, IWeightedPopulationSelector<I>> {
+        return Object.freeze({
+            children: this.selectors,
+            operatorExtractor: ({selector}: IWeightedPopulationSelector<I>) => selector,
+        });
     }
+
+    protected validateChild(child: IWeightedPopulationSelector<I>, index?: number) {
+        if (typeof child.weight !== "number" || !Number.isFinite(child.weight) || Number.isNaN(child.weight) || child.weight <= 0)
+            throw new Error(`${ProportionalPopulationSelector.name}.children[${index ?? "i"}].weight must be a number greater than or equal to 0`);
+        if (child.predicate !== undefined && typeof child.predicate !== "function")
+            throw new Error(`${ProportionalPopulationSelector.name}.children[${index ?? "i"}].predicate must be a function (if defined)`);
+        if (!(child.selector instanceof PopulationSelector))
+            throw new Error(`${ProportionalPopulationSelector.name}.children[${index ?? "i"}].selector must be an instance of ${PopulationSelector.name}`);
+    }
+
 
     public override select(population: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         const nextPopulation: IFitness<I>[] = [];
@@ -271,7 +292,15 @@ export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
     }
 }
 
-export type KillPredicate<I> = (individual: IFitness<I>) => boolean;
+export abstract class KillPredicate<I> extends GeneticOperator<I, KillPredicate<I>> {
+    public constructor(name: string) {
+        super(name);
+
+        this.validateIfConsumerInstantiation(KillPredicate, arguments);
+    }
+
+    public abstract shouldKill(individual: IFitness<I>): boolean;
+}
 
 export class KillInvalidPopulationSelector<I> extends PopulationSelector<I, KillPredicate<I>> {
     private readonly killPredicates: KillPredicate<I>[];
@@ -289,14 +318,6 @@ export class KillInvalidPopulationSelector<I> extends PopulationSelector<I, Kill
         this.validateIfConsumerInstantiation(KillInvalidPopulationSelector, arguments);
     }
 
-    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, KillPredicate<I>>[] {
-        return Object.freeze(this.killPredicates.map(child => ({child})));
-    }
-
-    public get children(): readonly KillPredicate<I>[] {
-        return this.killPredicates;
-    }
-
     public get probability(): number | ((generation: number) => number) {
         return this._probability;
     }
@@ -307,9 +328,20 @@ export class KillInvalidPopulationSelector<I> extends PopulationSelector<I, Kill
         this._probability = value;
     }
 
+
+    protected get provideChildren(): IGeneticOperatorChildren<I, KillPredicate<I>> {
+        return Object.freeze({children: this.killPredicates});
+    }
+
+    protected validateChild(child: KillPredicate<I>, index?: number) {
+        if (!(child instanceof KillPredicate))
+            throw new Error(`${KillInvalidPopulationSelector.name}.children[${index ?? "i"}] must be an instance of ${KillPredicate.name}`);
+    }
+
+
     public override select({population, generation}: IGeneration<I>, maximumPopulation: number): readonly IFitness<I>[] {
         return population.filter(individual =>
-            this.killPredicates.filter(predicate => predicate(individual)).length === 0
+            this.killPredicates.filter(predicate => predicate.shouldKill(individual)).length === 0
             || (typeof this._probability === "function" ? this._probability(generation) : this._probability) <= Math.random()
         );
     }

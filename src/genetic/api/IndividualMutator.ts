@@ -1,6 +1,6 @@
 import {selectRandomWeightedElement} from "../../utilities/Random";
 import {ReplaceReturnType} from "../../utilities/TypescriptTypes";
-import {GeneticOperator, IGeneticOperatorChild} from "./GeneticOperator";
+import {GeneticOperator, IGeneticOperatorChildren} from "./GeneticOperator";
 
 export abstract class IndividualMutator<I, TChildType = undefined> extends GeneticOperator<I, TChildType> {
     public abstract mutate(parent: I, population: readonly I[]): I | undefined;
@@ -10,7 +10,7 @@ export abstract class IndividualMutator<I, TChildType = undefined> extends Genet
 export interface IWeightedIndividualMutator<I> {
     weight: number;
     predicate?: ReplaceReturnType<IndividualMutator<I>["mutate"], boolean>;
-    mutator: IndividualMutator<I>;
+    mutator: IndividualMutator<I, any>;
 }
 
 export class WeightedRandomIndividualMutator<I> extends IndividualMutator<I, IWeightedIndividualMutator<I>> {
@@ -39,9 +39,18 @@ export class WeightedRandomIndividualMutator<I> extends IndividualMutator<I, IWe
         this._mutationProbability = value;
     }
 
-    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, IWeightedIndividualMutator<I>>[] {
-        return Object.freeze(this.mutators.map(child => ({child, operator: child.mutator})));
+
+    protected get provideChildren(): IGeneticOperatorChildren<I, IWeightedIndividualMutator<I>> {
+        return Object.freeze({children: this.mutators, operatorExtractor: ({mutator}: IWeightedIndividualMutator<I>) => mutator});
     }
+
+    protected validateChild(child: IWeightedIndividualMutator<I>, index?: number) {
+        if (typeof child.weight !== "number" || !Number.isFinite(child.weight) || Number.isNaN(child.weight) || child.weight <= 0)
+            throw new Error(`${WeightedRandomIndividualMutator.name}.mutators[${index ?? "i"}].weight must be a positive number`);
+        if (!(child.mutator instanceof IndividualMutator))
+            throw new Error(`${WeightedRandomIndividualMutator.name}.mutators[${index ?? "i"}].mutator must be an instance of ${IndividualMutator.name}`);
+    }
+
 
     public override mutate(individual: I, population: readonly I[]): I {
         if (this._mutationProbability <= Math.random()) {

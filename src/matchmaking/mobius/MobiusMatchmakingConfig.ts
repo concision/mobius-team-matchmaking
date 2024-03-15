@@ -8,6 +8,7 @@ import {
 import {GeneticParameters} from "../../genetic/api/GeneticParameters";
 import {LambdaIndividualGenerator} from "../../genetic/api/IndividualGenerator";
 import {WeightedRandomIndividualMutator} from "../../genetic/api/IndividualMutator";
+import {HallOfFameMetricCollector, HallOfFameResult} from "../../genetic/api/MetricCollector";
 import {
     ChainedPopulationSelector,
     DeduplicatePopulationSelector,
@@ -18,21 +19,22 @@ import {
     RouletteWheelPopulationSelector,
     TournamentPopulationSelector
 } from "../../genetic/api/PopulationSelector";
+import {IGeneticAlgorithmResults} from "../../genetic/GeneticAlgorithm";
 import {assignDefinedProperties} from "../../utilities/CollectionUtilities";
 import {IMatchmakingParameters, MatchmakingConfig} from "../api/IMatchmakingOptions";
 import {ITeam} from "../api/ITeam";
 import {IMatchupSchedule} from "../api/MatchmakingGeneticTypes";
 import {
-    averageGamesPlayedPerTeamVariance,
-    countRecentDuplicateMatchups,
-    countTotalMatchups,
-    eloDifferentialStandardDeviation
+    AverageGamesPlayedFitnessFunction,
+    CountDecentDuplicateMatchupsFitnessFunction,
+    CountTotalMatchupsFitnessFunction,
+    EloDifferentialFitnessFunction
 } from "./operators/MatchupFitnessFunctions";
 import {MutationAddNewMatchup, MutationRemoveMatchup, MutationSwapMatchupInTimeSlot} from "./operators/MatchupIndividualMutators";
 import {
-    backToBackMatchupKillPredicate,
-    hardEloDifferentialLimitKillPredicate,
-    maximumGamesPerTeamKillPredicate,
+    BackToBackMatchupKillPredicate,
+    HardEloDifferentialLimitKillPredicate,
+    MaximumGamesPerTeamKillPredicate,
     uniqueTeamMatchupIdentity
 } from "./operators/MatchupPopulationSelectors";
 
@@ -42,8 +44,7 @@ export interface IMobiusTeam extends ITeam {
 }
 
 /**
- * TODO
- * All options are optional and have default values if unspecified.
+ * The default Mobius matchmaking options. All options are optional and have default values if unspecified.
  */
 export interface IMobiusMatchmakingOptions extends IMobiusTeamMatchmakingParameters {
     /**
@@ -57,6 +58,9 @@ export interface IMobiusMatchmakingOptions extends IMobiusTeamMatchmakingParamet
     readonly hallOfFame?: number;
 }
 
+/**
+ * Team-specific parameter overrides for matchmaking.
+ */
 export interface IMobiusTeamMatchmakingParameters {
     /**
      * The maximum number of games that a team can play during the week.
@@ -87,13 +91,15 @@ export interface IMobiusTeamMatchmakingParameters {
     readonly countGamesPlayedInLastXDays?: number;
 
     /**
-     * TODO
+     * The number of timeslots a team must have between matchups to prevent back-to-back scheduling. For example, if this
+     * value is 1, then a team cannot have a matchup on consecutive timeslots on the same (there must be a gap of 1
+     * timeslot between).
      */
     readonly permittedBackToBackRecency?: number;
 }
 
 export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TPartitionKey = string>
-    extends MatchmakingConfig<TTeam, TPartitionKey> {
+    extends MatchmakingConfig<TTeam, HallOfFameResult<IMatchupSchedule<TTeam>>, TPartitionKey> {
     private readonly options: Required<IMobiusMatchmakingOptions>;
 
     public constructor(parameters?: IMobiusMatchmakingOptions) {
@@ -111,10 +117,25 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
         this.validateOptions(this.options);
     }
 
+    private validateOptions(options: Required<IMobiusMatchmakingOptions>): void {
+        if (options.maximumGamesPerTeam < 1)
+            throw new Error("The maximum number of games must be at least 1.");
+        if (options.hardEloDifferentialLimit < 1)
+            throw new Error("The hard elo differential limit must be at least 1 (however recommended to be much higher).");
+
+        if (options.preventDuplicateMatchupsInLastXDays < 0)
+            throw new Error("The duplicate matchup day recency must be greater than 0 to be enabled, or 0 to be disabled.");
+        if (options.countGamesPlayedInLastXDays < 0)
+            throw new Error("The games played day recency must be greater than 0 to be enabled, or 0 to be disabled.");
+
+        if (options.permittedBackToBackRecency < 0)
+            throw new Error("The back-to-back scheduling protection must be greater than 0 to be enabled, or 0 to be disabled.");
+    }
+
     public override configure(
         {teamsByTimeSlot, options}: IMatchmakingParameters<TTeam, TPartitionKey>,
-    ): GeneticParameters<IMatchupSchedule<TTeam>> {
-        return new GeneticParameters({
+    ): GeneticParameters<IMatchupSchedule<TTeam>, HallOfFameResult<IMatchupSchedule<TTeam>>> {
+        return new GeneticParameters<IMatchupSchedule<TTeam>, HallOfFameResult<IMatchupSchedule<TTeam>>>({
             // an upper bound estimate of the number of generations needed to find a decent solution
             maximumGenerations: 2 * [...teamsByTimeSlot.values()]
                 .reduce((sum, teams) => sum + teams.length * (teams.length + 1) / 2, 0),
@@ -131,25 +152,25 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
             ]),
             fitnessFunction: new MultivariateFitnessFunction<IMatchupSchedule<TTeam>>("fitness", new LinearWeightedFitnessReducer(), [
                 // maximize total matchups
-                {weight: 2, normalizer: FitnessNormalizer.NONE, fitnessFunction: countTotalMatchups()},
+                {weight: 2, normalizer: FitnessNormalizer.NONE, fitnessFunction: new CountTotalMatchupsFitnessFunction()},
                 // minimize ELO differential in team matchups
                 // elo standard deviation is likely proportional to parameters.hardEloDifferentialLimit
                 {
                     weight: Math.pow(this.options.hardEloDifferentialLimit, -.4),
                     normalizer: FitnessNormalizer.NONE,
-                    fitnessFunction: eloDifferentialStandardDeviation(),
+                    fitnessFunction: new EloDifferentialFitnessFunction(),
                 },
                 // favor scheduling games to teams who have played fewer games in the last options.countGamesPlayedInLastXDays days
-                {
+                ...(0 < this.options.countGamesPlayedInLastXDays ? [<IWeightedFitnessFunction<IMatchupSchedule<TTeam>>>{
                     weight: -1,
                     normalizer: FitnessNormalizer.NONE,
-                    fitnessFunction: averageGamesPlayedPerTeamVariance(options.scheduledDate, this.options.countGamesPlayedInLastXDays),
-                },
+                    fitnessFunction: new AverageGamesPlayedFitnessFunction(options.scheduledDate, this.options.countGamesPlayedInLastXDays),
+                }] : []),
                 // strong penalty for matchups that have occurred in the last options.preventDuplicateMatchupsInLastXWeeks weeks
                 ...(0 < this.options.preventDuplicateMatchupsInLastXDays ? [<IWeightedFitnessFunction<IMatchupSchedule<TTeam>>>{
                     weight: -100,
                     normalizer: FitnessNormalizer.NONE,
-                    fitnessFunction: countRecentDuplicateMatchups(options.scheduledDate, this.options.preventDuplicateMatchupsInLastXDays),
+                    fitnessFunction: new CountDecentDuplicateMatchupsFitnessFunction(options.scheduledDate, this.options.preventDuplicateMatchupsInLastXDays),
                 }] : []),
             ]),
             populationSelector: new ChainedPopulationSelector("chainedSelector", [
@@ -158,11 +179,11 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
                 // kill any matchups that are invalid, i.e. violate hard rules
                 new KillInvalidPopulationSelector("killMatchupsExceedingMaximumGames", [
                     // remove any matchups that are bac k-to-back scheduled (teams need a break)
-                    backToBackMatchupKillPredicate(),
+                    new BackToBackMatchupKillPredicate(this.options.permittedBackToBackRecency),
                     // enforce a maximum number of games for each team
-                    maximumGamesPerTeamKillPredicate(this.options.maximumGamesPerTeam),
+                    new MaximumGamesPerTeamKillPredicate(this.options.maximumGamesPerTeam),
                     // enforce a maximum ELO differential between teams
-                    hardEloDifferentialLimitKillPredicate(this.options.hardEloDifferentialLimit),
+                    new HardEloDifferentialLimitKillPredicate(this.options.hardEloDifferentialLimit),
                 ]),
                 // apply selective pressure
                 new ProportionalPopulationSelector("selectivePressure", [
@@ -171,30 +192,20 @@ export class MobiusMatchmakingConfig<TTeam extends IMobiusTeam = IMobiusTeam, TP
                     // preserve some of the best matchups without selective pressure
                     {weight: .10, selector: new ElitismPopulationSelector("elitism", 1)},
                     // preserve individuals to maintain diversity (proportional by fitness)
-                    {weight: .20, selector: new RouletteWheelPopulationSelector("roulette")},
+                    {weight: .20, selector: new RouletteWheelPopulationSelector("weightedRoulette")},
                     // preserve random-selected individuals to maintain diversity
-                    {weight: .20, selector: new RouletteWheelPopulationSelector("roulette", false)},
+                    {weight: .20, selector: new RouletteWheelPopulationSelector("randomRoulette", false)},
                 ]),
                 // always regrow the population if necessary
                 new RepopulatePopulationSelector("repopulate"),
             ]),
             // stop early if the fitness is not improving within XYZ generations
             earlyStopping: new EnsureGrowthEarlyStoppingEvaluator(16),
+            metricCollector: new HallOfFameMetricCollector(32, uniqueTeamMatchupIdentity()),
         });
     }
 
-    public validateOptions(options: Required<IMobiusMatchmakingOptions>): void {
-        if (options.maximumGamesPerTeam < 1)
-            throw new Error("The maximum number of games must be at least 1.");
-        if (options.hardEloDifferentialLimit < 1)
-            throw new Error("The hard elo differential limit must be at least 1 (however recommended to be much higher).");
-
-        if (options.preventDuplicateMatchupsInLastXDays < 0)
-            throw new Error("The duplicate matchup day recency must be greater than 0 to be enabled, or 0 to be disabled.");
-        if (options.countGamesPlayedInLastXDays < 0)
-            throw new Error("The games played day recency must be greater than 0 to be enabled, or 0 to be disabled.");
-
-        if (options.permittedBackToBackRecency < 0)
-            throw new Error("The back-to-back scheduling protection must be greater than 0 to be enabled, or 0 to be disabled.");
+    public selectSolution(results: IGeneticAlgorithmResults<IMatchupSchedule<TTeam>, HallOfFameResult<IMatchupSchedule<TTeam>>>): IMatchupSchedule<TTeam> {
+        return results.metrics![0].solution;
     }
 }

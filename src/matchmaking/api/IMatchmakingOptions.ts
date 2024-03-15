@@ -1,4 +1,5 @@
 import {GeneticParameters} from "../../genetic/api/GeneticParameters";
+import {IGeneticAlgorithmResults} from "../../genetic/GeneticAlgorithm";
 import {KeysOfType, UndefinedValues} from "../../utilities/TypescriptTypes";
 import {ITeam} from './ITeam';
 import {IScheduledMatchup} from './ITeamMatchup';
@@ -8,7 +9,7 @@ import {IMatchupSchedule} from "./MatchmakingGeneticTypes";
 /**
  * Configurable options for the matchmaking algorithm for {@link matchmakeTeams}.
  *
- * {@link teams} and {@link configure} are the main components for the matchmaking algorithm. The other properties are
+ * {@link teams} and {@link config} are the main components for the matchmaking algorithm. The other properties are
  * parameters that affect the default implementation behavior of the algorithm.
  */
 export interface IMatchmakingOptions<TTeam extends ITeam = ITeam, TPartitionKey = string> {
@@ -21,7 +22,7 @@ export interface IMatchmakingOptions<TTeam extends ITeam = ITeam, TPartitionKey 
      * configuration properties to customize the genetic algorithm's behavior. Or, the consumer may return an entirely
      * different custom configuration object.
      */
-    readonly configure: MatchmakingConfig<TTeam, TPartitionKey>;
+    readonly config: MatchmakingConfig<TTeam, any, TPartitionKey>;
 
     /**
      * TODO
@@ -83,6 +84,10 @@ export interface IMatchmakingParameters<TTeam extends ITeam = ITeam, TPartitionK
     readonly teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>;
 }
 
-export abstract class MatchmakingConfig<TTeam extends ITeam = ITeam, TPartitionKey = string> {
-    public abstract configure(parameters: IMatchmakingParameters<TTeam, TPartitionKey>): GeneticParameters<IMatchupSchedule<TTeam>>;
+export abstract class MatchmakingConfig<TTeam extends ITeam = ITeam, TMetricCollectorType = any, TPartitionKey = string> {
+    public abstract configure(parameters: IMatchmakingParameters<TTeam, TPartitionKey>): GeneticParameters<IMatchupSchedule<TTeam>, TMetricCollectorType>;
+
+    public selectSolution(matchups: IGeneticAlgorithmResults<IMatchupSchedule<TTeam>, TMetricCollectorType>): IMatchupSchedule<TTeam> {
+        return matchups.population[0].solution;
+    }
 }

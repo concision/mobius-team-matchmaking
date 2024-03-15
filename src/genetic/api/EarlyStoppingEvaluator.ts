@@ -14,9 +14,7 @@ export class EnsureGrowthEarlyStoppingEvaluator<I> extends EarlyStoppingEvaluato
     private _growthFailures: number = 0;
 
     public constructor(maximumGrowthFailures: number);
-
     public constructor(name: string, maximumGrowthFailures: number);
-
     public constructor(nameOrMaximumGrowthFailures: string | number, maximumGrowthFailures?: number) {
         super(typeof nameOrMaximumGrowthFailures === "string" ? nameOrMaximumGrowthFailures : EnsureGrowthEarlyStoppingEvaluator.name);
         this._maximumGrowthFailures = typeof nameOrMaximumGrowthFailures === "string" ? maximumGrowthFailures! : nameOrMaximumGrowthFailures;

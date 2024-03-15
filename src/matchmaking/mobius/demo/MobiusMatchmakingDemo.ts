@@ -53,7 +53,7 @@ class MobiusMatchmakingDemo {
                 partitionBy: 'region',
                 scheduledDate: date,
                 excludeTimeSlotsThatAlreadyOccurred: false,
-                configure: mobiusDemoMatchmakingConfig,
+                config: mobiusDemoMatchmakingConfig,
             });
         } finally {
             console.log = originalLogger;

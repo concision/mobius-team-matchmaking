@@ -1,12 +1,12 @@
 import {EarlyStoppingEvaluator} from "./EarlyStoppingEvaluator";
 import {FitnessFunction} from "./FitnessFunction";
-import {GeneticOperator, IGeneticOperatorChild} from "./GeneticOperator";
+import {GeneticOperator, IGeneticOperatorChildren} from "./GeneticOperator";
 import {IndividualGenerator} from "./IndividualGenerator";
 import {IndividualMutator} from "./IndividualMutator";
 import {MetricCollector} from "./MetricCollector";
 import {PopulationSelector} from "./PopulationSelector";
 
-export interface IGeneticParameters<I> {
+export interface IGeneticParameters<I, TMetricCollector> {
     debugLogging?: boolean;
 
     maximumGenerations: number;
@@ -15,17 +15,19 @@ export interface IGeneticParameters<I> {
     firstGeneration?: readonly I[];
     individualGenerator?: IndividualGenerator<I>;
 
-    individualMutator: IndividualMutator<I, unknown>;
-    fitnessFunction: FitnessFunction<I, unknown>;
-    populationSelector: PopulationSelector<I, unknown>;
+    individualMutator: IndividualMutator<I, any>;
+    fitnessFunction: FitnessFunction<I, any>;
+    populationSelector: PopulationSelector<I, any>;
     earlyStopping?: EarlyStoppingEvaluator<I>;
 
-    metricCollector?: MetricCollector<I, unknown>;
+    metricCollector?: MetricCollector<I, TMetricCollector>;
 }
 
-type RequiredGeneticParameters<I> = IGeneticParameters<I> & Required<Pick<IGeneticParameters<I>, "debugLogging">>;
+type RequiredGeneticParameters<I, TMetricCollector> = IGeneticParameters<I, TMetricCollector>
+    & Required<Pick<IGeneticParameters<I, TMetricCollector>, "debugLogging">>;
 
-export class GeneticParameters<I> extends GeneticOperator<I, GeneticOperator<I, unknown>> implements RequiredGeneticParameters<I> {
+export class GeneticParameters<I, TMetricCollector> extends GeneticOperator<I, GeneticOperator<I, any>>
+    implements RequiredGeneticParameters<I, TMetricCollector> {
     private _debugLogging: boolean;
 
     private _maximumGenerations: number;
@@ -34,14 +36,14 @@ export class GeneticParameters<I> extends GeneticOperator<I, GeneticOperator<I, 
     private _firstGeneration?: readonly I[] | undefined;
     private _individualGenerator?: IndividualGenerator<I> | undefined;
 
-    private _individualMutator: IndividualMutator<I, unknown>;
-    private _fitnessFunction: FitnessFunction<I, unknown>;
-    private _populationSelector: PopulationSelector<I, unknown>;
-    private _earlyStopping?: EarlyStoppingEvaluator<I> | undefined
+    private _individualMutator: IndividualMutator<I, any>;
+    private _fitnessFunction: FitnessFunction<I, any>;
+    private _populationSelector: PopulationSelector<I, any>;
+    private _earlyStopping?: EarlyStoppingEvaluator<I> | undefined;
 
-    private _metricCollector?: MetricCollector<I, unknown> | undefined;
+    private _metricCollector?: MetricCollector<I, TMetricCollector> | undefined;
 
-    public constructor(parameters: IGeneticParameters<I>) {
+    public constructor(parameters: IGeneticParameters<I, TMetricCollector>) {
         super(GeneticParameters.name);
 
         this._debugLogging = parameters.debugLogging ?? false;
@@ -116,31 +118,31 @@ export class GeneticParameters<I> extends GeneticOperator<I, GeneticOperator<I, 
         this._individualGenerator = value;
     }
 
-    public get individualMutator(): IndividualMutator<I, unknown> {
+    public get individualMutator(): IndividualMutator<I, any> {
         return this._individualMutator;
     }
 
-    public set individualMutator(value: IndividualMutator<I, unknown>) {
+    public set individualMutator(value: IndividualMutator<I, any>) {
         if (!(value instanceof IndividualMutator))
             throw new Error(`${GeneticParameters.name}.individualMutator must be an instance of ${IndividualMutator.name}`);
         this._individualMutator = value;
     }
 
-    public get fitnessFunction(): FitnessFunction<I, unknown> {
+    public get fitnessFunction(): FitnessFunction<I, any> {
         return this._fitnessFunction;
     }
 
-    public set fitnessFunction(value: FitnessFunction<I, unknown>) {
+    public set fitnessFunction(value: FitnessFunction<I, any>) {
         if (!(value instanceof FitnessFunction))
             throw new Error(`${GeneticParameters.name}.fitnessFunction must be an instance of ${FitnessFunction.name}`);
         this._fitnessFunction = value;
     }
 
-    public get populationSelector(): PopulationSelector<I, unknown> {
+    public get populationSelector(): PopulationSelector<I, any> {
         return this._populationSelector;
     }
 
-    public set populationSelector(value: PopulationSelector<I, unknown>) {
+    public set populationSelector(value: PopulationSelector<I, any>) {
         if (!(value instanceof PopulationSelector))
             throw new Error(`${GeneticParameters.name}.populationSelector must be an instance of ${PopulationSelector.name}`);
         this._populationSelector = value;
@@ -156,24 +158,27 @@ export class GeneticParameters<I> extends GeneticOperator<I, GeneticOperator<I, 
         this._earlyStopping = value;
     }
 
-    public get metricCollector(): MetricCollector<I, unknown> | undefined {
+    public get metricCollector(): MetricCollector<I, TMetricCollector> | undefined {
         return this._metricCollector;
     }
 
-    public set metricCollector(value: MetricCollector<I, unknown> | undefined) {
+    public set metricCollector(value: MetricCollector<I, TMetricCollector> | undefined) {
         if (value !== undefined && !(value instanceof MetricCollector))
             throw new Error(`${GeneticParameters.name}.metricCollector must be an instance of ${MetricCollector.name}`);
         this._metricCollector = value;
     }
 
-    public get geneticOperatorChildren(): readonly IGeneticOperatorChild<I, GeneticOperator<I, unknown>>[] {
-        return Object.freeze(<IGeneticOperatorChild<I, GeneticOperator<I, unknown>>[]>[
-            {child: this._individualMutator},
-            {child: this._fitnessFunction},
-            {child: this._populationSelector},
-            {child: this._individualGenerator},
-            {child: this._earlyStopping},
-            {child: this._metricCollector},
-        ]);
+
+    protected get provideChildren(): IGeneticOperatorChildren<I, GeneticOperator<I, any>> {
+        return Object.freeze({
+            children: Object.freeze(<GeneticOperator<I, any>[]>[
+                this._individualMutator,
+                this._fitnessFunction,
+                this._populationSelector,
+                this._individualGenerator,
+                this._earlyStopping,
+                this._metricCollector,
+            ]),
+        });
     }
 }

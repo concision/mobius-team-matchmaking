@@ -5,27 +5,32 @@ import {GeneticOperator} from "./GeneticOperator";
 import {IndividualIdentityFunction} from "./IndividualIdentityFunction";
 import {IGeneration} from "./PopulationSelector";
 
-export abstract class MetricCollector<I, TChildType = undefined> extends GeneticOperator<I, TChildType> {
+export abstract class MetricCollector<I, TReturnType, TChildType = undefined>
+    extends GeneticOperator<I, TChildType> {
     public abstract update(generation: IGeneration<I>): void;
 
-    public abstract finalize(): object;
+    public abstract finalize(): TReturnType;
 }
 
 
-export class HallOfFameMetricCollector<I> extends MetricCollector<I> {
+export type HallOfFameResult<I> = readonly IFitness<I>[];
+
+export class HallOfFameMetricCollector<I> extends MetricCollector<I, HallOfFameResult<I>> {
     private _individuals: number;
     private _identityFunction: IndividualIdentityFunction<I>;
 
     private fittest: IFitness<I>[] = [];
 
+    public constructor(individuals: number, identityFunction: IndividualIdentityFunction<I>);
+    public constructor(name: string, individuals: number, identityFunction: IndividualIdentityFunction<I>);
     public constructor(
-        name: string,
-        individuals: number,
-        identityFunction: IndividualIdentityFunction<I>,
+        name: string | number,
+        individuals: number | IndividualIdentityFunction<I>,
+        identityFunction?: IndividualIdentityFunction<I>
     ) {
-        super(name);
-        this._individuals = individuals;
-        this._identityFunction = identityFunction;
+        super(3 <= arguments.length ? <string>name : HallOfFameMetricCollector.name);
+        this._individuals = <number>(arguments.length <= 2 ? name : individuals);
+        this._identityFunction = <IndividualIdentityFunction<I>>(arguments.length <= 2 ? individuals : identityFunction);
 
         this.validateIfConsumerInstantiation(HallOfFameMetricCollector, arguments);
     }
@@ -62,20 +67,20 @@ export class HallOfFameMetricCollector<I> extends MetricCollector<I> {
             .slice(0, this._individuals);
     }
 
-    public override finalize(): readonly IFitness<I>[] {
+    public override finalize(): HallOfFameResult<I> {
         return Object.freeze(this.fittest);
     }
 }
 
-export class AggregateMetricCollector<I> extends MetricCollector<I, MetricCollector<I>> {
-    private readonly collectors: MetricCollector<I>[];
+export class AggregateMetricCollector<I> extends MetricCollector<I, ReadonlyMap<string, any>, MetricCollector<I, any>> {
+    private readonly collectors: MetricCollector<I, any>[];
 
-    public constructor(name: string, collectors: readonly MetricCollector<I>[]) {
+    public constructor(name: string, collectors: readonly MetricCollector<I, any>[]) {
         super(name);
         this.collectors = [...(collectors ?? [])];
     }
 
-    public get children(): readonly MetricCollector<I>[] {
+    public get children(): readonly MetricCollector<I, any>[] {
         return this.collectors;
     }
 
