@@ -1,7 +1,7 @@
 {
   "name": "@concision/mobius-team-matchmaking",
   "version": "0.2.0",
-  "description": "A competitive team-matchmaking algorithm for the melee game Mobius that utilizes a genetic algorithm to optimize for balanced team fights by analyzing criteria such as Elo differential, availability, frequency of games played, etc.",
+  "description": "A competitive team-matchmaking algorithm for the melee game Mobius that utilizes genetic programming to optimize for balanced team matchup schedules.",
   "author": "Concision <contact@concision.me>",
   "license": "GPL-3.0-only",
   "repository": {

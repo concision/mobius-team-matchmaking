@@ -1,59 +1,61 @@
 <h1 align="center">
-    Mobius: Competitive Team Matchmaking
+    Mobius's Competitive Team Matchmaking Algorithm
 </h1>
 
 <p align="center">
-    <i>A competitive team-matchmaking algorithm for the melee game <a href="https://store.steampowered.com/app/1766450/Mobius/">Mobius</a> that utilizes a genetic algorithm to optimize for balanced team match-ups.</i>
+    <a href="https://github.com/concision/mobius-team-matchmaking/blob/master/LICENSE"><img alt="Repository license" src="https://img.shields.io/github/license/concision/mobius-team-matchmaking?style=for-the-badge"/></a>
+    <a href="https://github.com/concision/mobius-team-matchmaking/pkgs/npm/mobius-team-matchmaking"><img alt="npm package: esm-loader-chaining-polyfill" src="https://img.shields.io/github/package-json/v/concision/mobius-team-matchmaking?color=red&logo=npm&style=for-the-badge"/></a>
+    <a href="https://github.com/concision/mobius-team-matchmaking/blob/master/package.json#L29C5-L29C23"><img alt="Node.js engine compatibility" src="https://img.shields.io/node/v/mobius-team-matchmaking?color=green&logo=node.js&logoColor=green&style=for-the-badge"/></a>
+</p>
+
+<p align="center">
+    <i>A competitive team-matchmaking algorithm for the melee game <a href="https://store.steampowered.com/app/1766450/Mobius/">Mobius</a> 
+        that utilizes genetic programming to optimize for balanced team matchup schedules.</i>
 </p>
 
 ## Table of Contents
 
 - [Motivations](#motivations)
-- [Build Instructions](#build-instructions)
 - [Usage](#usage)
-- [TODOs](#todos)
+    - [Releases](#releases)
+    - [Build Instructions](#build-instructions)
+    - [API](#api)
+- [Planned TODOs](#planned-todos)
 - [License](#license)
 
 <hr>
 
 ## Motivations
 
-The early-access multiplayer game [Mobius](https://store.steampowered.com/app/1766450/Mobius/) features a competitive
-tournament scene for teams of exactly 5 players. Team captains submit their team's availability in the game's
-[Discord server](https://discord.gg/mobiuscompetitive) to be scheduled to compete against another team in a match-up.
-Two teams will compete against each other for up to an hour, where the winning team takes
-[Elo rating](https://en.wikipedia.org/wiki/Elo_rating_system) from the losing team.
+The early-access multiplayer PvP game [Mobius](https://store.steampowered.com/app/1766450/Mobius/) features a
+competitive tournament league for teams to compete against each other on a weekly basis. Whereas traditional tournaments
+run on scheduled dates, Mobius's competitive scene permits teams to schedule their availability throughout the week on
+the game's [Discord server](https://discord.gg/mobiuscompetitive) and are to be automatically scheduled to compete
+against other teams.
 
-Team matchmaking is a difficult problem, since several factors must be considered to ensure a fair and balanced
-match-up. These factors include:
+While randomly scheduling teams to compete against each other is a simple solution, it is not a fair solution. Mobius's
+competitive scene aims to be fair and balanced which is important for the competitive integrity of the game and for the
+enjoyment of the players. Unfortunately, there is no obvious algorithm to solve this problem optimally, as the search
+space is massive and the constraints are complex to optimize for. Further, an algorithm should optimize for fairness
+across every team, not just for a single team.
 
-1. **(Required)** Teams cannot compete against a team from another geographic region in the interest of minimizing
-   latency for fairness (e.g. a NA team cannot compete against an EU team).
-2. **(Required)** Each team can only be scheduled once per time slot to avoid double-booking.
-3. **(Required)** Teams cannot play back-to-back matches to prevent fatigue (e.g. a team cannot play a 8pm match and
-   then subsequently a 9pm match on the same day).
-4. **(Soft)** The skill-level between competing teams should be minimal to ensure balanced wins/losses. Teams will be
-   assigned [Elo rating](https://en.wikipedia.org/wiki/Elo_rating_system) that will be used to estimate their skill
-   level; winning teams will take Elo from losing teams. The Elo differential between two teams should not exceed a
-   certain threshold, by default 200.
-5. **(Soft)** Teams should avoid being match-made with other teams they have competed against in the last 2 weeks.
-6. **(Soft)** The amount of games each team plays should be roughly equal (relative to their join time in the current
-   season).
+**This repository implements a competitive team matchmaking algorithm for Mobius that strives for fair and balanced
+team matchup schedules by utilizing genetic programming to optimize for desirable matchmaking criteria.** The algorithm
+is designed to be extensible and configurable for other competitive games and leagues, or for optimization of other
+criteria.
 
-> A **required constraint** is a constraint that must be satisfied for the match-up to be valid. A **soft constraint**
-> is a constraint that is desirable to optimize and satisfy, but not strictly required for a valid match-up.
+## Usage
 
-There is no obvious algorithm to solve this problem optimally, as the search space is massive and the constraints are
-complex to optimize for. Further, an algorithm should optimize for fairness across every team, not just for a single
-team.
+## Releases
 
-This repository uses a genetic algorithm implementation for Mobius's competitive team matchmaking that aims to optimize
-for balanced team match-ups for all teams.
+Prebuilt NPM packages are available for this repository
+via [Releases](https://github.com/concision/mobius-team-matchmaking/releases)
+and [GitHub Packages](https://github.com/concision?tab=packages&repo_name=mobius-team-matchmaking).
 
-## Build Instructions
+### Build Instructions
 
 This project uses [Node.js v20](https://nodejs.org/en/download) and
-[Yarn v2](https://yarnpkg.com/getting-started/install) for development. To build the project, run the following
+[Yarn v2](https://yarnpkg.com/getting-started/install) for development. To build the project locally, run the following
 commands:
 
 ```bash
@@ -62,32 +64,27 @@ yarn install --immutable --immutable-cache --check-cache
 yarn run build
 ```
 
-> Note: You may need to run `corepack enable` in a terminal with elevated permissions.
+> Note: `corepack enable` will likely need to be executed in a terminal with elevated permissions.
 
-See the [Releases](https://github.com/concision/mobius-team-matchmaking/releases)
-and [Packages](https://github.com/concision?tab=packages&repo_name=mobius-team-matchmaking) pages for pre-built
-NPM packages.
+### API
 
-## Usage
+There is a single public API function for performing matchmaking:
+[`matchmakeTeams(teams: ITeam[], options: IMatchmakingOptions): IMatchmakingResult`](src/matchmaking/TeamMatchmaking.ts#L26-L51).
 
-There are two "entrypoint" API functions that are exported from this module:
-
-- [`matchmakeTeams(options: IMatchmakingOptions): IMatchmakingResult`](src/matchmaking/api/TeamMatchmaking.ts#L141C1-L149C78):
-  Matchmakes teams without partitioning by region - all teams must be from the same region.
-- [`matchmakeTeamsByRegion(options: IMatchmakingOptions): IMatchmakingResult`](src/matchmaking/api/TeamMatchmaking.ts#L151C1-L159C86):
-  Partitions teams by region and matchmakes each region separately.
-
-To run the [matchmaking demo](src/matchmaking/mobius/demo/MatchmakingDemo.ts) with the existing dataset
-in `./data/teams.json`,
-follow the [build instructions](#build-instructions) and then run the following command:
+An example implementation can be found in
+the [matchmaking demo](src/matchmaking/mobius/demo/MobiusDemoMatchmakingConfig.ts) with
+the [default genetic configuration](src/matchmaking/mobius/MobiusMatchmakingConfig.ts). To run the matchmaking demo with
+the existing dataset in `./data/teams.json`, follow the [build instructions](#build-instructions) and then run the
+following CLI command:
 
 ```bash
 yarn run demo
 ```
 
-## TODOs
+## Planned TODOs
 
-A non-exhaustive list of tasks (in no particular order) to maybe be completed:
+<details>
+  <summary>A non-exhaustive list of tasks (in no particular order) to maybe be completed</summary>
 
 - [x] Initial experimental matchmaking API v0.1.0
     - [x] Implement genetic programming library
@@ -99,18 +96,17 @@ A non-exhaustive list of tasks (in no particular order) to maybe be completed:
         - [x] Automatic build validation on new commits
         - [x] Publish to GitHub NPM Packages on new semver tags
 
-- [ ] Significantly improve repository quality
-    - [ ] Comprehensively document all TypeScript types and functions
-    - [ ] Abstract complex data aggregations and mathematical operations to separate library functions
-    - [ ] Improve README documentation
-        - [ ] Shorten ['Motivations'](#motivations) section
-        - [ ] Explain matchmaking criteria and difficulty
-        - [ ] Explain genetic algorithm approach and optimization criteria
-        - [ ] Explain the API and its supported options
-        - [ ] Add silly GitHub badges and ✨flair✨
-    - [ ] Implement unit tests for all trivial library functions
+- Significantly improve repository quality
+    - [x] Document TypeScript types and functions
+    - [x] Abstract complex data aggregations and mathematical operations to separate library functions
+    - [x] Improve README documentation
+        - [x] Shorten ['Motivations'](#motivations) section
+        - [x] Explain matchmaking criteria and difficulty
+        - [x] Explain genetic algorithm approach and optimization criteria
+        - [x] Explain the API and its supported options
+        - [x] Add silly GitHub badges and ✨flair✨
 
-- [ ] Implement new library features
+- Implement new library features
     - [x] Permit any derived type of `ITeam` to be used in the matchmaking API
 
     - [x] Merge the region-partitioned matchmaking API with the non-partitioned API; expose a configuration option
@@ -121,12 +117,8 @@ A non-exhaustive list of tasks (in no particular order) to maybe be completed:
           root `IGeneticOptions`)
         - [x] Implement various helpful functions for tweaking `GeneticOperator` properties/weights without needing to
           rewrite an entire genetic operator configuration
-        - [x] Implement immutable types
-        - [ ] Improve debuggability of genetic algorithm types (e.g. weighted fitness functions are difficult to debug)
 
     - [ ] Implement configurable asynchronous multithreading pool using Node.js workers
-      > The current implementation blocks the main thread for a non-negligible amount of time, e.g. up to 10 seconds for
-      larger datasets
         - [ ] Implement configuration option for asynchronous and worker pool size
         - [ ] Determine how to pass consumer genetic operators to worker threads (e.g. pure functions and class
           definitions that are serializable? scoped closures would not be supported)
@@ -136,6 +128,9 @@ A non-exhaustive list of tasks (in no particular order) to maybe be completed:
     - [ ] Integrate `eslint` linter for TypeScript
     - [ ] Integrate `prettier` formatter for TypeScript with IDE integration
     - [ ] Integrate unit test framework
+        - [ ] Implement unit tests for all trivial library functions
+
+</details>
 
 ## License
 
