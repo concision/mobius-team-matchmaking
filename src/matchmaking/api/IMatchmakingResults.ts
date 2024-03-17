@@ -2,16 +2,15 @@ import {ITeam} from "./ITeam";
 import {IScheduledMatchup} from "./ITeamMatchup";
 import {ITimeSlot} from "./ITimeSlot";
 
-export interface IPartitionedMatchmakingResults<TTeam extends ITeam = ITeam, TPartitionKey = string>
-    extends Pick<IMatchmakingResults, 'unmatchedTeams'> {
-    readonly results: ReadonlyMap<TPartitionKey, IMatchmakingResults<TTeam>>;
-}
-
 /**
  * Represents the result of executing the matchmaking algorithm on a set of teams. This structure contains the matchups
- * that have been scheduled, as well as any teams that were unable to be matched.
+ * that have been scheduled, teams that were unable to be matched, as well as various other statistics and data.
  */
 export interface IMatchmakingResults<TTeam extends ITeam = ITeam> {
+    /**
+     * A list of all teams that were input into the matchmaking algorithm. If team partitioning was set via
+     * {@link IMatchmakingOptions.partitionBy}, then this list will be a subset of teams for the current partition.
+     */
     readonly teams: readonly TTeam[];
 
     /**
@@ -28,9 +27,21 @@ export interface IMatchmakingResults<TTeam extends ITeam = ITeam> {
     readonly unmatchedTeams: ReadonlyMap<TTeam, MatchupFailureReason>;
 
     /**
-     * TODO
+     * A map of time slots to the teams that are available to compete in that time slot.
      */
     readonly teamAvailability: ReadonlyMap<ITimeSlot, readonly TTeam[]>;
+
+    /**
+     * The total possible number of unique matchup schedules (i.e. "search space") that the matchmaking algorithm
+     * must explore through in order to find the best possible matchups. Note that this does not represent the number
+     * of explored schedules, but rather the total number of possible schedules that could be explored.
+     */
+    readonly searchSpace: bigint;
+}
+
+export interface IPartitionedMatchmakingResults<TTeam extends ITeam = ITeam, TPartitionKey = string>
+    extends Pick<IMatchmakingResults, 'unmatchedTeams' | 'searchSpace'> {
+    readonly results: ReadonlyMap<TPartitionKey, IMatchmakingResults<TTeam>>;
 }
 
 /**

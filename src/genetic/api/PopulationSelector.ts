@@ -226,10 +226,7 @@ export class RouletteWheelPopulationSelector<I> extends PopulationSelector<I> {
 export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
     private _tournamentSize: number;
 
-    public constructor(
-        name: string,
-        tournamentSize: number,
-    ) {
+    public constructor(name: string, tournamentSize: number) {
         super(name);
         this._tournamentSize = tournamentSize;
 
@@ -263,10 +260,7 @@ export class TournamentPopulationSelector<I> extends PopulationSelector<I> {
 export class DeduplicatePopulationSelector<I> extends PopulationSelector<I> {
     private _identityFunction: IndividualIdentityFunction<I>;
 
-    public constructor(
-        name: string,
-        identityFunction: IndividualIdentityFunction<I>,
-    ) {
+    public constructor(name: string, identityFunction: IndividualIdentityFunction<I>) {
         super(name);
         this._identityFunction = identityFunction;
 

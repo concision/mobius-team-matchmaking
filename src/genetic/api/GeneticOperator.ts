@@ -4,7 +4,8 @@ import {GeneticParameters} from "./GeneticParameters";
 
 export abstract class GeneticOperator<I, TChildType = undefined> {
     public readonly name: string;
-    private _parameters: GeneticParameters<TChildType, any> | undefined;
+
+    private _parameters?: GeneticParameters<TChildType, any>;
 
     public constructor(name: string) {
         this.name = name;
@@ -192,7 +193,7 @@ export abstract class GeneticOperator<I, TChildType = undefined> {
     }
 
     public replaceByPredicate<T extends TChildType>(predicate: (child: IGeneticOperatorChild) => boolean, replacement: TChildType, recursive: false): void;
-    public replaceByPredicate(predicate: (child: any, operator?: GeneticOperator<I, any>) => boolean, replacement: any, recursive: true): void;
+    public replaceByPredicate(predicate: (child: IGeneticOperatorChild) => boolean, replacement: any, recursive: true): void;
     public replaceByPredicate(
         predicate: (child: IGeneticOperatorChild) => boolean,
         replacement: any,

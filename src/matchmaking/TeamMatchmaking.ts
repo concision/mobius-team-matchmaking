@@ -1,5 +1,6 @@
 import {geneticAlgorithm} from "../genetic/GeneticAlgorithm";
 import {assignDefinedProperties, groupBy} from "../utilities/CollectionUtilities";
+import {factorial} from "../utilities/MathUtil";
 import {KeysOfType} from "../utilities/TypescriptTypes";
 import {
     IConfiguredMatchmakingOptions,
@@ -20,7 +21,7 @@ import {
     translateTimeSlotToDate
 } from "./TimeSlot";
 
-const defaultPartitionKey = {};
+const defaultPartitionKey = Object.freeze({});
 
 export function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey = string>(
     teams: readonly TTeam[],
@@ -32,18 +33,17 @@ export function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey = stri
     options: IPartitionedMatchmakingOptions<TTeam, TPartitionKey>,
 ): Promise<IPartitionedMatchmakingResults<TTeam, TPartitionKey>>;
 
-// TODO: update documentation
 /**
- * Performs the matchmaking algorithm on a set of teams, automatically partitioning them by region. This is a
- * convenience method computing matchups for all regions in the league at once. If a specific region needs to be
- * recomputed due to changes, use {@link matchmakeTeams} directly or invoke this with a subset of the teams.
+ * Performs the matchmaking algorithm on a set of teams, automatically partitioning them by
+ * {@link IMatchmakingOptions.partitionBy} if defined.
  *
- * @param teams An array of teams that are competing in the season's league. These teams will attempt to be paired up by the
- * matchmaking algorithm, referred to as a "matchup".
- * @param options The input options for the matchmaking algorithm. See {@link IMatchmakingOptions}.
- * @template TTeam
- * @template TPartitionKey
- * @exception Error If {@link options.maximumGames} is not a positive integer, then an exception will be thrown.
+ * @param teams An array of teams that are competing in the season's league. These teams will attempt to be paired up
+ * by the matchmaking algorithm, referred to as a "matchup".
+ * @param options The input options for the matchmaking algorithm; see {@link IMatchmakingOptions}.
+ * @template TTeam A derived type of {@link ITeam}; this is useful for consumers to extend the base {@link ITeam} with
+ * additional properties that are specific to their domain.
+ * @template TPartitionKey The type of the partition key that is used to partition the teams into separate groups; e.g.
+ * a string "region".
  */
 export async function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey = string>(
     teams: readonly TTeam[],
@@ -51,11 +51,13 @@ export async function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey 
 ): Promise<IMatchmakingResults<TTeam> | IPartitionedMatchmakingResults<TTeam, TPartitionKey>> {
     const parameters: IConfiguredMatchmakingOptions<TTeam, TPartitionKey> = addDefaultsAndValidateParameters(options);
 
+    // partition all teams by the partitioning function
     const partitioningFunction = parameters.partitionBy === undefined ? (() => <TPartitionKey>defaultPartitionKey)
         : typeof parameters.partitionBy === 'function' ? parameters.partitionBy
             : ((team: TTeam) => team[<keyof KeysOfType<ITeam, TPartitionKey>>parameters.partitionBy]);
     const partitionedTeams: ReadonlyMap<TPartitionKey, readonly TTeam[]> = groupBy<TPartitionKey, TTeam>(teams, partitioningFunction);
 
+    // matchmake each partition of teams
     type PartitionResult = { partitionKey: TPartitionKey; result: IMatchmakingResults<TTeam>; }
     const promises: Promise<PartitionResult>[] = [];
     for (const [partitionKey, partitionTeams] of partitionedTeams.entries()) {
@@ -66,6 +68,7 @@ export async function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey 
     }
     const partitionedResults = groupBy(await Promise.all(promises), result => result.partitionKey);
 
+    // combine partitioned results into a single result structure
     const unmatchedTeams = new Map<ITeam, MatchupFailureReason>();
     const results = new Map<TPartitionKey, IMatchmakingResults<TTeam>>();
     for (const [partitionKey, [{result}]] of partitionedResults.entries()) {
@@ -73,10 +76,13 @@ export async function matchmakeTeams<TTeam extends ITeam = ITeam, TPartitionKey 
         for (const [team, reason] of result.unmatchedTeams.entries())
             unmatchedTeams.set(team, reason);
     }
-    return {results: results, unmatchedTeams};
+    const searchSpace = Array.from(results.values())
+        .filter(({searchSpace}) => 0 < searchSpace)
+        .reduce((sum, {searchSpace}) => sum * searchSpace, BigInt(10));
+    return {results, unmatchedTeams, searchSpace};
 }
 
-// TODO: implement worker multithreading; current async signature is a placeholder
+// TODO: possibly implement worker multithreading; current async signature is a placeholder
 async function matchmakeTeamPartition<TTeam extends ITeam = ITeam, TPartitionKey = string>(
     teams: readonly TTeam[],
     partitionKey: TPartitionKey,
@@ -91,22 +97,18 @@ async function matchmakeTeamPartition<TTeam extends ITeam = ITeam, TPartitionKey
         teamsPartitionedByTimeSlot = filterTimeSlotsThatAlreadyOccurred(teamsPartitionedByTimeSlot);
     const {teamsByTimeSlot, unavailableTeams} = teamsPartitionedByTimeSlot;
 
-    // if all teams are unavailable, no matchups can be scheduled
-    if (unavailableTeams.size === teams.length)
-        return Promise.resolve<IMatchmakingResults<TTeam>>({
-            teams,
-            scheduledMatchups: [],
-            unmatchedTeams: unavailableTeams,
-            teamAvailability: teamsByTimeSlot,
-        });
-
-    // prepare genetic algorithm constraints
-    const geneticParameters = options.config.configure({options, partitionKey, teamsByTimeSlot});
-
     // run the genetic algorithm to compute matchmaking results
-    const results = geneticAlgorithm(geneticParameters);
+    let solution: IMatchupSchedule<TTeam>;
+    if (Array.from(teamsByTimeSlot.values()).some(teams => 2 <= teams.length)) { // at least two teams are available
+        // prepare genetic algorithm constraints
+        const geneticParameters = options.config.configure({options, partitionKey, teamsByTimeSlot});
 
-    const solution = options.config.selectSolution(results);
+        // run the genetic algorithm to compute matchmaking results
+        const results = geneticAlgorithm(geneticParameters);
+        solution = options.config.selectSolution(results);
+    } else { // no teams are available
+        solution = {matchups: [], unmatchedTeams: new Map()};
+    }
 
     // translate matchups into a format that is more useful for the consumer
     return convertToMatchmakingResults<TTeam>(teams, teamsByTimeSlot, unavailableTeams, solution);
@@ -134,9 +136,9 @@ function convertToMatchmakingResults<TTeam extends ITeam>(
     teams: readonly TTeam[],
     teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>,
     unavailableTeams: ReadonlyMap<TTeam, MatchupFailureReason>,
-    solution: IMatchupSchedule<TTeam>,
+    solution?: IMatchupSchedule<TTeam>,
 ): IMatchmakingResults<TTeam> {
-    const scheduledMatchups = solution.matchups
+    const scheduledMatchups = solution?.matchups
         .map(({timeSlot, teams}) => <IScheduledMatchup<TTeam>>({
             time: timeSlot,
             teams: <[ITeamNotYetPlayed<TTeam>, ITeamNotYetPlayed<TTeam>]>teams.map(team => ({
@@ -146,15 +148,18 @@ function convertToMatchmakingResults<TTeam extends ITeam>(
             })),
             played: false,
         }))
-        .toSorted(sortScheduledMatchupsByTime);
+        .toSorted(sortScheduledMatchupsByTime) ?? [];
 
     const unmatchedTeamReasons = new Map<TTeam, MatchupFailureReason>(unavailableTeams);
-    const matchedTeams = new Set<TTeam>(solution.matchups.flatMap(matchup => matchup.teams));
+    const matchedTeams = new Set<TTeam>(solution?.matchups.flatMap(matchup => matchup.teams) ?? []);
     const unmatchedTeams = Array.from(teams
         .flatMap(teams => teams)
         .filter(team => !matchedTeams.has(team) && !unmatchedTeamReasons.has(team))
-        .reduce((uniqueTeams, team) => !uniqueTeams.has(team.snowflake) ? uniqueTeams.set(team.snowflake, team) : uniqueTeams, new Map<string, TTeam>())
-        .values()
+        .reduce((uniqueTeams, team) => !uniqueTeams.has(team.snowflake)
+                ? uniqueTeams.set(team.snowflake, team)
+                : uniqueTeams,
+            new Map<string, TTeam>()
+        ).values()
     );
     for (const unmatchedTeam of unmatchedTeams)
         unmatchedTeamReasons.set(unmatchedTeam, MatchupFailureReason.NO_IDEAL_MATCHUPS);
@@ -164,5 +169,21 @@ function convertToMatchmakingResults<TTeam extends ITeam>(
         scheduledMatchups,
         unmatchedTeams: unmatchedTeamReasons,
         teamAvailability: teamsByTimeSlot,
+        searchSpace: computeSearchSpace(teamsByTimeSlot),
     };
+}
+
+function computeSearchSpace<TTeam extends ITeam>(teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>): bigint {
+    const solutions: bigint = Array.from(teamsByTimeSlot.values())
+        .filter(teams => 2 <= teams.length)
+        .map(teams => {
+            const teamFactorial = factorial(2 * Math.floor(teams.length / 2));
+            let sum = BigInt(1);
+            for (let t = 1; t <= Math.floor(teams.length / 2); t++)
+                // (|totalTeams| multi-choose 2, 2, ...) / |chosenTeamCount|
+                sum += teamFactorial / ((BigInt(2) ** BigInt(t)) * factorial(t));
+            return sum;
+        })
+        .reduce((sum, searchSpace) => sum * searchSpace, BigInt(1));
+    return solutions == BigInt(1) ? BigInt(0) : solutions;
 }

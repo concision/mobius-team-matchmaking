@@ -32,10 +32,7 @@ class MobiusMatchmakingDemo {
         for (const team of this.loadedTeams as Writeable<IMobiusTeam>[])
             team.elo = Math.floor(random.next(1200, 1900)); // a smaller ELO range results in more matchups
 
-        // list team counts by region
-        console.log(bold(`Loaded ${greenBright(this.loadedTeams!.length.toString())} teams from dataset:`));
-        for (const [region, regionTeams] of groupBy(this.loadedTeams!, team => team.region).entries())
-            console.log(` - Region ${magentaBright(region)} has ${greenBright(regionTeams.length.toString())} teams`);
+        console.log(bold(`Loaded ${greenBright(this.loadedTeams!.length.toString())} teams from dataset`));
     }
 
     private async matchmake(): Promise<void> {
@@ -44,20 +41,28 @@ class MobiusMatchmakingDemo {
         date.setDate(date.getDate() - date.getDay()); // set to sunday of this week
         // date.setDate(date.getDate() + 7 * 2); // uncomment this for 2 weeks from now
         console.log(bold("Scheduling matchmaking on the week of ") + yellowBright(date.toString()));
-        console.log();
 
         const originalLogger = console.log;
         console.log = (...args: any[]) => originalLogger(...[gray("[DEBUG]")].concat(args.map(arg => gray(arg))));
+        const now = Date.now();
         try {
             this.results = await matchmakeTeams<IMobiusTeam>(this.loadedTeams!, {
+                config: mobiusDemoMatchmakingConfig,
                 partitionBy: 'region',
                 scheduledDate: date,
                 excludeTimeSlotsThatAlreadyOccurred: false,
-                config: mobiusDemoMatchmakingConfig,
             });
         } finally {
             console.log = originalLogger;
         }
+        console.log(bold(`Matchmaking completed in ${blueBright(((Date.now() - now) / 1000).toString())}s`));
+        console.log();
+
+        console.log(bold(`Partitioned metrics:`) + ` (possible schedules: ${blueBright(this.results!.searchSpace.toString())})`);
+        for (const [region, regionResults] of  this.results!.results)
+            console.log(bold(` - Region ${magentaBright(region)} has ${greenBright(regionResults.teams.length.toString())} total teams`)
+            + ` (possible schedules: ${blueBright(regionResults.searchSpace.toString())})`);
+        console.log();
     }
 
     private printResults(): void {

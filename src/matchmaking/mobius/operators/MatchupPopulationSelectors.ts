@@ -125,10 +125,10 @@ export class HardEloDifferentialLimitKillPredicate<TTeam extends ITeam> extends 
 export function selectBestMatchupSchedule<TTeam extends ITeam>(solutions: readonly IMatchupSchedule<TTeam>[]): IMatchupSchedule<TTeam> {
     const solutionsRankedByMinimalUnmatchedTeams = solutions
         .map(solution => {
-            const matchmadeTeams = new Set(solution.matchups.flatMap(matchup => matchup.teams));
+            const matchedTeams = new Set(solution.matchups.flatMap(matchup => matchup.teams));
             const unmatchedTeamCount = new Set(Array.from(solution.unmatchedTeams.values())
                 .flatMap(teams => teams)
-                .filter(team => !matchmadeTeams.has(team))
+                .filter(team => !matchedTeams.has(team))
             ).size;
             return {solution, unmatchedTeamCount};
         });

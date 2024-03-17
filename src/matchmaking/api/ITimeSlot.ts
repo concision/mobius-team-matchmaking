@@ -40,9 +40,15 @@ export interface ITimeSlot {
      * Consumers should set this value with the exact time for any {@link IPlayedMatchup.time}.
      *
      * This property may be provided by the output of the matchmaking API for {@link IScheduledMatchup.time} and is
-     * computed by {@link IDefaultMatchmakingParameters.timeSlotToDateTranslator}. By default, this translates all known
+     * computed by {@link IMatchmakingParameters.timeSlotToDateTranslator}. By default, this translates all known
      * days of the week to the first moment of the day (at UTC time, not local time). This callback may be overridden to
      * provide an exact date and time for the time slot.
      */
     readonly date?: Date;
 }
+
+/**
+ * Translates a consumer time slot to an exact date and time. See
+ * {@link IMatchmakingOptions.timeSlotToDateTranslator}.
+ */
+export type TimeSlotToDateTranslator = (timeSlot: Omit<ITimeSlot, 'date'>, week: Date) => Date;

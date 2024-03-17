@@ -1,9 +1,8 @@
 import {Writeable} from "../utilities/TypescriptTypes";
-import {TimeSlotToDateTranslator} from "./api/IMatchmakingOptions";
 import {MatchupFailureReason} from "./api/IMatchmakingResults";
 import {ITeam} from "./api/ITeam";
 import {IScheduledMatchup} from "./api/ITeamMatchup";
-import {Day, ITimeSlot} from "./api/ITimeSlot";
+import {Day, ITimeSlot, TimeSlotToDateTranslator} from "./api/ITimeSlot";
 
 export interface ITeamsPartitionedByTimeSlot<TTeam extends ITeam> {
     teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>;

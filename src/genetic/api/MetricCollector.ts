@@ -55,6 +55,7 @@ export class HallOfFameMetricCollector<I> extends MetricCollector<I, HallOfFameR
         this._identityFunction = value;
     }
 
+
     public override update({population}: IGeneration<I>): void {
         const uniqueIndividuals = Array.from(groupBy(
             this.fittest.concat(population),

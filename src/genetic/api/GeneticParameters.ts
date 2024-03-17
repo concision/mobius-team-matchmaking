@@ -33,15 +33,15 @@ export class GeneticParameters<I, TMetricCollector> extends GeneticOperator<I, G
     private _maximumGenerations: number;
     private _maximumPopulationSize: number;
 
-    private _firstGeneration?: readonly I[] | undefined;
-    private _individualGenerator?: IndividualGenerator<I> | undefined;
+    private _firstGeneration?: readonly I[];
+    private _individualGenerator?: IndividualGenerator<I>;
 
     private _individualMutator: IndividualMutator<I, any>;
     private _fitnessFunction: FitnessFunction<I, any>;
     private _populationSelector: PopulationSelector<I, any>;
-    private _earlyStopping?: EarlyStoppingEvaluator<I> | undefined;
+    private _earlyStopping?: EarlyStoppingEvaluator<I>;
 
-    private _metricCollector?: MetricCollector<I, TMetricCollector> | undefined;
+    private _metricCollector?: MetricCollector<I, TMetricCollector>;
 
     public constructor(parameters: IGeneticParameters<I, TMetricCollector>) {
         super(GeneticParameters.name);

@@ -10,14 +10,14 @@ export abstract class EarlyStoppingEvaluator<I, TChildrenType extends GeneticOpe
 export class EnsureGrowthEarlyStoppingEvaluator<I> extends EarlyStoppingEvaluator<I> {
     private _maximumGrowthFailures: number;
 
-    private previousMaximumFitness: number | undefined;
+    private previousMaximumFitness?: number;
     private _growthFailures: number = 0;
 
     public constructor(maximumGrowthFailures: number);
     public constructor(name: string, maximumGrowthFailures: number);
     public constructor(nameOrMaximumGrowthFailures: string | number, maximumGrowthFailures?: number) {
-        super(typeof nameOrMaximumGrowthFailures === "string" ? nameOrMaximumGrowthFailures : EnsureGrowthEarlyStoppingEvaluator.name);
-        this._maximumGrowthFailures = typeof nameOrMaximumGrowthFailures === "string" ? maximumGrowthFailures! : nameOrMaximumGrowthFailures;
+        super(2 <= arguments.length ? nameOrMaximumGrowthFailures as string : EnsureGrowthEarlyStoppingEvaluator.name);
+        this._maximumGrowthFailures = arguments.length === 1 ? nameOrMaximumGrowthFailures as number : maximumGrowthFailures!;
 
         this.validateIfConsumerInstantiation(EnsureGrowthEarlyStoppingEvaluator, arguments);
     }

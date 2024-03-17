@@ -3,29 +3,27 @@ import {IGeneticAlgorithmResults} from "../../genetic/GeneticAlgorithm";
 import {KeysOfType, UndefinedValues} from "../../utilities/TypescriptTypes";
 import {ITeam} from './ITeam';
 import {IScheduledMatchup} from './ITeamMatchup';
-import {ITimeSlot} from "./ITimeSlot";
+import {ITimeSlot, TimeSlotToDateTranslator} from "./ITimeSlot";
 import {IMatchupSchedule} from "./MatchmakingGeneticTypes";
 
 /**
  * Configurable options for the matchmaking algorithm for {@link matchmakeTeams}.
- *
- * {@link teams} and {@link config} are the main components for the matchmaking algorithm. The other properties are
- * parameters that affect the default implementation behavior of the algorithm.
  */
 export interface IMatchmakingOptions<TTeam extends ITeam = ITeam, TPartitionKey = string> {
     /**
-     * This property configures the genetic algorithm implementation that is used to compute the matchups. This is an
-     * optional property, and may be omitted if the default genetic algorithm is sufficient. If provided, then the
-     * supplied function will be invoked to override the genetic algorithm's default configuration.
+     * This property configures the genetic algorithm implementation that is used to compute the matchups.
      *
-     * {@link options} is the default configuration for the genetic algorithm. The consumer may override any
-     * configuration properties to customize the genetic algorithm's behavior. Or, the consumer may return an entirely
-     * different custom configuration object.
+     * There exists a default implementation {@link MobiusMatchmakingConfig}.
      */
-    readonly config: MatchmakingConfig<TTeam, any, TPartitionKey>;
+    readonly config: MatchmakingConfig<TTeam, TPartitionKey>;
 
     /**
-     * TODO
+     * If some subsets of teams are mutually exclusive (e.g. region), then this property may be used to partition the
+     * teams into separate groups that will be match-made independently. If this property is not provided, then the
+     * teams will be match-made together in a single group.
+     *
+     * This property may be a key of {@link ITeam} that is used to partition the teams, or a function that returns the
+     * partition key for a given team.
      */
     readonly partitionBy?: KeysOfType<TTeam, TPartitionKey> | TeamPartitioner<TTeam, TPartitionKey>;
 
@@ -50,9 +48,9 @@ export interface IMatchmakingOptions<TTeam extends ITeam = ITeam, TPartitionKey 
      */
     readonly timeSlotToDateTranslator?: TimeSlotToDateTranslator;
     /**
-     * Ignores any time slots that have already occurred. If true, then any time slots that have already occurred will be
-     * ignored and no matches will be made for those time slots. If false, then the algorithm will attempt to match teams
-     * for all time slots, regardless of whether they have already occurred.
+     * Ignores any time slots that have already occurred. If true, then any time slots that have already occurred will
+     * be ignored and no matches will be made for those time slots. If false, then the algorithm will attempt to match
+     * teams for all time slots, regardless of whether they have already occurred.
      *
      * By default, this value is true.
      */
@@ -68,13 +66,11 @@ export type IPartitionedMatchmakingOptions<TTeam extends ITeam = ITeam, TPartiti
 export type IConfiguredMatchmakingOptions<TTeam extends ITeam = ITeam, TPartitionKey = string> =
     Required<IMatchmakingOptions<TTeam, TPartitionKey>>;
 
-export type TeamPartitioner<TTeam extends ITeam = ITeam, TPartitionKey = string> = (team: TTeam) => TPartitionKey;
 
 /**
- * Translates a consumer time slot to an exact date and time. See
- * {@link IMatchmakingOptions.timeSlotToDateTranslator}.
+ * Partitions teams into a mutually exclusive groups. Each team is partitioned by the key returned by this function.
  */
-export type TimeSlotToDateTranslator = (timeSlot: Omit<ITimeSlot, 'date'>, week: Date) => Date;
+export type TeamPartitioner<TTeam extends ITeam = ITeam, TPartitionKey = string> = (team: TTeam) => TPartitionKey;
 
 
 export interface IMatchmakingParameters<TTeam extends ITeam = ITeam, TPartitionKey = string> {
@@ -84,10 +80,21 @@ export interface IMatchmakingParameters<TTeam extends ITeam = ITeam, TPartitionK
     readonly teamsByTimeSlot: ReadonlyMap<ITimeSlot, readonly TTeam[]>;
 }
 
-export abstract class MatchmakingConfig<TTeam extends ITeam = ITeam, TMetricCollectorType = any, TPartitionKey = string> {
-    public abstract configure(parameters: IMatchmakingParameters<TTeam, TPartitionKey>): GeneticParameters<IMatchupSchedule<TTeam>, TMetricCollectorType>;
+/**
+ * Configures the genetic algorithm implementation that is used to compute the matchups.
+ */
+export abstract class MatchmakingConfig<TTeam extends ITeam = ITeam, TPartitionKey = string, TMetricCollector = any> {
+    /**
+     * Provides a genetic algorithm configuration that is used to compute the matchups.
+     * @param parameters The requested matchmaking API parameters.
+     */
+    public abstract configure(parameters: IMatchmakingParameters<TTeam, TPartitionKey>): GeneticParameters<IMatchupSchedule<TTeam>, TMetricCollector>;
 
-    public selectSolution(matchups: IGeneticAlgorithmResults<IMatchupSchedule<TTeam>, TMetricCollectorType>): IMatchupSchedule<TTeam> {
+    /**
+     * Selects a desired solution from the genetic algorithm results.
+     * @param matchups The genetic algorithm results.
+     */
+    public selectSolution(matchups: IGeneticAlgorithmResults<IMatchupSchedule<TTeam>, TMetricCollector>): IMatchupSchedule<TTeam> {
         return matchups.population[0].solution;
     }
 }

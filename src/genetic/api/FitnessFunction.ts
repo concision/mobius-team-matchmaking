@@ -6,8 +6,7 @@ export interface IFitness<I> {
 }
 
 
-export abstract class FitnessFunction<I, TChildrenType = undefined>
-    extends GeneticOperator<I, TChildrenType> {
+export abstract class FitnessFunction<I, TChildrenType = undefined> extends GeneticOperator<I, TChildrenType> {
     public abstract evaluate(population: readonly I[]): readonly IFitness<I>[];
 }
 
